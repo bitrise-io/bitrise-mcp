@@ -6,21 +6,17 @@
 
 ## Development Commands
 ```bash
+# Activate python virtual environment
+source .venv/bin/activate
+
 # Development server
-python main.py
+uv run main.py
 
-# Install dependencies 
-uv pip install -e .
+# Add new dependencies
+uv add "mcp[cli]" httpx
 
-# Linting (ruff recommended)
-ruff check .
-
-# Type checking
-mypy --python-version 3.12 .
-
-# Testing (pytest recommended)
-pytest
-pytest tests/test_specific.py -v  # Run single test
+# Sync dependencies
+uv sync
 ```
 
 ## Code Style Guidelines
