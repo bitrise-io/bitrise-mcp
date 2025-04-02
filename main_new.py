@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("bitrise")
 
-BITRISE_API_BASE = "https://api.bitrise.io/v0.1"
+BITRISE_API_BASE = "https://api-staging.bitrise.io/v0.1"
 USER_AGENT = "bitrise-mcp/1.0"
 
 async def call_api(method, url: str, body = None) -> str:
@@ -52,25 +52,21 @@ async def list_apps(sort_by: Optional[str] = None, next: Optional[str] = None,
 
 @mcp.tool()
 async def register_app(repo_url: str, is_public: bool, 
-                      repo_provider: str, git_owner: str, git_repo_slug: str,
+                      organization_slug: str,
                       project_type: Optional[str] = "other") -> str:
     """Add a new app to Bitrise.
     
     Args:
         repo_url: Repository URL
         is_public: Whether the app's builds visibility is "public"
-        repo_provider: Repository provider (github, gitlab, etc.)
-        git_owner: Owner of the repository
-        git_repo_slug: Repository slug
+        organization_slug: The organization (aka workspace) the app to add to
         project_type: Type of project (ios, android, etc.)
     """
     url = f"{BITRISE_API_BASE}/apps/register"
     body = {
         "repo_url": repo_url,
         "is_public": is_public,
-        "repo_provider": repo_provider,
-        "git_owner": git_owner,
-        "git_repo_slug": git_repo_slug,
+        "organization_slug": repo_provider,
         "project_type": project_type
     }
     return await call_api("POST", url, body)
@@ -665,6 +661,86 @@ async def replace_group_roles(app_slug: str, role_name: str, group_slugs: List[s
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/roles/{role_name}"
     body = group_slugs
     return await call_api("PUT", url, body)
+
+
+# ==== Workspaces ====
+@mcp.tool()
+async def list_workspaces() -> str:
+    """List the workspaces the user has access to"""
+    url = f"{BITRISE_API_BASE}/organizations"
+    return await call_api("GET", url)
+
+@mcp.tool()
+async def get_workspace(workspace_slug: str) -> str:
+    """Get details for one workspace
+
+    Args:
+        workspace_slug: Slug of the Bitrise workspace
+    """
+    url = f"{BITRISE_API_BASE}/organizations/{workspace_slug}"
+    return await call_api("GET", url)
+
+@mcp.tool()
+async def get_workspace_groups(workspace_slug: str) -> str:
+    """Get the groups in a workspace
+
+    Args:
+        workspace_slug: Slug of the Bitrise workspace
+    """
+    url = f"{BITRISE_API_BASE}/organizations/{workspace_slug}/groups"
+    return await call_api("GET", url)
+
+@mcp.tool()
+async def create_workspace_group(workspace_slug: str, group_name: str) -> str:
+    """Get the groups in a workspace
+
+    Args:
+        workspace_slug: Slug of the Bitrise workspace
+        group_name: Name of the group
+    """
+    url = f"{BITRISE_API_BASE}/organizations/{workspace_slug}/groups"
+    return await call_api("POST", url, {"name": group_name})
+
+@mcp.tool()
+async def get_workspace_members(workspace_slug: str) -> str:
+    """Get the groups in a workspace
+
+    Args:
+        workspace_slug: Slug of the Bitrise workspace
+    """
+    url = f"{BITRISE_API_BASE}/organizations/{workspace_slug}/members"
+    return await call_api("GET", url)
+
+@mcp.tool()
+async def invite_member_to_workspace(workspace_slug: str, email: str) -> str:
+    """Get the groups in a workspace
+
+    Args:
+        workspace_slug: Slug of the Bitrise workspace
+        email: Email address of the user
+    """
+    url = f"{BITRISE_API_BASE}/organizations/{workspace_slug}/members"
+    return await call_api("POST", url, {"email": email})
+
+@mcp.tool()
+async def add_member_to_group(group_slug: str, user_slug: str) -> str:
+    """Get the groups in a workspace
+
+    Args:
+        workspace_slug: Slug of the Bitrise workspace
+        user_slug: Slug of the user
+    """
+    url = f"{BITRISE_API_BASE}/groups/{group_slug}/add_member"
+    return await call_api("POST", url, {"user_id": user_slug})
+
+@mcp.tool()
+async def me() -> str:
+    """Get info from the currently authenticated user account
+
+    Args:
+    """
+    url = f"{BITRISE_API_BASE}/me"
+    return await call_api("GET", url)
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')
