@@ -12,6 +12,7 @@ async def call_api(method, url: str, body = None) -> str:
     headers = {
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
+        "Content-Type": "application/json",
         "Authorization": os.environ.get("BITRISE_TOKEN"),
     }
     async with httpx.AsyncClient() as client:
@@ -53,23 +54,48 @@ async def list_apps(sort_by: Optional[str] = None, next: Optional[str] = None,
 @mcp.tool()
 async def register_app(repo_url: str, is_public: bool, 
                       organization_slug: str,
-                      project_type: Optional[str] = "other") -> str:
-    """Add a new app to Bitrise.
+                      project_type: Optional[str] = "other",
+                      provider: Optional[str] = "github" ) -> str:
+    """Add a new app to Bitrise. After this app should be finished on order to be registered coompletely on Bitrise.
     
     Args:
         repo_url: Repository URL
         is_public: Whether the app's builds visibility is "public"
         organization_slug: The organization (aka workspace) the app to add to
         project_type: Type of project (ios, android, etc.)
+        provider: github
     """
     url = f"{BITRISE_API_BASE}/apps/register"
     body = {
         "repo_url": repo_url,
         "is_public": is_public,
         "organization_slug": repo_provider,
-        "project_type": project_type
+        "project_type": project_type,
+        "provider": provider
     }
     return await call_api("POST", url, body)
+
+@mcp.tool()
+async def finish_bitrise_app(app_slug: str, stack_id: str, organization_slug: str, project_type: str) -> str:
+    """Finish the setup of a Bitrise app.
+
+    Args:
+        app_slug: The slug of the Bitrise app to finish setup for.
+        stack_id: The stack ID to use for the app (default is "linux-docker-22.04").
+        organization_slug: the workspace's slug
+        project_type: Type of project (ios, android, etc.) If it's not given use the app's project type.
+
+    Returns:
+        The response from the Bitrise API after finishing the app setup.
+    """
+    url = f"{BITRISE_API_BASE}/apps/{app_slug}/finish"
+    payload = {
+        "mode": "manual",
+        "stack_id": stack_id,
+        "organizaion_slug": organization_slug,
+        "project_type": project_type
+    }
+    return await call_api("POST", url, payload)
 
 @mcp.tool()
 async def get_app(app_slug: str) -> str:
