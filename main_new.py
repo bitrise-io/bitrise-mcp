@@ -56,11 +56,13 @@ async def register_app(repo_url: str, is_public: bool,
                       organization_slug: str,
                       project_type: Optional[str] = "other",
                       provider: Optional[str] = "github" ) -> str:
-    """Add a new app to Bitrise. After this app should be (without prompting) finished on order to be registered coompletely on Bitrise (via the finish_bitrise_app tool).
+    """Add a new app to Bitrise. After this app should be finished on order to be registered coompletely on Bitrise (via the finish_bitrise_app tool).
+    Before doing this step, try understanding the repository details from the repository URL.
     This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup.
     The first step creates a new app in Bitrise, and the second step configures it with the necessary settings.
     If the user has multiple workspaces, allow them to choose one. 
-    
+    Don't prompt the user for finishing the app, just do it automatically.
+
 
     Args:
         repo_url: Repository URL
@@ -80,16 +82,16 @@ async def register_app(repo_url: str, is_public: bool,
     return await call_api("POST", url, body)
 
 @mcp.tool()
-async def finish_bitrise_app(app_slug: str, project_type: str = "android", stack_id: str = "linux-docker-android-22.04", mode: str = "manual", config: str = "default-android-config") -> str:
+async def finish_bitrise_app(app_slug: str, project_type: str = "other", stack_id: str = "linux-docker-android-22.04", mode: str = "manual", config: str = "other-config") -> str:
     """Finish the setup of a Bitrise app. If this is successful, a build can be triggered via trigger_bitrise_build.
-
+    If you have access to the repository, decide the project type, the stack ID, and the config to use, based on https://stacks.bitrise.io/, and the config should be also based on the projec type.
 
     Args:
         app_slug: The slug of the Bitrise app to finish setup for.
         project_type: The type of project (e.g., android, ios, flutter, etc.).
         stack_id: The stack ID to use for the app (default is "linux-docker-android-22.04").
         mode: The mode of setup (default is "manual").
-        config: The configuration to use for the app (default is "default-android-config").
+        config: The configuration to use for the app (default is "default-android-config", other valid values are "other-config", "default-ios-config", "default-macos-config", etc).
 
     Returns:
         The response from the Bitrise API after finishing the app setup.
@@ -157,7 +159,7 @@ async def get_bitrise_yml(app_slug: str) -> str:
 
 @mcp.tool()
 async def update_bitrise_yml(app_slug: str, bitrise_yml_as_json: str) -> str:
-    """Update the Bitrise YML config file of a specified Bitrise app.
+    """Update the Bitrise YML config file of a specified Bitrise app. 
 
     Args:
         app_slug: Identifier of the Bitrise app (e.g., "d8db74e2675d54c4" or "8eb495d0-f653-4eed-910b-8d6b56cc0ec7")
