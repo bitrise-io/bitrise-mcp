@@ -56,9 +56,10 @@ async def register_app(repo_url: str, is_public: bool,
                       organization_slug: str,
                       project_type: Optional[str] = "other",
                       provider: Optional[str] = "github" ) -> str:
-    """Add a new app to Bitrise. After this app should be finished on order to be registered coompletely on Bitrise (via the finish_bitrise_app tool).
+    """Add a new app to Bitrise. After this app should be (without prompting) finished on order to be registered coompletely on Bitrise (via the finish_bitrise_app tool).
     This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup.
     The first step creates a new app in Bitrise, and the second step configures it with the necessary settings.
+    If the user has multiple workspaces, allow them to choose one. 
     
 
     Args:
