@@ -69,31 +69,33 @@ async def register_app(repo_url: str, is_public: bool,
     body = {
         "repo_url": repo_url,
         "is_public": is_public,
-        "organization_slug": repo_provider,
+        "organization_slug": organization_slug,
         "project_type": project_type,
         "provider": provider
     }
     return await call_api("POST", url, body)
 
 @mcp.tool()
-async def finish_bitrise_app(app_slug: str, stack_id: str, organization_slug: str, project_type: str) -> str:
+async def finish_bitrise_app(app_slug: str, project_type: str = "android", stack_id: str = "linux-docker-android-22.04", mode: str = "manual", config: str = "default-android-config") -> str:
     """Finish the setup of a Bitrise app.
 
     Args:
         app_slug: The slug of the Bitrise app to finish setup for.
-        stack_id: The stack ID to use for the app (default is "linux-docker-22.04").
-        organization_slug: the workspace's slug
-        project_type: Type of project (ios, android, etc.) If it's not given use the app's project type.
+        project_type: The type of project (e.g., android, ios, flutter, etc.).
+        stack_id: The stack ID to use for the app (default is "linux-docker-android-22.04").
+        mode: The mode of setup (default is "manual").
+        config: The configuration to use for the app (default is "default-android-config").
 
     Returns:
         The response from the Bitrise API after finishing the app setup.
     """
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/finish"
     payload = {
-        "mode": "manual",
+        "project_type": project_type,
         "stack_id": stack_id,
-        "organizaion_slug": organization_slug,
-        "project_type": project_type
+        "mode": mode,
+        "config": config,
+        
     }
     return await call_api("POST", url, payload)
 
@@ -149,12 +151,12 @@ async def get_bitrise_yml(app_slug: str) -> str:
     return await call_api("GET", url)
 
 @mcp.tool()
-async def update_bitrise_yml(app_slug: str, bitrise_yml_as_json: dict) -> str:
+async def update_bitrise_yml(app_slug: str, bitrise_yml_as_json: str) -> str:
     """Update the Bitrise YML config file of a specified Bitrise app.
 
     Args:
         app_slug: Identifier of the Bitrise app (e.g., "d8db74e2675d54c4" or "8eb495d0-f653-4eed-910b-8d6b56cc0ec7")
-        bitrise_yml_as_json: The new Bitrise YML config file content to be updated. It must be a JSON string.
+        bitrise_yml_as_json: The new Bitrise YML config file content to be updated. It must be a string.
     """
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/bitrise.yml"
     return await call_api("POST", url, {
