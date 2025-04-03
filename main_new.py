@@ -522,15 +522,15 @@ async def list_android_keystore_files(app_slug: str) -> str:
 
 @mcp.tool()
 async def create_android_keystore_file(app_slug: str, upload_file_name: str, 
-                                     upload_file_size: int, upload_content_type: str,
+                                     upload_file_size: int, keystore_file_name: str,
                                      alias: str, password: str, private_key_password: str) -> str:
     """Create an Android keystore file.
     
     Args:
         app_slug: Identifier of the Bitrise app
-        upload_file_name: Name of the keystore file
-        upload_file_size: Size of the keystore file
-        upload_content_type: Content type of the keystore file
+        upload_file_name: Name of the uploaded keystore file
+        upload_file_size: Size of the uploaded keystore file
+        keystore_file_name: Name of the stored keystore file (required if a keystore file already exists on the app)
         alias: Alias of the keystore
         password: Password of the keystore
         private_key_password: Private key password of the keystore
@@ -538,8 +538,8 @@ async def create_android_keystore_file(app_slug: str, upload_file_name: str,
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/android-keystore-files"
     body = {
         "upload_file_name": upload_file_name,
+        "keystore_file_name": keystore_file_name,
         "upload_file_size": upload_file_size,
-        "upload_content_type": upload_content_type,
         "alias": alias,
         "password": password,
         "private_key_password": private_key_password
@@ -694,7 +694,7 @@ async def replace_group_roles(app_slug: str, role_name: str, group_slugs: List[s
         group_slugs: List of group slugs
     """
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/roles/{role_name}"
-    body = group_slugs
+    body = { "groups": group_slugs }
     return await call_api("PUT", url, body)
 
 
