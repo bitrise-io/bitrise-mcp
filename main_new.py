@@ -648,9 +648,38 @@ async def list_outgoing_webhooks(app_slug: str) -> str:
 
 
 @mcp.tool()
-async def create_outgoing_webhook(
-    app_slug: str, events: List[str], url: str, headers: Optional[Dict[str, str]] = None
-) -> str:
+async def delete_outgoing_webhook(app_slug: str, webhook_slug: str) -> str:
+    """Delete the outgoing webhook of an app.
+    
+    Args:
+        app_slug: Identifier of the Bitrise app
+    """
+    url = f"{BITRISE_API_BASE}/apps/{app_slug}/outgoing-webhooks/{webhook_slug}"
+    return await call_api("DELETE", url)
+
+@mcp.tool()
+async def update_outgoing_webhook(app_slug: str, webhook_slug: str, events: List[str], url: str, 
+                                 headers: Dict[str, str] = None) -> str:
+    """Update an outgoing webhook for an app.
+    
+    Args:
+        app_slug: Identifier of the Bitrise app
+        events: List of events to trigger the webhook
+        url: URL of the webhook
+        headers: Headers to be sent with the webhook
+    """
+    api_url = f"{BITRISE_API_BASE}/apps/{app_slug}/outgoing-webhooks/{webhook_slug}"
+    body = {
+        "events": events,
+        "url": url,
+        "headers": headers
+    }
+ 
+    return await call_api("PUT", api_url, body)
+
+@mcp.tool()
+async def create_outgoing_webhook(app_slug: str, events: List[str], url: str, 
+                                 headers: Dict[str, str] = None) -> str:
     """Create an outgoing webhook for an app.
 
     Args:
