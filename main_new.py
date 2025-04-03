@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("bitrise")
 
-BITRISE_API_BASE = "https://api-staging.bitrise.io/v0.1"
+BITRISE_API_BASE = "https://api.bitrise.io/v0.1"
 USER_AGENT = "bitrise-mcp/1.0"
 
 async def call_api(method, url: str, body = None) -> str:
@@ -56,8 +56,11 @@ async def register_app(repo_url: str, is_public: bool,
                       organization_slug: str,
                       project_type: Optional[str] = "other",
                       provider: Optional[str] = "github" ) -> str:
-    """Add a new app to Bitrise. After this app should be finished on order to be registered coompletely on Bitrise.
+    """Add a new app to Bitrise. After this app should be finished on order to be registered coompletely on Bitrise (via the finish_bitrise_app tool).
+    This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup.
+    The first step creates a new app in Bitrise, and the second step configures it with the necessary settings.
     
+
     Args:
         repo_url: Repository URL
         is_public: Whether the app's builds visibility is "public"
@@ -77,7 +80,8 @@ async def register_app(repo_url: str, is_public: bool,
 
 @mcp.tool()
 async def finish_bitrise_app(app_slug: str, project_type: str = "android", stack_id: str = "linux-docker-android-22.04", mode: str = "manual", config: str = "default-android-config") -> str:
-    """Finish the setup of a Bitrise app.
+    """Finish the setup of a Bitrise app. If this is successful, a build can be triggered via trigger_bitrise_build.
+
 
     Args:
         app_slug: The slug of the Bitrise app to finish setup for.
