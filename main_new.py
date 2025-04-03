@@ -2,6 +2,7 @@ import os
 from typing import Any, Dict, List, Optional, Union
 import httpx
 from mcp.server.fastmcp import FastMCP
+from pydantic import Field
 
 mcp = FastMCP("bitrise")
 
@@ -248,28 +249,29 @@ async def list_branches(app_slug: str) -> str:
 # ===== Builds =====
 
 
-@mcp.tool()
+@mcp.tool(
+    description="List all the builds of a specified Bitrise app or all accessible builds."
+)
 async def list_builds(
-    app_slug: Optional[str] = None,
-    sort_by: Optional[str] = None,
-    branch: Optional[str] = None,
-    workflow: Optional[str] = None,
-    status: Optional[int] = None,
-    next: Optional[str] = None,
-    limit: Optional[int] = None,
+    app_slug: str,
+    sort_by: str = Field(
+        default="created_at",
+        description="Order of builds: created_at (default), running_first",
+    ),
+    branch: str = Field(description="Filter builds by branch"),
+    workflow: Optional[str] = Field(
+        description="Filter builds by workflow", default=None
+    ),
+    status: Optional[int] = Field(
+        description="Filter builds by status (0: not finished, 1: successful, 2: failed, 3: aborted, 4: in-progress)",
+        default=None,
+    ),
+    next: Optional[str] = Field(
+        description="Slug of the first build in the response", default=None
+    ),
+    limit: int = Field(default=10, le=50),
 ) -> str:
-    """List all the builds of a specified Bitrise app or all accessible builds.
-
-    Args:
-        app_slug: Identifier of the Bitrise app (optional)
-        sort_by: Order of builds: created_at (default), running_first
-        branch: Filter builds by branch
-        workflow: Filter builds by workflow
-        status: Filter builds by status (0: not finished, 1: successful, 2: failed, 3: aborted, 4: in-progress)
-        next: Slug of the first build in the response
-        limit: Max number of elements per page (default: 50)
-    """
-    params: Dict[str, Union[str, int]] = {}
+    params = {}
     if sort_by:
         params["sort_by"] = sort_by
     if branch:
