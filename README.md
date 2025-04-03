@@ -347,10 +347,12 @@ To use this with Claude Desktop, add the following to your `claude_desktop_confi
         "BITRISE_TOKEN": "<your Bitrise API token>"
       },
       "args": [
-        "--directory",
-        "<full path to>/bitrise-mcp",
         "run",
-        "main_new.py"
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "<full path to bitrise-mcp>/main_new.py"
       ]
     }
   }
