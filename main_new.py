@@ -72,7 +72,7 @@ async def register_app(
     Before doing this step, try understanding the repository details from the repository URL.
     This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup.
     The first step creates a new app in Bitrise, and the second step configures it with the necessary settings.
-    If the user has multiple workspaces, allow them to choose one.
+    If the user has multiple workspaces, always prompt the user to choose which one you should use. 
     Don't prompt the user for finishing the app, just do it automatically.
 
 
@@ -138,7 +138,7 @@ async def get_app(app_slug: str) -> str:
 
 @mcp.tool()
 async def delete_app(app_slug: str) -> str:
-    """Delete an app from Bitrise.
+    """Delete an app from Bitrise. When deleting apps belonging to multiple workspaces always confirm that which workspaces' apps the user wants to delete.  
 
     Args:
         app_slug: Identifier of the Bitrise app
@@ -477,162 +477,6 @@ async def update_artifact(
     body = {"is_public_page_enabled": is_public_page_enabled}
     return await call_api("PATCH", url, body)
 
-
-# ===== Addons =====
-
-
-@mcp.tool()
-async def list_addons() -> str:
-    """List all the available Bitrise addons."""
-    url = f"{BITRISE_API_BASE}/addons"
-    return await call_api("GET", url)
-
-
-@mcp.tool()
-async def get_addon(addon_id: str) -> str:
-    """Show details of a specific Bitrise addon.
-
-    Args:
-        addon_id: Identifier of the addon
-    """
-    url = f"{BITRISE_API_BASE}/addons/{addon_id}"
-    return await call_api("GET", url)
-
-
-@mcp.tool()
-async def list_app_addons(app_slug: str) -> str:
-    """List all the provisioned addons for an app.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/addons"
-    return await call_api("GET", url)
-
-
-# ===== iOS Code Signing =====
-
-
-@mcp.tool()
-async def list_build_certificates(app_slug: str) -> str:
-    """Get a list of the build certificates.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/build-certificates"
-    return await call_api("GET", url)
-
-
-@mcp.tool()
-async def create_build_certificate(
-    app_slug: str,
-    upload_file_name: str,
-    upload_file_size: int,
-    upload_content_type: str,
-    certificate_password: str,
-) -> str:
-    """Create a build certificate.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-        upload_file_name: Name of the certificate file
-        upload_file_size: Size of the certificate file
-        upload_content_type: Content type of the certificate file
-        certificate_password: Password of the certificate
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/build-certificates"
-    body = {
-        "upload_file_name": upload_file_name,
-        "upload_file_size": upload_file_size,
-        "upload_content_type": upload_content_type,
-        "certificate_password": certificate_password,
-    }
-    return await call_api("POST", url, body)
-
-
-@mcp.tool()
-async def list_provisioning_profiles(app_slug: str) -> str:
-    """Get a list of the provisioning profiles.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/provisioning-profiles"
-    return await call_api("GET", url)
-
-
-@mcp.tool()
-async def create_provisioning_profile(
-    app_slug: str,
-    upload_file_name: str,
-    upload_file_size: int,
-    upload_content_type: str,
-) -> str:
-    """Create a provisioning profile.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-        upload_file_name: Name of the provisioning profile file
-        upload_file_size: Size of the provisioning profile file
-        upload_content_type: Content type of the provisioning profile file
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/provisioning-profiles"
-    body = {
-        "upload_file_name": upload_file_name,
-        "upload_file_size": upload_file_size,
-        "upload_content_type": upload_content_type,
-    }
-    return await call_api("POST", url, body)
-
-
-# ===== Android Keystore =====
-
-
-@mcp.tool()
-async def list_android_keystore_files(app_slug: str) -> str:
-    """Get a list of the android keystore files.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/android-keystore-files"
-    return await call_api("GET", url)
-
-
-@mcp.tool()
-async def create_android_keystore_file(
-    app_slug: str,
-    upload_file_name: str,
-    upload_file_size: int,
-    keystore_file_name: str,
-    alias: str,
-    password: str,
-    private_key_password: str,
-) -> str:
-    """Create an Android keystore file.
-
-    Args:
-        app_slug: Identifier of the Bitrise app
-        upload_file_name: Name of the uploaded keystore file
-        upload_file_size: Size of the uploaded keystore file
-        keystore_file_name: Name of the stored keystore file (required if a keystore file already exists on the app)
-        alias: Alias of the keystore
-        password: Password of the keystore
-        private_key_password: Private key password of the keystore
-    """
-    url = f"{BITRISE_API_BASE}/apps/{app_slug}/android-keystore-files"
-    body = {
-        "upload_file_name": upload_file_name,
-        "keystore_file_name": keystore_file_name,
-        "upload_file_size": upload_file_size,
-        "alias": alias,
-        "password": password,
-        "private_key_password": private_key_password,
-    }
-    return await call_api("POST", url, body)
-
-
 # ===== Webhooks =====
 
 
@@ -824,7 +668,7 @@ async def replace_group_roles(
     Args:
         app_slug: Identifier of the Bitrise app
         role_name: Name of the role
-        group_slugs: List of group slugs
+        groups: List of group slugs
     """
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/roles/{role_name}"
     body = {"groups": group_slugs}
