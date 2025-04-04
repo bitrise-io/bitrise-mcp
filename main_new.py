@@ -68,11 +68,11 @@ async def register_app(
     project_type: Optional[str] = "other",
     provider: Optional[str] = "github",
 ) -> str:
-    """Add a new app to Bitrise. After this app should be finished on order to be registered coompletely on Bitrise (via the finish_bitrise_app tool).
+    """Add a new app to Bitrise. After this app should be finished on order to be registered completely on Bitrise (via the finish_bitrise_app tool).
     Before doing this step, try understanding the repository details from the repository URL.
     This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup.
     The first step creates a new app in Bitrise, and the second step configures it with the necessary settings.
-    If the user has multiple workspaces, always prompt the user to choose which one you should use. 
+    If the user has multiple workspaces, always prompt the user to choose which one you should use.
     Don't prompt the user for finishing the app, just do it automatically.
 
 
@@ -138,7 +138,7 @@ async def get_app(app_slug: str) -> str:
 
 @mcp.tool()
 async def delete_app(app_slug: str) -> str:
-    """Delete an app from Bitrise. When deleting apps belonging to multiple workspaces always confirm that which workspaces' apps the user wants to delete.  
+    """Delete an app from Bitrise. When deleting apps belonging to multiple workspaces always confirm that which workspaces' apps the user wants to delete.
 
     Args:
         app_slug: Identifier of the Bitrise app
@@ -477,6 +477,7 @@ async def update_artifact(
     body = {"is_public_page_enabled": is_public_page_enabled}
     return await call_api("PATCH", url, body)
 
+
 # ===== Webhooks =====
 
 
@@ -494,18 +495,24 @@ async def list_outgoing_webhooks(app_slug: str) -> str:
 @mcp.tool()
 async def delete_outgoing_webhook(app_slug: str, webhook_slug: str) -> str:
     """Delete the outgoing webhook of an app.
-    
+
     Args:
         app_slug: Identifier of the Bitrise app
     """
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/outgoing-webhooks/{webhook_slug}"
     return await call_api("DELETE", url)
 
+
 @mcp.tool()
-async def update_outgoing_webhook(app_slug: str, webhook_slug: str, events: List[str], url: str, 
-                                 headers: Dict[str, str] = None) -> str:
+async def update_outgoing_webhook(
+    app_slug: str,
+    webhook_slug: str,
+    events: List[str],
+    url: str,
+    headers: Dict[str, str] = None,
+) -> str:
     """Update an outgoing webhook for an app.
-    
+
     Args:
         app_slug: Identifier of the Bitrise app
         events: List of events to trigger the webhook
@@ -513,17 +520,15 @@ async def update_outgoing_webhook(app_slug: str, webhook_slug: str, events: List
         headers: Headers to be sent with the webhook
     """
     api_url = f"{BITRISE_API_BASE}/apps/{app_slug}/outgoing-webhooks/{webhook_slug}"
-    body = {
-        "events": events,
-        "url": url,
-        "headers": headers
-    }
- 
+    body = {"events": events, "url": url, "headers": headers}
+
     return await call_api("PUT", api_url, body)
 
+
 @mcp.tool()
-async def create_outgoing_webhook(app_slug: str, events: List[str], url: str, 
-                                 headers: Dict[str, str] = None) -> str:
+async def create_outgoing_webhook(
+    app_slug: str, events: List[str], url: str, headers: Dict[str, str] = None
+) -> str:
     """Create an outgoing webhook for an app.
 
     Args:

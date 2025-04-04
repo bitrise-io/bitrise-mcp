@@ -6,7 +6,6 @@
 	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bullseye",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// Node is for support running claude code in this repostiory
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {
 			"nodeGypDependencies": true,
@@ -16,8 +15,6 @@
 			"nvmVersion": "0.40"
 		  }
 	},
-
-	"runArgs": ["--name", "${localEnv:USER}_bitrise_mcp_devcontainer"],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
