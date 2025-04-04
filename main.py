@@ -1,5 +1,4 @@
 import os
-from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -12,7 +11,7 @@ async def call_api(method, url: str, body = None) -> str:
     headers = {
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
-        "Authorization": os.environ.get("BITRISE_TOKEN"),
+        "Authorization": os.environ.get("BITRISE_TOKEN") or "",
     }
     async with httpx.AsyncClient() as client:
         response = await client.request(method, url, headers=headers, json=body, timeout=30.0)

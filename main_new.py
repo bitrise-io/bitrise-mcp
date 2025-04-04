@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -13,7 +13,7 @@ async def call_api(method, url: str, body = None) -> str:
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": os.environ.get("BITRISE_TOKEN"),
+        "Authorization": os.environ.get("BITRISE_TOKEN") or ""
     }
     async with httpx.AsyncClient() as client:
         response = await client.request(method, url, headers=headers, json=body, timeout=30.0)
@@ -32,7 +32,7 @@ async def list_apps(sort_by: Optional[str] = None, next: Optional[str] = None,
         next: Slug of the first app in the response
         limit: Max number of elements per page (default: 50)
     """
-    params = {}
+    params: Dict[str, Union[str, int]] = {}
     if sort_by:
         params["sort_by"] = sort_by
     if next:
@@ -45,7 +45,7 @@ async def list_apps(sort_by: Optional[str] = None, next: Optional[str] = None,
         headers = {
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
-            "Authorization": os.environ.get("BITRISE_TOKEN"),
+            "Authorization": os.environ.get("BITRISE_TOKEN") or "",
         }
         response = await client.get(url, headers=headers, params=params, timeout=30.0)
         response.raise_for_status()
@@ -227,7 +227,7 @@ async def list_builds(app_slug: Optional[str] = None, sort_by: Optional[str] = N
         next: Slug of the first build in the response
         limit: Max number of elements per page (default: 50)
     """
-    params = {}
+    params: Dict[str, Union[str, int]] = {}
     if sort_by:
         params["sort_by"] = sort_by
     if branch:
@@ -250,7 +250,7 @@ async def list_builds(app_slug: Optional[str] = None, sort_by: Optional[str] = N
         headers = {
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
-            "Authorization": os.environ.get("BITRISE_TOKEN"),
+            "Authorization": os.environ.get("BITRISE_TOKEN") or "",
         }
         response = await client.get(url, headers=headers, params=params, timeout=30.0)
         response.raise_for_status()
@@ -361,7 +361,7 @@ async def list_artifacts(app_slug: str, build_slug: str, next: Optional[str] = N
         limit: Max number of elements per page (default: 50)
     """
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/builds/{build_slug}/artifacts"
-    params = {}
+    params: Dict[str, Union[str, int]] = {}
     if next:
         params["next"] = next
     if limit:
@@ -371,7 +371,7 @@ async def list_artifacts(app_slug: str, build_slug: str, next: Optional[str] = N
         headers = {
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
-            "Authorization": os.environ.get("BITRISE_TOKEN"),
+            "Authorization": os.environ.get("BITRISE_TOKEN") or "",
         }
         response = await client.get(url, headers=headers, params=params, timeout=30.0)
         response.raise_for_status()
@@ -560,7 +560,7 @@ async def list_outgoing_webhooks(app_slug: str) -> str:
 
 @mcp.tool()
 async def create_outgoing_webhook(app_slug: str, events: List[str], url: str, 
-                                 headers: Dict[str, str] = None) -> str:
+                                 headers: Optional[Dict[str, str]] = None) -> str:
     """Create an outgoing webhook for an app.
     
     Args:
@@ -570,7 +570,7 @@ async def create_outgoing_webhook(app_slug: str, events: List[str], url: str,
         headers: Headers to be sent with the webhook
     """
     api_url = f"{BITRISE_API_BASE}/apps/{app_slug}/outgoing-webhooks"
-    body = {
+    body: Dict[str, Any] = {
         "events": events,
         "url": url
     }

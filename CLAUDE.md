@@ -19,6 +19,10 @@ uv add "mcp[cli]" httpx
 uv sync
 ```
 
+# Devcontainer support
+For editing the code you can use the devcontainer setup, which installs the dependencies and configures vscode for you automatically.
+However you still need to setup your host to be able to run uv, as setting up the claude code desktop with the devcontainer instance is not supported.
+
 ## Code Style Guidelines
 - **Imports**: Group standard lib, third-party, and local imports
 - **Formatting**: Follow PEP 8, max line length 100
