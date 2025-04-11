@@ -11,6 +11,7 @@ mcp = FastMCP("bitrise")
 
 
 BITRISE_API_BASE = "https://api.bitrise.io/v0.1"
+BITRISE_RM_API_BASE = "https://api.bitrise.io/release-management/v1"
 USER_AGENT = "bitrise-mcp/1.0"
 
 
@@ -19,7 +20,7 @@ parser.add_argument(
     "--enabled-api-groups",
     help="The list of enabled API groups, comma separated",
     type=partial(str.split, sep=","),
-    default="apps,builds,workspaces,webhooks,build-artifacts,group-roles,cache-items,pipelines,account,read-only",
+    default="apps,builds,workspaces,webhooks,build-artifacts,group-roles,cache-items,pipelines,account,read-only,release-management",
 )
 args = parser.parse_args()
 print(f"Enabled API groups {args.enabled_api_groups}", file=sys.stderr)
@@ -38,7 +39,7 @@ def mcp_tool(
     return decorator
 
 
-async def call_api(method, url: str, body=None) -> str:
+async def call_api(method, url: str, params=None, body=None) -> str:
     headers = {
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
@@ -47,14 +48,129 @@ async def call_api(method, url: str, body=None) -> str:
     }
     async with httpx.AsyncClient() as client:
         response = await client.request(
-            method, url, headers=headers, json=body, timeout=30.0
+            method, url, headers=headers, json=body, params=params, timeout=30.0
         )
         return response.text
 
 
+# ===== Release Management =====
+@mcp_tool(
+    api_groups=["release-management"],
+    description="Add a new Release Management connected app to Bitrise."
+)
+async def register_app(
+    platform: str = Field(
+        description="The mobile platform for the connected app. Available values are 'ios' and 'android'.",
+    ),
+    store_app_id: str = Field(
+        description="The app store identifier for the connected app. In case of 'ios' platform it is the bundle id "
+                    "from App Store Connect. For additional context you can check the property description: "
+                    "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleidentifier"
+                    "In case of Android platform it is the package name. Check the documentation: "
+                    "https://developer.android.com/build/configure-app-module#set_the_application_id",
+    ),
+    workspace_slug: str = Field(
+        description="Identifier of the Bitrise workspace for the Release Management connected app. This field is mandatory.",
+    ),
+    id: Optional[str] = Field(
+        default=None,
+        description="An uuidV4 identifier for your new connected app. If it is not given, one will be generated. It is "
+                    "useful for making the request idempotent or if the id is triggered outside of Bitrise and needs "
+                    "to be stored separately as well.",
+    ),
+    manual_connection: Optional[bool] = Field(
+        default=False,
+        description="If set to true it indicates a manual connection (bypassing using store api keys) and requires "
+                    "giving 'store_app_name' as well. This can be especially useful for enterprise apps.",
+    ),
+    project_id: Optional[str] = Field(
+        default=None,
+        description="Specifies which Bitrise Project you want to get the connected app to be associated with. If this field is not given a new project will be created alongside with the connected app.",
+    ),
+    store_app_name: Optional[str] = Field(
+        default=None,
+        description="If you have no active app store API keys added on Bitrise, you can decide to add your app manually by giving the app's name as well while indicating manual connection with the similarly named boolean flag.",
+    ),
+    store_credential_id: Optional[str] = Field(
+        default=None,
+        description="If you have credentials added on Bitrise, you can decide to select one for your app. In case of "
+                    "ios platform it will be an Apple API credential id. In case of android platform it will be a "
+                    "Google Service credential id.",
+    ),
+) -> str:
+    url = f"{BITRISE_RM_API_BASE}/connected-apps"
+    body = {
+        "platform": platform,
+        "store_app_id": store_app_id,
+        "workspace_slug": workspace_slug,
+        "id": id,
+        "manual_connection": manual_connection,
+        "project_id": project_id,
+        "store_app_name": store_app_name,
+        "store_credential_id": store_credential_id,
+    }
+    return await call_api("POST", url, body)
+
+@mcp_tool(
+    api_groups=["release-management"],
+    description="List Release Management connected apps available for the authenticated account within a workspace.",
+)
+async def list_connected_apps(
+    workspace_slug: str = Field(
+        description="Identifier of the Bitrise workspace for the Release Management connected apps. This field is mandatory.",
+    ),
+    project_id: Optional[str] = Field(
+        default=None,
+        description="Specifies which Bitrise Project you want to get associated connected apps for",
+    ),
+    platform: Optional[str] = Field(
+        default=None,
+        description="Filters for a specific mobile platform for the list of connected apps. Available values are: 'ios' and 'android'.",
+    ),
+    search: Optional[str] = Field(
+        default=None,
+        description="Search by bundle ID (for ios), package name (for android), or app title (for both platforms). The filter is case-sensitive.",
+    ),
+    items_per_page: Optional[int] = Field(
+        default=10,
+        description="Specifies the maximum number of connected apps returned per page. Default value is 10.",
+    ),
+    page: Optional[int] = Field(
+        default=1,
+        description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
+    ),
+) -> str:
+    params: Dict[str, Union[str, int]] = {}
+    if workspace_slug:
+        params["workspace_slug"] = workspace_slug
+    if project_id:
+        params["project_id"] = project_id
+    if platform:
+        params["platform"] = platform
+    if search:
+        params["search"] = search
+    if items_per_page:
+        params["items_per_page"] = items_per_page
+    if page:
+        params["page"] = page
+
+    url = f"{BITRISE_RM_API_BASE}/connected-apps"
+    return await call_api("GET", url, params=params)
+
+@mcp_tool(
+    api_groups=["release-management"],
+    description="Gives back a Release Management connected app for the authenticated account.",
+)
+async def get_connected_app(
+    id: str = Field(
+        description="Identifier of the Release Management connected app",
+    ),
+) -> str:
+    url = f"{BITRISE_RM_API_BASE}/connected-apps/{id}"
+    return await call_api("GET", url)
+
+
 # ===== Apps =====
-
-
 @mcp_tool(
     api_groups=["apps", "read-only"],
     description="List all the apps available for the authenticated account.",
