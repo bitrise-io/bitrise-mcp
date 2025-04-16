@@ -59,6 +59,37 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
 
 Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
+### Use with [VS Code](https://code.visualstudio.com/Download)
+
+Follow the [official guide](https://code.visualstudio.com/blogs/2025/04/07/agentMode) to enable Agent mode in Copilot Chat.
+
+Then, open VSCode's `settings.json`, and add the Bitrise MCP server configuration under the `mcp.servers` key:
+
+```json
+{
+  "mcp": {
+      "servers": {
+          "bitrise": {
+              "command": "uvx",
+              "args": [
+                  "--from",
+                  "git+https://github.com/bitrise-io/bitrise-mcp@v1.0.1",
+                  "bitrise-mcp"
+              ],
+              "type": "stdio",
+              "env": {
+                  "BITRISE_TOKEN": "<YOUR_TOKEN>"
+              },
+          },
+      }
+  }
+}
+```
+
+Save the configuration. VS Code will automatically recognize the change and load the tools into Copilot Chat.
+
+### Advanced configuration
+
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
 Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, webhooks, build-artifacts, group-roles, cache-items, pipelines, account, read-only, release-management`.
@@ -70,7 +101,7 @@ Example configuration:
 {
   "mcpServers": {
     "bitrise": {
-      "command": "<ABSOLUTE_PATH_TO>/uvx",
+      "command": "uvx",
       "env": {
         "BITRISE_TOKEN": "<YOUR_PAT>"
       },
