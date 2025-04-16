@@ -81,14 +81,7 @@ async def list_apps(
         params["limit"] = limit
 
     url = f"{BITRISE_API_BASE}/apps"
-    async with httpx.AsyncClient() as client:
-        headers = {
-            "User-Agent": USER_AGENT,
-            "Accept": "application/json",
-            "Authorization": os.environ.get("BITRISE_TOKEN") or "",
-        }
-        response = await client.get(url, headers=headers, params=params, timeout=30.0)
-        return response.text
+    return await call_api("GET", url, params=params)
 
 
 @mcp_tool(
@@ -971,6 +964,8 @@ async def me() -> str:
 
 
 # ===== Release Management =====
+
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Add a new Release Management connected app to Bitrise."
