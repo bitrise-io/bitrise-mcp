@@ -965,6 +965,11 @@ async def add_member_to_group(
     description="Get user info for the currently authenticated user account",
 )
 
+async def me() -> str:
+    url = f"{BITRISE_API_BASE}/me"
+    return await call_api("GET", url)
+
+
 # ===== Release Management =====
 @mcp_tool(
     api_groups=["release-management"],
@@ -1627,11 +1632,6 @@ async def get_potential_testers(
 
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/testers"
     return await call_api("GET", url, params=params)
-
-
-async def me() -> str:
-    url = f"{BITRISE_API_BASE}/me"
-    return await call_api("GET", url)
 
 
 def main():
