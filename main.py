@@ -54,6 +54,8 @@ async def call_api(method, url: str, body=None, params=None) -> str:
 
 
 # ===== Apps =====
+
+
 @mcp_tool(
     api_groups=["apps", "read-only"],
     description="List all the apps available for the authenticated account.",

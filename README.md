@@ -63,6 +63,8 @@ You can limit the number of tools exposed to the MCP client. This is useful if y
 
 Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, webhooks, build-artifacts, group-roles, cache-items, pipelines, account, read-only, release-management`.
 
+We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
+
 Example configuration:
 ```json
 {
