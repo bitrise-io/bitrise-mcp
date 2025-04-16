@@ -59,15 +59,15 @@ async def call_api(method, url: str, body=None, params=None) -> str:
     description="List all the apps available for the authenticated account.",
 )
 async def list_apps(
-    sort_by: Optional[str] = Field(
+    sort_by: str = Field(
         default="last_build_at",
-        description="Order of the apps: last_build_at (default) or created_at",
+        description="Order of the apps: last_build_at (default) or created_at. If set, you should accept the response as sorted.",
     ),
-    next: Optional[str] = Field(
+    next: str = Field(
         default=None,
         description="Slug of the first app in the response",
     ),
-    limit: Optional[int] = Field(
+    limit: int = Field(
         default=50,
         description="Max number of elements per page (default: 50)",
     ),
@@ -110,11 +110,11 @@ async def register_app(
     organization_slug: str = Field(
         description="The organization (aka workspace) the app to add to",
     ),
-    project_type: Optional[str] = Field(
+    project_type: str = Field(
         default="other",
         description="Type of project (ios, android, etc.)",
     ),
-    provider: Optional[str] = Field(
+    provider: str = Field(
         default="github",
         description="Repository provider",
     ),
@@ -320,31 +320,31 @@ async def register_webhook(
     description="List all the builds of a specified Bitrise app or all accessible builds.",
 )
 async def list_builds(
-    app_slug: Optional[str] = Field(
+    app_slug: str = Field(
         default=None,
         description="Identifier of the Bitrise app",
     ),
-    sort_by: Optional[str] = Field(
+    sort_by: str = Field(
         default="created_at",
         description="Order of builds: created_at (default), running_first",
     ),
-    branch: Optional[str] = Field(
+    branch: str = Field(
         default=None,
         description="Filter builds by branch",
     ),
-    workflow: Optional[str] = Field(
+    workflow: str = Field(
         default=None,
         description="Filter builds by workflow",
     ),
-    status: Optional[int] = Field(
+    status: int = Field(
         default=None,
         description="Filter builds by status (0: not finished, 1: successful, 2: failed, 3: aborted, 4: in-progress)",
     ),
-    next: Optional[str] = Field(
+    next: str = Field(
         default=None,
         description="Slug of the first build in the response",
     ),
-    limit: Optional[int] = Field(
+    limit: int = Field(
         default=None,
         description="Max number of elements per page (default: 50)",
     ),
@@ -391,15 +391,15 @@ async def trigger_bitrise_build(
         default="main",
         description="The branch to build",
     ),
-    workflow_id: Optional[str] = Field(
+    workflow_id: str = Field(
         default=None,
         description="The workflow to build",
     ),
-    commit_message: Optional[str] = Field(
+    commit_message: str = Field(
         default=None,
         description="The commit message for the build",
     ),
-    commit_hash: Optional[str] = Field(
+    commit_hash: str = Field(
         default=None,
         description="The commit hash for the build",
     ),
@@ -449,7 +449,7 @@ async def abort_build(
     build_slug: str = Field(
         description="Identifier of the build",
     ),
-    reason: Optional[str] = Field(
+    reason: str = Field(
         default=None,
         description="Reason for aborting the build",
     ),
@@ -520,11 +520,11 @@ async def list_artifacts(
     build_slug: str = Field(
         description="Identifier of the build",
     ),
-    next: Optional[str] = Field(
+    next: str = Field(
         default=None,
         description="Slug of the first artifact in the response",
     ),
-    limit: Optional[int] = Field(
+    limit: int = Field(
         default=None,
         description="Max number of elements per page (default: 50)",
     ),
@@ -657,7 +657,7 @@ async def update_outgoing_webhook(
     url: str = Field(
         description="URL of the webhook",
     ),
-    headers: Optional[Dict[str, str]] = Field(
+    headers: Dict[str, str] = Field(
         default=None,
         description="Headers to be sent with the webhook",
     ),
@@ -682,7 +682,7 @@ async def create_outgoing_webhook(
     url: str = Field(
         description="URL of the webhook",
     ),
-    headers: Optional[Dict[str, str]] = Field(
+    headers: Dict[str, str] = Field(
         default=None,
         description="Headers to be sent with the webhook",
     ),
@@ -795,7 +795,7 @@ async def abort_pipeline(
     pipeline_id: str = Field(
         description="Identifier of the pipeline",
     ),
-    reason: Optional[str] = Field(
+    reason: str = Field(
         default=None,
         description="Reason for aborting the pipeline",
     ),
