@@ -989,26 +989,26 @@ async def create_connected_app(
     workspace_slug: str = Field(
         description="Identifier of the Bitrise workspace for the Release Management connected app. This field is mandatory.",
     ),
-    id: Optional[str] = Field(
+    id: str = Field(
         default=None,
         description="An uuidV4 identifier for your new connected app. If it is not given, one will be generated. It is "
                     "useful for making the request idempotent or if the id is triggered outside of Bitrise and needs "
                     "to be stored separately as well.",
     ),
-    manual_connection: Optional[bool] = Field(
+    manual_connection: bool = Field(
         default=False,
         description="If set to true it indicates a manual connection (bypassing using store api keys) and requires "
                     "giving 'store_app_name' as well. This can be especially useful for enterprise apps.",
     ),
-    project_id: Optional[str] = Field(
+    project_id: str = Field(
         default=None,
         description="Specifies which Bitrise Project you want to get the connected app to be associated with. If this field is not given a new project will be created alongside with the connected app.",
     ),
-    store_app_name: Optional[str] = Field(
+    store_app_name: str = Field(
         default=None,
         description="If you have no active app store API keys added on Bitrise, you can decide to add your app manually by giving the app's name as well while indicating manual connection with the similarly named boolean flag.",
     ),
-    store_credential_id: Optional[str] = Field(
+    store_credential_id: str = Field(
         default=None,
         description="If you have credentials added on Bitrise, you can decide to select one for your app. In case of "
                     "ios platform it will be an Apple API credential id. In case of android platform it will be a "
@@ -1016,16 +1016,23 @@ async def create_connected_app(
     ),
 ) -> str:
     url = f"{BITRISE_RM_API_BASE}/connected-apps"
+
     body = {
         "platform": platform,
         "store_app_id": store_app_id,
         "workspace_slug": workspace_slug,
-        "id": id,
-        "manual_connection": manual_connection,
-        "project_id": project_id,
-        "store_app_name": store_app_name,
-        "store_credential_id": store_credential_id,
     }
+    if id:
+        body["id"] = id
+    if manual_connection:
+        body["manual_connection"] = manual_connection
+    if project_id:
+        body["project_id"] = project_id
+    if store_app_name:
+        body["store_app_name"] = store_app_name
+    if store_credential_id:
+        body["store_credential_id"] = store_credential_id
+
     return await call_api("POST", url, body=body)
 
 @mcp_tool(
@@ -1036,30 +1043,30 @@ async def list_connected_apps(
     workspace_slug: str = Field(
         description="Identifier of the Bitrise workspace for the Release Management connected apps. This field is mandatory.",
     ),
-    project_id: Optional[str] = Field(
+    project_id: str = Field(
         default=None,
         description="Specifies which Bitrise Project you want to get associated connected apps for",
     ),
-    platform: Optional[str] = Field(
+    platform: str = Field(
         default=None,
         description="Filters for a specific mobile platform for the list of connected apps. Available values are: 'ios' and 'android'.",
     ),
-    search: Optional[str] = Field(
+    search: str = Field(
         default=None,
         description="Search by bundle ID (for ios), package name (for android), or app title (for both platforms). The filter is case-sensitive.",
     ),
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of connected apps returned per page. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int]] = {}
-    if workspace_slug:
-        params["workspace_slug"] = workspace_slug
+    params: Dict[str, Union[str, int]] = {
+        "workspace_slug": workspace_slug
+    }
     if project_id:
         params["project_id"] = project_id
     if platform:
@@ -1094,21 +1101,21 @@ async def update_connected_app(
     connected_app_id: str = Field(
         description="The uuidV4 identifier for your connected app.",
     ),
-    connect_to_store: Optional[bool] = Field(
+    connect_to_store: bool = Field(
         default=False,
         description="If true, will check connected app validity against the Apple App Store or Google Play Store "
                     "(dependent on the platform of your connected app). This means, that the already set or just given "
                     "store_app_id will be validated against the Store, using the already set or just given store "
                     "credential id.",
     ),
-    store_app_id: Optional[str] = Field(
+    store_app_id: str = Field(
         description="The store identifier for your app. You can change the previously set store_app_id to match the "
                 "one in the App Store or Google Play depending on the app platform. This is especially useful if "
                 "you want to connect your app with the store as the system will validate the given store_app_id "
                 "against the Store. In case of iOS platform it is the bundle id. In case of Android platform it is "
                 "the package name.",
     ),
-    store_credential_id: Optional[str] = Field(
+    store_credential_id: str = Field(
         default=None,
         description="If you have credentials added on Bitrise, you can decide to select one for your app. In case of "
                     "ios platform it will be an Apple API credential id. In case of android platform it will be a "
@@ -1116,11 +1123,15 @@ async def update_connected_app(
     ),
 ) -> str:
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}"
-    body = {
-        "connect_to_store": connect_to_store,
-        "store_app_id": store_app_id,
-        "store_credential_id": store_credential_id,
-    }
+
+    body = {}
+    if connect_to_store:
+        body["connect_to_store"] = connect_to_store
+    if store_app_id:
+        body["store_app_id"] = store_app_id
+    if store_credential_id:
+        body["store_credential_id"] = store_credential_id
+
     return await call_api("PATCH", url, body=body)
 
 @mcp_tool(
@@ -1132,71 +1143,68 @@ async def list_installable_artifacts(
         description="Identifier of the Release Management connected app for the installable artifacts. This field is mandatory.",
     ),
 
-    after_date: Optional[str] = Field(
+    after_date: str = Field(
         default=None,
         description="A date in ISO 8601 string format specifying the start of the interval when the installable "
                     "artifact to be returned was created or uploaded. This value will be defaulted to 1 month ago if "
                     "distribution_ready filter is not set or set to false."
     ),
-    artifact_type: Optional[str] = Field(
+    artifact_type: str = Field(
         default=None,
         description="Filters for a specific artifact type or file extension for the list of installable artifacts. "
                     "Available values are: 'aab' and 'apk' for android artifacts and 'ipa' for ios artifacts."
     ),
-    before_date: Optional[str] = Field(
+    before_date: str = Field(
         default=None,
         description="A date in ISO 8601 string format specifying the end of the interval when the installable artifact "
                     "to be returned was created or uploaded. This value will be defaulted to the current time if "
                     "distribution_ready filter is not set or set to false."
     ),
-    branch: Optional[str] = Field(
+    branch: str = Field(
         default=None,
         description="Filters for the Bitrise CI branch of the installable artifact on which it has been generated on.",
     ),
-    distribution_ready: Optional[bool] = Field(
+    distribution_ready: bool = Field(
         default=None,
         description="Filters for distribution ready installable artifacts. This means .apk and .ipa (with "
                     "distribution type ad-hoc, development, or enterprise) installable artifacts.",
     ),
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of installable artifacts to be returned per page. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
-    platform: Optional[str] = Field(
+    platform: str = Field(
         default=None,
         description="Filters for a specific mobile platform for the list of installable artifacts. Available values are: 'ios' and 'android'.",
     ),
-    search: Optional[str] = Field(
+    search: str = Field(
         default=None,
         description="Search by version, filename or build number (Bitrise CI). The filter is case-sensitive.",
     ),
-    source: Optional[str] = Field(
+    source: str = Field(
         default=None,
         description="Filters for the source of installable artifacts to be returned. Available values are 'api' and "
                     "'ci'."
     ),
-    store_signed: Optional[bool] = Field(
+    store_signed: bool = Field(
         default=None,
         description="Filters for store ready installable artifacts. This means signed .aab and .ipa (with distribution type app-store) installable artifacts.",
     ),
-    version: Optional[str] = Field(
+    version: str = Field(
         default=None,
         description="Filters for the version this installable artifact was created for. This field is required if the "
                     "distribution_ready filter is set to true."
     ),
-    workflow: Optional[str] = Field(
+    workflow: str = Field(
         default=None,
         description="Filters for the Bitrise CI workflow of the installable artifact it has been generated by.",
     ),
 ) -> str:
     params: Dict[str, Union[str, int, bool]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-
     if after_date:
         params["after_date"] = after_date
     if artifact_type:
@@ -1244,7 +1252,6 @@ async def generate_installable_artifact_upload_url(
         description="An uuidv4 identifier generated on the client side for the installable artifact. This field is "
                     "mandatory.",
     ),
-
     file_name: str = Field(
         description="The name of the installable artifact file (with extension) to be uploaded to Bitrise. This field "
                     "is mandatory.",
@@ -1252,32 +1259,25 @@ async def generate_installable_artifact_upload_url(
     file_size_bytes: str = Field(
         description="The byte size of the installable artifact file to be uploaded.",
     ),
-
-    branch: Optional[str] = Field(
+    branch: str = Field(
         default=None,
         description="Optionally you can add the name of the CI branch the installable artifact has been generated on.",
     ),
-    with_public_page: Optional[bool] = Field(
+    with_public_page: bool = Field(
         default=None,
         description="Optionally, you can enable public install page for your artifact. This can only be enabled by "
                     "Bitrise Project Admins, Bitrise Project Owners and Bitrise Workspace Admins. Changing this value "
                     "without proper permissions will result in an error. The default value is false.",
     ),
-    workflow: Optional[str] = Field(
+    workflow: str = Field(
         default=None,
         description="Optionally you can add the name of the CI workflow this installable artifact has been generated by.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int, bool]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-    if installable_artifact_id:
-        params["installable_artifact_id"] = installable_artifact_id
-
-    if file_name:
-        params["file_name"] = file_name
-    if file_size_bytes:
-        params["file_size_bytes"] = file_size_bytes
+    params: Dict[str, Union[str, int, bool]] = {
+        "file_name": file_name,
+        "file_size_bytes": file_size_bytes
+    }
 
     if branch:
         params["branch"] = branch
@@ -1303,14 +1303,8 @@ async def get_installable_artifact_upload_and_processing_status(
         description="The uuidv4 identifier for the installable artifact. This field is mandatory.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int, bool]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-    if installable_artifact_id:
-        params["installable_artifact_id"] = installable_artifact_id
-
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/installable-artifacts/{installable_artifact_id}/status"
-    return await call_api("GET", url, params=params)
+    return await call_api("GET", url)
 
 @mcp_tool(
     api_groups=["release-management"],
@@ -1348,18 +1342,16 @@ async def list_build_distribution_versions(
     connected_app_id: str = Field(
         description="The uuidV4 identifier of the app the build distribution is connected to. This field is mandatory.",
     ),
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of build distribution versions returned per page. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
     params: Dict[str, Union[str, int]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
     if items_per_page:
         params["items_per_page"] = items_per_page
     if page:
@@ -1380,20 +1372,18 @@ async def list_build_distribution_version_test_builds(
         description="The version of the build distribution. This field is mandatory.",
     ),
 
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of test builds to return for a build distribution version per page. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-    if version:
-        params["version"] = version
+    params: Dict[str, Union[str, int]] = {
+        "version": version
+    }
 
     if items_per_page:
         params["items_per_page"] = items_per_page
@@ -1421,16 +1411,19 @@ async def create_tester_group(
     name: str = Field(
         description="The name for the new tester group. Must be unique in the scope of the connected app.",
     ),
-    auto_notify: Optional[bool] = Field(
+    auto_notify: bool = Field(
         default=False,
         description="If set to true it indicates that the tester group will receive notifications automatically.",
     ),
 ) -> str:
-    url = f"{BITRISE_RM_API_BASE}/connected-apps/tester-groups"
-    body = {
-        "name": name,
-        "auto_notify": auto_notify,
-    }
+    url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups"
+
+    body = {}
+    if name:
+        body["name"] = name
+    if auto_notify:
+        body["auto_notify"] = auto_notify
+
     return await call_api("POST", url, body=body)
 
 @mcp_tool(
@@ -1486,21 +1479,24 @@ async def update_tester_group(
     id: str = Field(
         description="The uuidV4 identifier of the tester group to which testers will be added.",
     ),
-    name: Optional[str] = Field(
+    name: str = Field(
         default=None,
         description="The new name for the tester group. Must be unique in the scope of the related connected app.",
     ),
-    auto_notify: Optional[bool] = Field(
+    auto_notify: bool = Field(
         default=False,
         description="If set to true it indicates the tester group will receive email notifications automatically from "
                     "now on about new installable builds.",
     ),
 ) -> str:
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups/{id}"
-    body = {
-        "name": name,
-        "auto_notify": auto_notify,
-    }
+
+    body = {}
+    if name:
+        body["name"] = name
+    if auto_notify:
+        body["auto_notify"] = auto_notify
+
     return await call_api("PUT", url, body=body)
 
 @mcp_tool(
@@ -1511,20 +1507,16 @@ async def list_tester_groups(
     connected_app_id: str = Field(
         description="The uuidV4 identifier of the app the tester group is connected to. This field is mandatory.",
     ),
-
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of tester groups to return related to a specific connected app. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
     params: Dict[str, Union[str, int]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-
     if items_per_page:
         params["items_per_page"] = items_per_page
     if page:
@@ -1545,14 +1537,8 @@ async def get_tester_group(
         description="The uuidV4 identifier of the tester group. This field is mandatory.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-    if id:
-        params["id"] = id
-
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups/{id}"
-    return await call_api("GET", url, params=params)
+    return await call_api("GET", url)
 
 @mcp_tool(
     api_groups=["release-management"],
@@ -1566,25 +1552,20 @@ async def get_potential_testers(
     id: str = Field(
         description="The uuidV4 identifier of the tester group. This field is mandatory.",
     ),
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of potential testers to return having access to a specific connected app. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
-    search: Optional[str] = Field(
+    search: str = Field(
         default=None,
         description="Searches for potential testers based on email or username using a case-insensitive approach.",
     ),
 ) -> str:
     params: Dict[str, Union[str, int]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-    if id:
-        params["id"] = id
-
     if items_per_page:
         params["items_per_page"] = items_per_page
     if page:
@@ -1604,25 +1585,21 @@ async def get_potential_testers(
     connected_app_id: str = Field(
         description="The uuidV4 identifier of the app the tester group is connected to. This field is mandatory.",
     ),
-
-    tester_group_id: Optional[str] = Field(
+    tester_group_id: str = Field(
         description="The uuidV4 identifier of a tester group. If given, only testers within this specific tester group "
                     "will be returned.",
     ),
-    items_per_page: Optional[int] = Field(
+    items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of testers to be returned that have been added to a tester group "
                     "related to the specific connected app.. Default value is 10.",
     ),
-    page: Optional[int] = Field(
+    page: int = Field(
         default=1,
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
     params: Dict[str, Union[str, int]] = {}
-    if connected_app_id:
-        params["connected_app_id"] = connected_app_id
-
     if tester_group_id:
         params["tester_group_id"] = tester_group_id
     if items_per_page:
