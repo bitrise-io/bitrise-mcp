@@ -1,0 +1,46 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - bitriseToken
+    properties:
+      bitriseToken:
+        type: string
+        description: Bitrise API token used for authentication
+      enabledApiGroups:
+        type: array
+        items:
+          type: string
+        default:
+          - apps
+          - builds
+          - workspaces
+          - webhooks
+          - build-artifacts
+          - group-roles
+          - cache-items
+          - pipelines
+          - account
+          - read-only
+          - release-management
+        description: List of enabled API groups
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => {
+      const args = [];
+      if (config.enabledApiGroups && config.enabledApiGroups.length > 0) {
+        args.push("--enabled-api-groups", config.enabledApiGroups.join(","));
+      }
+      return { command: "python", args: ["/app/main.py", ...args], env: { BITRISE_TOKEN: config.bitriseToken } };
+    }
+  exampleConfig:
+    bitriseToken: 0123456789abcdef0123456789abcdef
+    enabledApiGroups:
+      - apps
+      - builds
+      - pipelines
