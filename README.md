@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/bitrise-io-bitrise-mcp-badge.png)](https://mseep.ai/app/bitrise-io-bitrise-mcp)
+
 # Bitrise MCP Server
 
 MCP Server for the Bitrise API, enabling app management, build operations, artifact management and more.
