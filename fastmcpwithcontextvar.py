@@ -1,3 +1,4 @@
+from typing import Any
 from mcp.server.fastmcp import FastMCP
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.applications import Starlette
@@ -5,8 +6,18 @@ import contextvars
 
 
 class FastMCPWithContextVar(FastMCP):
-    def __init__(self, name, tools_by_groups, *args, **kwargs):
-        super().__init__(name, *args, **kwargs)
+    def __init__(
+        self,
+        name=None,
+        tools_by_groups={},
+        instructions=None,
+        auth_server_provider=None,
+        event_store=None,
+        **settings: Any,
+    ):
+        super().__init__(
+            name, instructions, auth_server_provider, event_store, **settings
+        )
         self.tools_by_groups = tools_by_groups
         self.request_var = contextvars.ContextVar("request_var", default=None)
 
@@ -14,8 +25,8 @@ class FastMCPWithContextVar(FastMCP):
         """Get the current request from the context variable."""
         return self.request_var.get()
 
-    def sse_app(self) -> Starlette:
-        app = super().sse_app()
+    def streamable_http_app(self) -> Starlette:
+        app = super().streamable_http_app()
 
         class RequestContextMiddleware(BaseHTTPMiddleware):
             async def dispatch(inner_self, request, call_next):

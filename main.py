@@ -18,12 +18,20 @@ PORT = int(os.environ.get("PORT") or 8000)
 tools_by_groups = {}
 
 mcp = (
-    FastMCPWithContextVar("bitrise", tools_by_groups)
+    FastMCPWithContextVar(
+        "bitrise",
+        tools_by_groups,
+        None,
+        None,
+        None,
+        host=HOST,
+        port=PORT,
+        streamable_http_path="/",
+        stateless_http=True,
+    )
     if not BITRISE_TOKEN
     else FastMCP("bitrise")
 )
-mcp.settings.host = HOST
-mcp.settings.port = PORT
 
 if BITRISE_TOKEN:
     parser = argparse.ArgumentParser()
@@ -1650,7 +1658,7 @@ async def get_potential_testers(
 def main():
     transport = "stdio"
     if not BITRISE_TOKEN:
-        transport = "sse"
+        transport = "streamable-http"
 
         mcp.run(transport=transport)
 

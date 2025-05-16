@@ -65,7 +65,7 @@ To use remote MCP server:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://localhost:8000/sse",
+        "https://localhost:8000/",
         "--header",
         "Authorization: <YOUR_TOKEN>",
         "--header",
