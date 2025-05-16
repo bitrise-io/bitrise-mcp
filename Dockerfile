@@ -1,21 +1,40 @@
-FROM python:3.12-slim
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
-# Set a working directory
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1 \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_SYSTEM_PYTHON=true
+
 WORKDIR /app
 
-# Install curl and other dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Create a non-root user
+RUN adduser --disabled-password --gecos "" bitrise
 
-# Install uv (install script installs it to /usr/local/bin)
-RUN curl -LsSf https://astral.sh/uv/install.sh |env UV_INSTALL_DIR="/usr/local/bin" sh
+# Copy dependency files first to leverage Docker cache
+COPY pyproject.toml uv.lock ./
 
-# Copy project files
-COPY . .
+# Install dependencies before copying application code
+# This improves build caching - dependencies change less frequently than code
+RUN uv sync --frozen --no-dev
 
-# Synchronize dependencies
-RUN uv sync
+# Make sure the virtual environment is in the PATH
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Command to run your app
-ENTRYPOINT ["uv", "run", "main.py"]
+# Copy application code
+COPY . . 
+
+# Set ownership to the non-root user
+RUN chown -R bitrise:bitrise /app
+
+# Switch to non-root user for security
+USER bitrise
+
+# Expose the port the app runs on
+EXPOSE 8000
+
+# Command to run the API with optimized parameters
+CMD ["python3", "main.py"]
