@@ -8,10 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv (install script installs it to /root/.cargo/bin or /root/.local/bin)
+# Install uv (install script installs it to /root/.local/bin)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Add uv to PATH (modify according to where uv is installed)
+# Add uv to PATH
 ENV PATH="/root/.local/bin:$PATH"
 
 # Copy project files
