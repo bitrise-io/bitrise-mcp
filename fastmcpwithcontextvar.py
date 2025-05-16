@@ -1,13 +1,18 @@
 from mcp.server.fastmcp import FastMCP
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.applications import Starlette
-from mcp.server.fastmcp.server import MCPTool
+import contextvars
 
 
 class FastMCPWithContextVar(FastMCP):
-    def __init__(self, name, request_var, *args, **kwargs):
+    def __init__(self, name, tools_by_groups, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
-        self.request_var = request_var
+        self.tools_by_groups = tools_by_groups
+        self.request_var = contextvars.ContextVar("request_var", default=None)
+
+    def get_request(self):
+        """Get the current request from the context variable."""
+        return self.request_var.get()
 
     def sse_app(self) -> Starlette:
         app = super().sse_app()
@@ -26,17 +31,21 @@ class FastMCPWithContextVar(FastMCP):
 
     async def list_tools(self):
         tools = await super().list_tools()
-
         request = self.request_var.get()
-        if request:
-            enabled_api_groups_header = request.headers.get(
-                "x-bitrise-enabled-api-groups"
+
+        if request is None:
+            return tools
+
+        enabled_api_groups_header = request.headers.get("x-bitrise-enabled-api-groups")
+
+        if enabled_api_groups_header:
+            allowed_groups = set(
+                tool.strip() for tool in enabled_api_groups_header.split(",")
             )
-            if enabled_api_groups_header:
-                allowed_tools = set(
-                    tool.strip() for tool in enabled_api_groups_header.split(",")
-                )
-                tools = [tool for tool in tools if tool in allowed_tools]
-                print(f">>> Filtered tools: {[tool.name for tool in tools]}")
+            filtered_tools = []
+            for group in allowed_groups:
+                group_tools = self.tools_by_groups.get(group, [])
+                filtered_tools.extend(group_tools)
+            tools = [tool for tool in tools if tool.name in filtered_tools]
 
         return tools

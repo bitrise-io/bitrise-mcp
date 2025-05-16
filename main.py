@@ -2,7 +2,6 @@ import argparse
 import os
 import httpx
 import sys
-import contextvars
 from functools import partial
 from typing import Any, Dict, List, Union
 from mcp.server.fastmcp import FastMCP
@@ -16,17 +15,17 @@ BITRISE_TOKEN = os.environ.get("BITRISE_TOKEN")
 HOST = os.environ.get("HOST") or "0.0.0.0"
 PORT = int(os.environ.get("PORT") or 8000)
 
-request_var = contextvars.ContextVar("request_var", default=None)
+tools_by_groups = {}
 
 mcp = (
-    FastMCPWithContextVar("bitrise", request_var)
+    FastMCPWithContextVar("bitrise", tools_by_groups)
     if not BITRISE_TOKEN
     else FastMCP("bitrise")
 )
 mcp.settings.host = HOST
 mcp.settings.port = PORT
 
-if not BITRISE_TOKEN:
+if BITRISE_TOKEN:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--enabled-api-groups",
@@ -44,6 +43,11 @@ def mcp_tool(
     description: str | None = None,
 ):
     def decorator(fn):
+        for group in api_groups:
+            if group not in tools_by_groups:
+                tools_by_groups[group] = []
+            tools_by_groups[group].append(name or fn.__name__)
+
         if not BITRISE_TOKEN or set(api_groups) & set(args.enabled_api_groups):
             mcp.add_tool(fn, name=name, description=description)
         return fn
@@ -69,7 +73,7 @@ async def call_api(method, url: str, body=None, params=None) -> str:
 
 def token_from_header():
     if not BITRISE_TOKEN:
-        request = request_var.get()
+        request = mcp.get_request()
         if request:
             token = request.headers.get("Authorization", "")
     return token
