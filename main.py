@@ -2,28 +2,40 @@ import argparse
 import os
 import httpx
 import sys
+import contextvars
 from functools import partial
 from typing import Any, Dict, List, Union
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
-
-mcp = FastMCP("bitrise")
-
+from fastmcpwithcontextvar import FastMCPWithContextVar
 
 BITRISE_API_BASE = "https://api.bitrise.io/v0.1"
 BITRISE_RM_API_BASE = "https://api.bitrise.io/release-management/v1"
 USER_AGENT = "bitrise-mcp/1.0"
+BITRISE_TOKEN = os.environ.get("BITRISE_TOKEN")
+HOST = os.environ.get("HOST") or "localhost"
+PORT = int(os.environ.get("PORT") or 8000)
 
+request_var = contextvars.ContextVar("request_var", default=None)
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--enabled-api-groups",
-    help="The list of enabled API groups, comma separated",
-    type=partial(str.split, sep=","),
-    default="apps,builds,workspaces,webhooks,build-artifacts,group-roles,cache-items,pipelines,account,read-only,release-management",
+mcp = (
+    FastMCPWithContextVar("bitrise", request_var)
+    if not BITRISE_TOKEN
+    else FastMCP("bitrise")
 )
-args = parser.parse_args()
-print(f"Enabled API groups {args.enabled_api_groups}", file=sys.stderr)
+mcp.settings.host = HOST
+mcp.settings.port = PORT
+
+if not BITRISE_TOKEN:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--enabled-api-groups",
+        help="The list of enabled API groups, comma separated",
+        type=partial(str.split, sep=","),
+        default="apps,builds,workspaces,webhooks,build-artifacts,group-roles,cache-items,pipelines,account,read-only,release-management",
+    )
+    args = parser.parse_args()
+    print(f"Enabled API groups {args.enabled_api_groups}", file=sys.stderr)
 
 
 def mcp_tool(
@@ -32,7 +44,7 @@ def mcp_tool(
     description: str | None = None,
 ):
     def decorator(fn):
-        if set(api_groups) & set(args.enabled_api_groups):
+        if not BITRISE_TOKEN or set(api_groups) & set(args.enabled_api_groups):
             mcp.add_tool(fn, name=name, description=description)
         return fn
 
@@ -40,17 +52,27 @@ def mcp_tool(
 
 
 async def call_api(method, url: str, body=None, params=None) -> str:
+    token = token_from_header()
+
     headers = {
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": os.environ.get("BITRISE_TOKEN") or "",
+        "Authorization": BITRISE_TOKEN or token or "",
     }
     async with httpx.AsyncClient() as client:
         response = await client.request(
             method, url, headers=headers, json=body, params=params, timeout=30.0
         )
         return response.text
+
+
+def token_from_header():
+    if not BITRISE_TOKEN:
+        request = request_var.get()
+        if request:
+            token = request.headers.get("Authorization", "")
+    return token
 
 
 # ===== Apps =====
@@ -364,10 +386,12 @@ async def list_builds(
         url = f"{BITRISE_API_BASE}/builds"
 
     async with httpx.AsyncClient() as client:
+        token = token_from_header()
+
         headers = {
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
-            "Authorization": os.environ.get("BITRISE_TOKEN") or "",
+            "Authorization": BITRISE_TOKEN or token or "",
         }
         response = await client.get(url, headers=headers, params=params, timeout=30.0)
         response.raise_for_status()
@@ -532,10 +556,12 @@ async def list_artifacts(
         params["limit"] = limit
 
     async with httpx.AsyncClient() as client:
+        token = token_from_header()
+
         headers = {
             "User-Agent": USER_AGENT,
             "Accept": "application/json",
-            "Authorization": os.environ.get("BITRISE_TOKEN") or "",
+            "Authorization": BITRISE_TOKEN or token or "",
         }
         response = await client.get(url, headers=headers, params=params, timeout=30.0)
         response.raise_for_status()
@@ -959,7 +985,6 @@ async def add_member_to_group(
     api_groups=["user", "read-only"],
     description="Get user info for the currently authenticated user account",
 )
-
 async def me() -> str:
     url = f"{BITRISE_API_BASE}/me"
     return await call_api("GET", url)
@@ -970,7 +995,7 @@ async def me() -> str:
 
 @mcp_tool(
     api_groups=["release-management"],
-    description="Add a new Release Management connected app to Bitrise."
+    description="Add a new Release Management connected app to Bitrise.",
 )
 async def create_connected_app(
     platform: str = Field(
@@ -978,10 +1003,10 @@ async def create_connected_app(
     ),
     store_app_id: str = Field(
         description="The app store identifier for the connected app. In case of 'ios' platform it is the bundle id "
-                    "from App Store Connect. For additional context you can check the property description: "
-                    "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleidentifier"
-                    "In case of Android platform it is the package name. Check the documentation: "
-                    "https://developer.android.com/build/configure-app-module#set_the_application_id",
+        "from App Store Connect. For additional context you can check the property description: "
+        "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleidentifier"
+        "In case of Android platform it is the package name. Check the documentation: "
+        "https://developer.android.com/build/configure-app-module#set_the_application_id",
     ),
     workspace_slug: str = Field(
         description="Identifier of the Bitrise workspace for the Release Management connected app. This field is mandatory.",
@@ -989,13 +1014,13 @@ async def create_connected_app(
     id: str = Field(
         default=None,
         description="An uuidV4 identifier for your new connected app. If it is not given, one will be generated. It is "
-                    "useful for making the request idempotent or if the id is triggered outside of Bitrise and needs "
-                    "to be stored separately as well.",
+        "useful for making the request idempotent or if the id is triggered outside of Bitrise and needs "
+        "to be stored separately as well.",
     ),
     manual_connection: bool = Field(
         default=False,
         description="If set to true it indicates a manual connection (bypassing using store api keys) and requires "
-                    "giving 'store_app_name' as well. This can be especially useful for enterprise apps.",
+        "giving 'store_app_name' as well. This can be especially useful for enterprise apps.",
     ),
     project_id: str = Field(
         default=None,
@@ -1008,8 +1033,8 @@ async def create_connected_app(
     store_credential_id: str = Field(
         default=None,
         description="If you have credentials added on Bitrise, you can decide to select one for your app. In case of "
-                    "ios platform it will be an Apple API credential id. In case of android platform it will be a "
-                    "Google Service credential id.",
+        "ios platform it will be an Apple API credential id. In case of android platform it will be a "
+        "Google Service credential id.",
     ),
 ) -> str:
     url = f"{BITRISE_RM_API_BASE}/connected-apps"
@@ -1031,6 +1056,7 @@ async def create_connected_app(
         body["store_credential_id"] = store_credential_id
 
     return await call_api("POST", url, body=body)
+
 
 @mcp_tool(
     api_groups=["release-management"],
@@ -1061,9 +1087,7 @@ async def list_connected_apps(
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int]] = {
-        "workspace_slug": workspace_slug
-    }
+    params: Dict[str, Union[str, int]] = {"workspace_slug": workspace_slug}
     if project_id:
         params["project_id"] = project_id
     if platform:
@@ -1078,6 +1102,7 @@ async def list_connected_apps(
     url = f"{BITRISE_RM_API_BASE}/connected-apps"
     return await call_api("GET", url, params=params)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Gives back a Release Management connected app for the authenticated account.",
@@ -1090,10 +1115,8 @@ async def get_connected_app(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{id}"
     return await call_api("GET", url)
 
-@mcp_tool(
-    api_groups=["release-management"],
-    description="Updates a connected app."
-)
+
+@mcp_tool(api_groups=["release-management"], description="Updates a connected app.")
 async def update_connected_app(
     connected_app_id: str = Field(
         description="The uuidV4 identifier for your connected app.",
@@ -1101,22 +1124,22 @@ async def update_connected_app(
     connect_to_store: bool = Field(
         default=False,
         description="If true, will check connected app validity against the Apple App Store or Google Play Store "
-                    "(dependent on the platform of your connected app). This means, that the already set or just given "
-                    "store_app_id will be validated against the Store, using the already set or just given store "
-                    "credential id.",
+        "(dependent on the platform of your connected app). This means, that the already set or just given "
+        "store_app_id will be validated against the Store, using the already set or just given store "
+        "credential id.",
     ),
     store_app_id: str = Field(
         description="The store identifier for your app. You can change the previously set store_app_id to match the "
-                "one in the App Store or Google Play depending on the app platform. This is especially useful if "
-                "you want to connect your app with the store as the system will validate the given store_app_id "
-                "against the Store. In case of iOS platform it is the bundle id. In case of Android platform it is "
-                "the package name.",
+        "one in the App Store or Google Play depending on the app platform. This is especially useful if "
+        "you want to connect your app with the store as the system will validate the given store_app_id "
+        "against the Store. In case of iOS platform it is the bundle id. In case of Android platform it is "
+        "the package name.",
     ),
     store_credential_id: str = Field(
         default=None,
         description="If you have credentials added on Bitrise, you can decide to select one for your app. In case of "
-                    "ios platform it will be an Apple API credential id. In case of android platform it will be a "
-                    "Google Service credential id.",
+        "ios platform it will be an Apple API credential id. In case of android platform it will be a "
+        "Google Service credential id.",
     ),
 ) -> str:
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}"
@@ -1131,6 +1154,7 @@ async def update_connected_app(
 
     return await call_api("PATCH", url, body=body)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="List Release Management installable artifacts of a connected app available for the authenticated account.",
@@ -1139,23 +1163,22 @@ async def list_installable_artifacts(
     connected_app_id: str = Field(
         description="Identifier of the Release Management connected app for the installable artifacts. This field is mandatory.",
     ),
-
     after_date: str = Field(
         default=None,
         description="A date in ISO 8601 string format specifying the start of the interval when the installable "
-                    "artifact to be returned was created or uploaded. This value will be defaulted to 1 month ago if "
-                    "distribution_ready filter is not set or set to false."
+        "artifact to be returned was created or uploaded. This value will be defaulted to 1 month ago if "
+        "distribution_ready filter is not set or set to false.",
     ),
     artifact_type: str = Field(
         default=None,
         description="Filters for a specific artifact type or file extension for the list of installable artifacts. "
-                    "Available values are: 'aab' and 'apk' for android artifacts and 'ipa' for ios artifacts."
+        "Available values are: 'aab' and 'apk' for android artifacts and 'ipa' for ios artifacts.",
     ),
     before_date: str = Field(
         default=None,
         description="A date in ISO 8601 string format specifying the end of the interval when the installable artifact "
-                    "to be returned was created or uploaded. This value will be defaulted to the current time if "
-                    "distribution_ready filter is not set or set to false."
+        "to be returned was created or uploaded. This value will be defaulted to the current time if "
+        "distribution_ready filter is not set or set to false.",
     ),
     branch: str = Field(
         default=None,
@@ -1164,7 +1187,7 @@ async def list_installable_artifacts(
     distribution_ready: bool = Field(
         default=None,
         description="Filters for distribution ready installable artifacts. This means .apk and .ipa (with "
-                    "distribution type ad-hoc, development, or enterprise) installable artifacts.",
+        "distribution type ad-hoc, development, or enterprise) installable artifacts.",
     ),
     items_per_page: int = Field(
         default=10,
@@ -1185,7 +1208,7 @@ async def list_installable_artifacts(
     source: str = Field(
         default=None,
         description="Filters for the source of installable artifacts to be returned. Available values are 'api' and "
-                    "'ci'."
+        "'ci'.",
     ),
     store_signed: bool = Field(
         default=None,
@@ -1194,7 +1217,7 @@ async def list_installable_artifacts(
     version: str = Field(
         default=None,
         description="Filters for the version this installable artifact was created for. This field is required if the "
-                    "distribution_ready filter is set to true."
+        "distribution_ready filter is set to true.",
     ),
     workflow: str = Field(
         default=None,
@@ -1229,17 +1252,20 @@ async def list_installable_artifacts(
     if workflow:
         params["workflow"] = workflow
 
-    url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/installable-artifacts"
+    url = (
+        f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/installable-artifacts"
+    )
     return await call_api("GET", url, params=params)
+
 
 @mcp_tool(
     api_groups=["release-management"],
     description="Generates a signed upload url valid for 1 hour for an installable artifact to be uploaded to Bitrise "
-                "Release Management. The response will contain an url that can be used to upload an artifact to Bitrise "
-                "Release Management using a simple curl request with the file data that should be uploaded. The "
-                "necessary headers and http method will also be in the response. This artifact will need to be "
-                "processed after upload to be usable. The status of processing can be checked by making another request"
-                "to a different url giving back the processed status of an installable artifact.",
+    "Release Management. The response will contain an url that can be used to upload an artifact to Bitrise "
+    "Release Management using a simple curl request with the file data that should be uploaded. The "
+    "necessary headers and http method will also be in the response. This artifact will need to be "
+    "processed after upload to be usable. The status of processing can be checked by making another request"
+    "to a different url giving back the processed status of an installable artifact.",
 )
 async def generate_installable_artifact_upload_url(
     connected_app_id: str = Field(
@@ -1247,11 +1273,11 @@ async def generate_installable_artifact_upload_url(
     ),
     installable_artifact_id: str = Field(
         description="An uuidv4 identifier generated on the client side for the installable artifact. This field is "
-                    "mandatory.",
+        "mandatory.",
     ),
     file_name: str = Field(
         description="The name of the installable artifact file (with extension) to be uploaded to Bitrise. This field "
-                    "is mandatory.",
+        "is mandatory.",
     ),
     file_size_bytes: str = Field(
         description="The byte size of the installable artifact file to be uploaded.",
@@ -1263,8 +1289,8 @@ async def generate_installable_artifact_upload_url(
     with_public_page: bool = Field(
         default=None,
         description="Optionally, you can enable public install page for your artifact. This can only be enabled by "
-                    "Bitrise Project Admins, Bitrise Project Owners and Bitrise Workspace Admins. Changing this value "
-                    "without proper permissions will result in an error. The default value is false.",
+        "Bitrise Project Admins, Bitrise Project Owners and Bitrise Workspace Admins. Changing this value "
+        "without proper permissions will result in an error. The default value is false.",
     ),
     workflow: str = Field(
         default=None,
@@ -1273,7 +1299,7 @@ async def generate_installable_artifact_upload_url(
 ) -> str:
     params: Dict[str, Union[str, int, bool]] = {
         "file_name": file_name,
-        "file_size_bytes": file_size_bytes
+        "file_size_bytes": file_size_bytes,
     }
 
     if branch:
@@ -1286,11 +1312,12 @@ async def generate_installable_artifact_upload_url(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/installable-artifacts/{installable_artifact_id}/upload-url"
     return await call_api("GET", url, params=params)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Gets the processing and upload status of an installable artifact. An artifact will need to be "
-                "processed after upload to be usable. This endpoint helps understanding when an uploaded installable "
-                "artifacts becomes usable for later purposes.",
+    "processed after upload to be usable. This endpoint helps understanding when an uploaded installable "
+    "artifacts becomes usable for later purposes.",
 )
 async def get_installable_artifact_upload_and_processing_status(
     connected_app_id: str = Field(
@@ -1303,9 +1330,10 @@ async def get_installable_artifact_upload_and_processing_status(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/installable-artifacts/{installable_artifact_id}/status"
     return await call_api("GET", url)
 
+
 @mcp_tool(
     api_groups=["release-management"],
-    description="Changes whether public install page should be available for the installable artifact or not."
+    description="Changes whether public install page should be available for the installable artifact or not.",
 )
 async def set_installable_artifact_public_install_page(
     connected_app_id: str = Field(
@@ -1324,16 +1352,17 @@ async def set_installable_artifact_public_install_page(
     }
     return await call_api("PATCH", url, body=body)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Lists Build Distribution versions. Release Management offers a convenient, secure solution to "
-                "distribute the builds of your mobile apps to testers without having to engage with either TestFlight "
-                "or Google Play. Once you have installable artifacts, Bitrise can generate both private and public "
-                "install links that testers or other stakeholders can use to install the app on real devices via "
-                "over-the-air installation. Build distribution allows you to define tester groups that can receive "
-                "notifications about installable artifacts. The email takes the notified testers to the test build "
-                "page, from where they can install the app on their own device. Build distribution versions are the "
-                " app versions available for testers.",
+    "distribute the builds of your mobile apps to testers without having to engage with either TestFlight "
+    "or Google Play. Once you have installable artifacts, Bitrise can generate both private and public "
+    "install links that testers or other stakeholders can use to install the app on real devices via "
+    "over-the-air installation. Build distribution allows you to define tester groups that can receive "
+    "notifications about installable artifacts. The email takes the notified testers to the test build "
+    "page, from where they can install the app on their own device. Build distribution versions are the "
+    " app versions available for testers.",
 )
 async def list_build_distribution_versions(
     connected_app_id: str = Field(
@@ -1357,6 +1386,7 @@ async def list_build_distribution_versions(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/build-distributions"
     return await call_api("GET", url, params=params)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Gives back a list of test builds for the given build distribution version.",
@@ -1368,7 +1398,6 @@ async def list_build_distribution_version_test_builds(
     version: str = Field(
         description="The version of the build distribution. This field is mandatory.",
     ),
-
     items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of test builds to return for a build distribution version per page. Default value is 10.",
@@ -1378,9 +1407,7 @@ async def list_build_distribution_version_test_builds(
         description="Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1.",
     ),
 ) -> str:
-    params: Dict[str, Union[str, int]] = {
-        "version": version
-    }
+    params: Dict[str, Union[str, int]] = {"version": version}
 
     if items_per_page:
         params["items_per_page"] = items_per_page
@@ -1390,16 +1417,17 @@ async def list_build_distribution_version_test_builds(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/build-distributions/test-builds"
     return await call_api("GET", url, params=params)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Creates a tester group for a Release Management connected app. Tester groups can be used to distribute "
-                "installable artifacts to testers automatically. When a new installable artifact is available, the "
-                "tester groups can either automatically or manually be notified via email. The notification email will "
-                "contain a link to the installable artifact page for the artifact within Bitrise Release "
-                "Management. A Release Management connected app can have multiple tester groups. Project team members "
-                "of the connected app can be selected to be testers and added to the tester group. This endpoint has "
-                "an elevated access level requirement. Only the owner of the related Bitrise Workspace, a workspace "
-                "manager or the related project's admin can manage tester groups."
+    "installable artifacts to testers automatically. When a new installable artifact is available, the "
+    "tester groups can either automatically or manually be notified via email. The notification email will "
+    "contain a link to the installable artifact page for the artifact within Bitrise Release "
+    "Management. A Release Management connected app can have multiple tester groups. Project team members "
+    "of the connected app can be selected to be testers and added to the tester group. This endpoint has "
+    "an elevated access level requirement. Only the owner of the related Bitrise Workspace, a workspace "
+    "manager or the related project's admin can manage tester groups.",
 )
 async def create_tester_group(
     connected_app_id: str = Field(
@@ -1423,9 +1451,10 @@ async def create_tester_group(
 
     return await call_api("POST", url, body=body)
 
+
 @mcp_tool(
     api_groups=["release-management"],
-    description="Notifies a tester group about a new test build."
+    description="Notifies a tester group about a new test build.",
 )
 async def notify_tester_group(
     connected_app_id: str = Field(
@@ -1444,9 +1473,10 @@ async def notify_tester_group(
     }
     return await call_api("POST", url, body=body)
 
+
 @mcp_tool(
     api_groups=["release-management"],
-    description="Adds testers to a tester group of a connected app."
+    description="Adds testers to a tester group of a connected app.",
 )
 async def add_testers_to_tester_group(
     connected_app_id: str = Field(
@@ -1465,9 +1495,10 @@ async def add_testers_to_tester_group(
     }
     return await call_api("POST", url, body=body)
 
+
 @mcp_tool(
     api_groups=["release-management"],
-    description="Updates the given tester group. The name and the auto notification setting can be updated optionally."
+    description="Updates the given tester group. The name and the auto notification setting can be updated optionally.",
 )
 async def update_tester_group(
     connected_app_id: str = Field(
@@ -1483,7 +1514,7 @@ async def update_tester_group(
     auto_notify: bool = Field(
         default=False,
         description="If set to true it indicates the tester group will receive email notifications automatically from "
-                    "now on about new installable builds.",
+        "now on about new installable builds.",
     ),
 ) -> str:
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups/{id}"
@@ -1495,6 +1526,7 @@ async def update_tester_group(
         body["auto_notify"] = auto_notify
 
     return await call_api("PUT", url, body=body)
+
 
 @mcp_tool(
     api_groups=["release-management"],
@@ -1522,6 +1554,7 @@ async def list_tester_groups(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups"
     return await call_api("GET", url, params=params)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Gives back the details of the selected tester group.",
@@ -1537,10 +1570,11 @@ async def get_tester_group(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups/{id}"
     return await call_api("GET", url)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Gets a list of potential testers whom can be added as testers to a specific tester group. The list "
-                "consists of Bitrise users having access to the related Release Management connected app.",
+    "consists of Bitrise users having access to the related Release Management connected app.",
 )
 async def get_potential_testers(
     connected_app_id: str = Field(
@@ -1573,10 +1607,11 @@ async def get_potential_testers(
     url = f"{BITRISE_RM_API_BASE}/connected-apps/{connected_app_id}/tester-groups/{id}/potential-testers"
     return await call_api("GET", url, params=params)
 
+
 @mcp_tool(
     api_groups=["release-management"],
     description="Gives back a list of testers that has been associated with a tester group related to a specific "
-                "connected app.",
+    "connected app.",
 )
 async def get_potential_testers(
     connected_app_id: str = Field(
@@ -1584,12 +1619,12 @@ async def get_potential_testers(
     ),
     tester_group_id: str = Field(
         description="The uuidV4 identifier of a tester group. If given, only testers within this specific tester group "
-                    "will be returned.",
+        "will be returned.",
     ),
     items_per_page: int = Field(
         default=10,
         description="Specifies the maximum number of testers to be returned that have been added to a tester group "
-                    "related to the specific connected app.. Default value is 10.",
+        "related to the specific connected app.. Default value is 10.",
     ),
     page: int = Field(
         default=1,
@@ -1609,7 +1644,11 @@ async def get_potential_testers(
 
 
 def main():
-    mcp.run(transport="stdio")
+    transport = "stdio"
+    if not BITRISE_TOKEN:
+        transport = "sse"
+
+        mcp.run(transport=transport)
 
 
 if __name__ == "__main__":
