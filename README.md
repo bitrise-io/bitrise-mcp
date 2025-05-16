@@ -57,6 +57,28 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
 }
 ```
 
+To use remote MCP server:
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://localhost:8000/sse",
+        "--header",
+        "Authorization: <YOUR_TOKEN>",
+        "--header",
+        "x-bitrise-enabled-api-groups: cache-items,pipelines"
+      ],
+      "env": {
+        "PATH": "/.../..../nodejs/20.13.1/bin:/bin"
+      }
+    }
+  }
+}
+```
+
 Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
 ### Use with [VS Code](https://code.visualstudio.com/Download)
