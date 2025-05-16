@@ -13,7 +13,7 @@ BITRISE_API_BASE = "https://api.bitrise.io/v0.1"
 BITRISE_RM_API_BASE = "https://api.bitrise.io/release-management/v1"
 USER_AGENT = "bitrise-mcp/1.0"
 BITRISE_TOKEN = os.environ.get("BITRISE_TOKEN")
-HOST = os.environ.get("HOST") or "localhost"
+HOST = os.environ.get("HOST") or "0.0.0.0"
 PORT = int(os.environ.get("PORT") or 8000)
 
 request_var = contextvars.ContextVar("request_var", default=None)
