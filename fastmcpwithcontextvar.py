@@ -51,7 +51,7 @@ class FastMCPWithContextVar(FastMCP):
 
         if enabled_api_groups_header:
             allowed_groups = set(
-                tool.strip() for tool in enabled_api_groups_header.split(",")
+                group.strip() for group in enabled_api_groups_header.split(",")
             )
             filtered_tools = []
             for group in allowed_groups:
