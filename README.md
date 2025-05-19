@@ -31,6 +31,13 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
 
+### Server modes
+#### stdio
+- Set BITRISE_TOKEN token.
+
+#### streamable-http
+- Do not set BITRISE_TOKEN token.
+
 ### Use with [Claude Desktop](https://claude.ai/download)
 
 _This guide uses Claude Desktop as the MCP client, but you can use any other MCP-compatible client and adapt the following config options to your preferred client._
@@ -65,19 +72,17 @@ To use remote MCP server:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://localhost:8000/",
+        "https://mcp.bitrise.io/",
         "--header",
         "Authorization: <YOUR_TOKEN>",
         "--header",
         "x-bitrise-enabled-api-groups: cache-items,pipelines"
       ],
-      "env": {
-        "PATH": "/.../..../nodejs/20.13.1/bin:/bin"
-      }
     }
   }
 }
 ```
+You might need to pass an absolute path to command or set the PATH env var accordingly.
 
 Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
