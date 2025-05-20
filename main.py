@@ -390,6 +390,10 @@ async def trigger_bitrise_build(
         default=None,
         description="The workflow to build",
     ),
+    pipeline_id: str = Field(
+        default=None,
+        description="The pipeline to build",
+    ),
     commit_message: str = Field(
         default=None,
         description="The commit message for the build",
@@ -402,6 +406,8 @@ async def trigger_bitrise_build(
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/builds"
     build_params = {"branch": branch}
 
+    if pipeline_id:
+        build_params["pipeline_id"] = pipeline_id
     if workflow_id:
         build_params["workflow_id"] = workflow_id
     if commit_message:

@@ -220,6 +220,7 @@ Example configuration:
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `branch` (optional): The branch to build (default: main)
+      - `pipeline_id` (optional): The pipeline to build
       - `workflow_id` (optional): The workflow to build
       - `commit_message` (optional): The commit message for the build
       - `commit_hash` (optional): The commit hash for the build
