@@ -9,7 +9,7 @@ import (
 )
 
 var listOutgoingWebhooks = Tool{
-	APIGroups: []string{"outgoing-webhooks", "read-only"},
+	APIGroups: []string{"webhooks", "read-only"},
 	Definition: mcp.NewTool("list_outgoing_webhooks",
 		mcp.WithDescription("List the outgoing webhooks of an app."),
 		mcp.WithString("app_slug",
@@ -36,7 +36,7 @@ var listOutgoingWebhooks = Tool{
 }
 
 var deleteOutgoingWebhook = Tool{
-	APIGroups: []string{"outgoing-webhooks"},
+	APIGroups: []string{"webhooks"},
 	Definition: mcp.NewTool("delete_outgoing_webhook",
 		mcp.WithDescription("Delete the outgoing webhook of an app."),
 		mcp.WithString("app_slug",
@@ -71,7 +71,7 @@ var deleteOutgoingWebhook = Tool{
 }
 
 var createOutgoingWebhook = Tool{
-	APIGroups: []string{"outgoing-webhooks"},
+	APIGroups: []string{"webhooks"},
 	Definition: mcp.NewTool("create_outgoing_webhook",
 		mcp.WithDescription("Create an outgoing webhook for an app."),
 		mcp.WithString("app_slug",
@@ -127,7 +127,7 @@ var createOutgoingWebhook = Tool{
 }
 
 var updateOutgoingWebhook = Tool{
-	APIGroups: []string{"outgoing-webhooks"},
+	APIGroups: []string{"webhooks"},
 	Definition: mcp.NewTool("update_outgoing_webhook",
 		mcp.WithDescription("Update an outgoing webhook for an app. Even if you do not want to change one of the parameters, you still have to provide that parameter as well: simply use its existing value."),
 		mcp.WithString("app_slug",

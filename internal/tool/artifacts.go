@@ -10,7 +10,7 @@ import (
 )
 
 var listArtifacts = Tool{
-	APIGroups: []string{"artifacts", "read-only"},
+	APIGroups: []string{"build-artifacts", "read-only"},
 	Definition: mcp.NewTool("list_artifacts",
 		mcp.WithDescription("Get a list of all build artifacts."),
 		mcp.WithString("app_slug",
@@ -60,7 +60,7 @@ var listArtifacts = Tool{
 }
 
 var getArtifact = Tool{
-	APIGroups: []string{"artifacts", "read-only"},
+	APIGroups: []string{"build-artifacts", "read-only"},
 	Definition: mcp.NewTool("get_artifact",
 		mcp.WithDescription("Get a specific build artifact."),
 		mcp.WithString("app_slug",
@@ -103,7 +103,7 @@ var getArtifact = Tool{
 }
 
 var deleteArtifact = Tool{
-	APIGroups: []string{"artifacts"},
+	APIGroups: []string{"build-artifacts"},
 	Definition: mcp.NewTool("delete_artifact",
 		mcp.WithDescription("Delete a build artifact."),
 		mcp.WithString("app_slug",
@@ -146,7 +146,7 @@ var deleteArtifact = Tool{
 }
 
 var updateArtifact = Tool{
-	APIGroups: []string{"artifacts"},
+	APIGroups: []string{"build-artifacts"},
 	Definition: mcp.NewTool("update_artifact",
 		mcp.WithDescription("Update a build artifact."),
 		mcp.WithString("app_slug",
