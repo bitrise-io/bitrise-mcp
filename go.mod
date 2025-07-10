@@ -1,6 +1,6 @@
 module github.com/bitrise-io/bitrise-mcp
 
-go 1.23.2
+go 1.23
 
 require (
 	github.com/jinzhu/configor v1.2.2
