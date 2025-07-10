@@ -184,7 +184,7 @@ func newStructuredLogger(level string) (*zap.SugaredLogger, error) {
 		loggerConfig.DisableStacktrace = true
 	}
 
-	loggerConfig.OutputPaths = []string{"stdout"}
+	loggerConfig.OutputPaths = []string{"stderr"}
 	loggerConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	loggerConfig.Level = atom
 
