@@ -126,7 +126,7 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
       "command": "go",
       "args": [
         "run",
-        "github.com/bitrise-io/bitrise-mcp@4137da97c2040bbcdd74dc239f01f6c1d3e5399c"
+        "github.com/bitrise-io/bitrise-mcp@eaa2bddab74103a1cbed8b418c14d569a35b8a62"
       ],
       "env": {
         "BITRISE_TOKEN": "<YOUR_PAT>",
