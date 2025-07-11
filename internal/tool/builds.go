@@ -92,6 +92,9 @@ var triggerBitriseBuild = Tool{
 		mcp.WithString("workflow_id",
 			mcp.Description("The workflow to build"),
 		),
+		mcp.WithString("pipeline_id",
+			mcp.Description("The pipeline to build"),
+		),
 		mcp.WithString("commit_message",
 			mcp.Description("The commit message for the build"),
 		),
@@ -110,6 +113,9 @@ var triggerBitriseBuild = Tool{
 		}
 		if v := request.GetString("workflow_id", ""); v != "" {
 			buildParams["workflow_id"] = v
+		}
+		if v := request.GetString("pipeline_id", ""); v != "" {
+			buildParams["pipeline_id"] = v
 		}
 		if v := request.GetString("commit_message", ""); v != "" {
 			buildParams["commit_message"] = v
