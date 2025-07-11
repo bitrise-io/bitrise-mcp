@@ -114,9 +114,8 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		return fmt.Errorf("BITRISE_TOKEN cannot be provided in http transport mode")
 	}
 
-	httpServer := server.NewStreamableHTTPServer(
+	mcpHandler := server.NewStreamableHTTPServer(
 		mcpServer,
-		server.WithEndpointPath("/"),
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
 			pat := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
@@ -136,17 +135,27 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		server.WithLogger(logger),
 	)
 
+	mux := http.NewServeMux()
+	mux.HandleFunc("/readyz", readyzHandler)
+	mux.HandleFunc("/livez", livezHandler)
+	mux.HandleFunc("/", mcpHandler.ServeHTTP)
+
+	httpServer := &http.Server{
+		Addr:    cfg.Addr,
+		Handler: mux,
+	}
+
 	// Start the HTTP server in another goroutine.
 	errListen := make(chan error, 1)
 	go func() {
-		err := httpServer.Start(cfg.Addr)
+		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errListen <- fmt.Errorf("listen and serve: %w", err)
 			return
 		}
 		errListen <- nil
 	}()
-	logger.Infof("started listening on %q\n", cfg.Addr)
+	logger.Infof("started listening on %q", cfg.Addr)
 
 	ctx := context.Background()
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
@@ -193,4 +202,12 @@ func newStructuredLogger(level string) (*zap.SugaredLogger, error) {
 		return nil, fmt.Errorf("new zap logger: %w", err)
 	}
 	return logger.Sugar(), nil
+}
+
+func readyzHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func livezHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
