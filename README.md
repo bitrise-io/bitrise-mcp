@@ -8,22 +8,7 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 - **Authentication Support**: Secure API token-based access to Bitrise resources.
 - **Detailed Documentation**: Well-documented tools with parameter descriptions.
 
-## Setup
-
-### Environment Setup
-- Python 3.12.6 required (you can use [pyenv](https://github.com/pyenv/pyenv)).
-- Use [uv](https://docs.astral.sh/uv/getting-started/installation/) for dependency management.
-
-#### Example setting up the environment
-> Please read the official documentation for uv and pylint for more options.
-```bash
-# Install pyenv and python 3.12.6
-curl -fsSL https://pyenv.run | bash
-pyenv install 3.12.6
-
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+## Connect to remote server
 
 ### Bitrise API Token
 [Create a Bitrise API Token](https://devcenter.bitrise.io/api/authentication):
@@ -31,35 +16,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
 
-### Use with [Claude Desktop](https://claude.ai/download)
-
-_This guide uses Claude Desktop as the MCP client, but you can use any other MCP-compatible client and adapt the following config options to your preferred client._
-
-Open Claude settings, then navigate to the Developer tab.
-
-Click _Edit config_. This creates a config file called `claude_desktop_config.json`. Open this file with your preferred editor and add the Bitrise MCP server:
-
-```json
-{
-  "mcpServers": {
-    "bitrise": {
-      "command": "uvx",
-      "env": {
-        "BITRISE_TOKEN": "<YOUR_TOKEN>"
-      },
-      "args": [
-        "--from",
-        "git+https://github.com/bitrise-io/bitrise-mcp@v1.1.1",
-        "bitrise-mcp"
-      ]
-    }
-  }
-}
-```
-
-Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
-
-### Use with [VS Code](https://code.visualstudio.com/Download)
+### Example usage with [VS Code](https://code.visualstudio.com/Download)
 
 Follow the [official guide](https://code.visualstudio.com/blogs/2025/04/07/agentMode) to enable Agent mode in Copilot Chat.
 
@@ -78,17 +35,12 @@ Then, open VSCode's `settings.json` (either the workspace level or the user leve
     ],
     "servers": {
       "bitrise": {
-        "command": "uvx",
-        "args": [
-          "--from",
-          "git+https://github.com/bitrise-io/bitrise-mcp@v1.1.1",
-          "bitrise-mcp"
-        ],
-        "type": "stdio",
-        "env": {
-          "BITRISE_TOKEN": "${input:bitrise-workspace-token}"
+        "type": "http",
+        "url": "https://mcp.bitrise.io",
+        "headers": {
+          "Authorization": "Bearer ${input:bitrise-workspace-token}"
         }
-      },
+      }
     }
   }
 }
@@ -96,23 +48,34 @@ Then, open VSCode's `settings.json` (either the workspace level or the user leve
 
 Save the configuration. VS Code will automatically recognize the change and load the tools into Copilot Chat.
 
-### Use with [Cursor](https://cursor.com/download)
+### Example usage with [Claude Desktop](https://claude.ai/download)
 
-Add Bitrise MCP to Cursor by clicking on the following cursor [weblink](https://cursor.com/en-US/install-mcp?name=bitrise&config=eyJ0eXBlIjoic3RkaW8iLCJlbnYiOnsiQklUUklTRV9UT0tFTiI6IjxZb3VyX1Rva2VuPiJ9LCJjb21tYW5kIjoidXZ4IC0tZnJvbSBnaXQraHR0cHM6Ly9naXRodWIuY29tL2JpdHJpc2UtaW8vYml0cmlzZS1tY3BAdjEuMS4xIGJpdHJpc2UtbWNwIn0%3D). Enter Bitrise access token while adding.
+Claude Desktop doesn't natively support remote MCP servers but you can use [mcp-remote](https://www.npmjs.com/package/mcp-remote) as an adapter.
 
-### Use with [Claude Code](https://www.claude.com/product/claude-code)
+Open Claude settings, then navigate to the Developer tab.
 
-Run the following command with your `<bitirse-token>` to add Bitrise MCP Server to Claude Code
+Click _Edit config_. This creates a config file called `claude_desktop_config.json`. Open this file with your preferred editor and add the Bitrise MCP server:
 
-```bash
-claude mcp add bitrise \
-  --scope user \
-  --transport stdio \
-  --env BITRISE_TOKEN=<bitrise-token> \
-  -- uvx \
-  --from git+https://github.com/bitrise-io/bitrise-mcp@v1.1.1 \
-  bitrise-mcp
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.bitrise.io",
+        "--header",
+        "Authorization: <YOUR_PAT>"
+      ],
+      "env": {
+        "PATH": "<PATH to bin of npx>:/bin"
+      }
+    }
+  }
+}
 ```
+
+Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
 ### Advanced configuration
 
@@ -127,21 +90,55 @@ Example configuration:
 {
   "mcpServers": {
     "bitrise": {
-      "command": "uvx",
-      "env": {
-        "BITRISE_TOKEN": "<YOUR_PAT>"
-      },
+      "command": "npx",
       "args": [
-        "--from",
-        "git+https://github.com/bitrise-io/bitrise-mcp@v1.1.1",
-        "bitrise-mcp",
+        "mcp-remote",
+        "https://mcp.bitrise.io",
+        "--header",
+        "Authorization: <YOUR_PAT>",
         "--enabled-api-groups",
         "cache-items,pipelines"
-      ]
-    },
+      ],
+      "env": {
+        "PATH": "<PATH to bin of npx>:/bin"
+      }
+    }
   }
 }
 ```
+
+## Connect to local server
+
+If you want to run the MCP server locally, you need to install
+[Go](https://go.dev/) (>=1.23), generate a Bitrise API token, and then
+configure the client to start the MCP server in local (stdio) mode.
+
+### Example usage with [Claude Desktop](https://claude.ai/download)
+
+Open Claude settings, then navigate to the Developer tab.
+
+Click _Edit config_. This creates a config file called `claude_desktop_config.json`. Open this file with your preferred editor and add the Bitrise MCP server:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "command": "go",
+      "args": [
+        "run",
+        "github.com/bitrise-io/bitrise-mcp@3219a290325861e4661e1d9cdbca77973db0dc21"
+      ],
+      "env": {
+        "BITRISE_TOKEN": "<YOUR_PAT>",
+        "GOPATH": "<your GOPATH>",
+        "GOCACHE": "<your GOCACHE>"
+      }
+    }
+  }
+}
+```
+
+Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
 ## Tools
 

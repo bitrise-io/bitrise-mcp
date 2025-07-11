@@ -61,10 +61,10 @@ func run() error {
 		"bitrise",
 		"2.0.0",
 		server.WithToolFilter(func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
-			enabledGroups, err := tool.EnabledGroupsFromCtx(ctx)
+			enabledGroups, err := tool.EnabledGroupsFromCtx(ctx) // http transport only
 			if err != nil {
-				logger.Errorf("get enabled api groups from context: %v", err)
-				return tools // return all tools if there's an error
+				// stdio transport/no tool filtering in http transport
+				enabledGroups = strings.Split(cfg.EnabledAPIGroups, ",")
 			}
 			var filtered []mcp.Tool
 			for _, tool := range tools {
@@ -95,12 +95,7 @@ func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
 
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			ctx = tool.ContextWithPAT(ctx, cfg.BitriseToken)
-
-			enabledGroups := strings.Split(cfg.EnabledAPIGroups, ",")
-			ctx = tool.ContextWithEnabledGroups(ctx, enabledGroups)
-
-			return fn(ctx, request)
+			return fn(tool.ContextWithPAT(ctx, cfg.BitriseToken), request)
 		}
 	})(mcpServer)
 	if err := server.ServeStdio(mcpServer); err != nil {
@@ -118,18 +113,17 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		mcpServer,
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
+			// The tools can use it to auth to the Bitrise API.
 			pat := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 			if pat != "" {
 				ctx = tool.ContextWithPAT(ctx, pat)
 			}
-
-			enabledGroups := strings.Split(cfg.EnabledAPIGroups, ",")
-			clientEnabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
-			if clientEnabledGroups != "" {
-				enabledGroups = strings.Split(clientEnabledGroups, ",")
+			// server.WithToolFilter can use it to limit the tools listed.
+			enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
+			if enabledGroups != "" {
+				a := strings.Split(enabledGroups, ",")
+				ctx = tool.ContextWithEnabledGroups(ctx, a)
 			}
-			ctx = tool.ContextWithEnabledGroups(ctx, enabledGroups)
-
 			return ctx
 		}),
 		server.WithLogger(logger),
