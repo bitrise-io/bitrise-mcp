@@ -92,7 +92,7 @@ var createConnectedApp = Tool{
 }
 
 var listConnectedApps = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("list_connected_apps",
 		mcp.WithDescription("List Release Management connected apps available for the authenticated account within a workspace."),
 		mcp.WithString("workspace_slug",
@@ -157,7 +157,7 @@ var listConnectedApps = Tool{
 }
 
 var getConnectedApp = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("get_connected_app",
 		mcp.WithDescription("Gives back a Release Management connected app for the authenticated account."),
 		mcp.WithString("id",
@@ -233,7 +233,7 @@ var updateConnectedApp = Tool{
 }
 
 var listInstallableArtifacts = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("list_installable_artifacts",
 		mcp.WithDescription("List Release Management installable artifacts of a connected app available for the authenticated account."),
 		mcp.WithString("connected_app_id",
@@ -424,7 +424,7 @@ var generateInstallableArtifactUploadURL = Tool{
 }
 
 var getInstallableArtifactUploadAndProcessingStatus = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("get_installable_artifact_upload_and_processing_status",
 		mcp.WithDescription("Gets the processing and upload status of an installable artifact. An artifact will need to be processed after upload to be usable. This endpoint helps understanding when an uploaded installable artifacts becomes usable for later purposes."),
 		mcp.WithString("connected_app_id",
@@ -507,7 +507,7 @@ var setInstallableArtifactPublicInstallPage = Tool{
 }
 
 var listBuildDistributionVersions = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("list_build_distribution_versions",
 		mcp.WithDescription("Lists Build Distribution versions. Release Management offers a convenient, secure solution to distribute the builds of your mobile apps to testers without having to engage with either TestFlight or Google Play. Once you have installable artifacts, Bitrise can generate both private and public install links that testers or other stakeholders can use to install the app on real devices via over-the-air installation. Build distribution allows you to define tester groups that can receive notifications about installable artifacts. The email takes the notified testers to the test build page, from where they can install the app on their own device. Build distribution versions are the app versions available for testers."),
 		mcp.WithString("connected_app_id",
@@ -551,7 +551,7 @@ var listBuildDistributionVersions = Tool{
 }
 
 var listBuildDistributionVersionTestBuilds = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("list_build_distribution_version_test_builds",
 		mcp.WithDescription("Gives back a list of test builds for the given build distribution version."),
 		mcp.WithString("connected_app_id",
@@ -796,7 +796,7 @@ var updateTesterGroup = Tool{
 }
 
 var listTesterGroups = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("list_tester_groups",
 		mcp.WithDescription("Gives back a list of tester groups related to a specific Release Management connected app."),
 		mcp.WithString("connected_app_id",
@@ -840,7 +840,7 @@ var listTesterGroups = Tool{
 }
 
 var getTesterGroup = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("get_tester_group",
 		mcp.WithDescription("Gives back the details of the selected tester group."),
 		mcp.WithString("connected_app_id",
@@ -875,7 +875,7 @@ var getTesterGroup = Tool{
 }
 
 var getPotentialTesters = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("get_potential_testers",
 		mcp.WithDescription("Gets a list of potential testers whom can be added as testers to a specific tester group. The list consists of Bitrise users having access to the related Release Management connected app."),
 		mcp.WithString("connected_app_id",
@@ -933,7 +933,7 @@ var getPotentialTesters = Tool{
 }
 
 var getTesters = Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management", "read-only"},
 	Definition: mcp.NewTool("get_testers",
 		mcp.WithDescription("Gives back a list of testers that has been associated with a tester group related to a specific connected app."),
 		mcp.WithString("connected_app_id",

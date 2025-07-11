@@ -646,22 +646,22 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | add_member_to_group | | | ✅ | | | | | | | | |
 | me | | | | | | | | | ✅ | ✅ | |
 | create_connected_app | | | | | | | | | | | ✅ |
-| list_connected_apps | | | | | | | | | | | ✅ |
-| get_connected_app | | | | | | | | | | | ✅ |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ |
+| get_connected_app | | | | | | | | | | ✅ | ✅ |
 | update_connected_app | | | | | | | | | | | ✅ |
-| list_installable_artifacts | | | | | | | | | | | ✅ |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ |
 | generate_installable_artifact_upload_url | | | | | | | | | | | ✅ |
-| get_installable_artifact_upload_and_processing_status | | | | | | | | | | | ✅ |
+| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ |
 | set_installable_artifact_public_install_page | | | | | | | | | | | ✅ |
-| list_build_distribution_versions | | | | | | | | | | | ✅ |
-| list_build_distribution_version_test_builds | | | | | | | | | | | ✅ |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ |
 | create_tester_group | | | | | | | | | | | ✅ |
 | notify_tester_group | | | | | | | | | | | ✅ |
 | add_testers_to_tester_group | | | | | | | | | | | ✅ |
 | update_tester_group | | | | | | | | | | | ✅ |
-| list_tester_groups | | | | | | | | | | | ✅ |
-| get_tester_group | | | | | | | | | | | ✅ |
-| get_potential_testers | | | | | | | | | | | ✅ |
-| get_testers | | | | | | | | | | | ✅ |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ |
+| get_tester_group | | | | | | | | | | ✅ | ✅ |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ |
+| get_testers | | | | | | | | | | ✅ | ✅ |
 
-By default, all API groups are enabled. You can specify which groups to enable using the `--enabled-api-groups` command-line argument with a comma-separated list of group names.
+By default, all API groups are enabled. You can specify which groups to enable using the `--enabled-api-groups` command-line argument or the `x-bitrise-enabled-api-groups` HTTP header with a comma-separated list of group names.
