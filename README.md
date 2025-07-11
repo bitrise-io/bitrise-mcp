@@ -1,6 +1,6 @@
 # Bitrise MCP Server
 
-MCP Server for the Bitrise API, enabling app management, build operations, artifact management and more.
+MCP Server for the Bitrise API, enabling app management, build operations, artifact management, and more.
 
 ### Features
 
@@ -68,7 +68,7 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
         "Authorization: <YOUR_PAT>"
       ],
       "env": {
-        "PATH": "<PATH to bin of npx>:/bin"
+        "PATH": "<PATH to bin of npx>"
       }
     }
   }
@@ -96,11 +96,11 @@ Example configuration:
         "https://mcp.bitrise.io",
         "--header",
         "Authorization: <YOUR_PAT>",
-        "--enabled-api-groups",
-        "cache-items,pipelines"
+        "--header",
+        "x-bitrise-enabled-api-groups: cache-items,pipelines,user"
       ],
       "env": {
-        "PATH": "<PATH to bin of npx>:/bin"
+        "PATH": "<PATH to bin of npx>"
       }
     }
   }
@@ -126,12 +126,14 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
       "command": "go",
       "args": [
         "run",
-        "github.com/bitrise-io/bitrise-mcp@3219a290325861e4661e1d9cdbca77973db0dc21"
+        "github.com/bitrise-io/bitrise-mcp@4137da97c2040bbcdd74dc239f01f6c1d3e5399c"
       ],
       "env": {
         "BITRISE_TOKEN": "<YOUR_PAT>",
+        "PATH": "<PATH to bin directory of go>",
         "GOPATH": "<your GOPATH>",
-        "GOCACHE": "<your GOCACHE>"
+        "GOCACHE": "<your GOCACHE>",
+        "ENABLED_API_GROUPS": "apps,builds" // optional
       }
     }
   }
@@ -442,8 +444,6 @@ Save the config file and restart Claude Desktop. If everything is set up correct
 
 ### Release Management
 
-# MCP Tools
-
 45. `create_connected_app`
    - Add a new Release Management connected app to Bitrise.
    - Arguments:
@@ -587,6 +587,14 @@ Save the config file and restart Claude Desktop. If everything is set up correct
      - `page`: (Optional) Page number to return.
      - `search`: (Optional) Search for testers by email or username.
 
+62. `get_testers`
+   - Gets a list of testers that have been associated with a tester group related to a specific connected app.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `tester_group_id`: (Optional) The uuidV4 identifier of a tester group. If given, only testers within this specific tester group will be returned.
+     - `items_per_page`: (Optional) Maximum number of testers per page (default: 10).
+     - `page`: (Optional) Page number to return (default: 1).
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
@@ -654,5 +662,6 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | list_tester_groups | | | | | | | | | | | ✅ |
 | get_tester_group | | | | | | | | | | | ✅ |
 | get_potential_testers | | | | | | | | | | | ✅ |
+| get_testers | | | | | | | | | | | ✅ |
 
 By default, all API groups are enabled. You can specify which groups to enable using the `--enabled-api-groups` command-line argument with a comma-separated list of group names.
