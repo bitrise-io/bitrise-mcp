@@ -1,22 +1,23 @@
-package tool
+package user
 
 import (
 	"context"
 	"net/http"
 
+	"github.com/bitrise-io/bitrise-mcp/internal/bitrise"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-var me = Tool{
+var Me = bitrise.Tool{
 	APIGroups: []string{"user", "read-only"},
 	Definition: mcp.NewTool("me",
 		mcp.WithDescription("Get user info for the currently authenticated user account"),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		res, err := callAPI(ctx, callAPIParams{
-			method:  http.MethodGet,
-			baseURL: apiBaseURL,
-			path:    "/me",
+		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
+			Method:  http.MethodGet,
+			BaseURL: bitrise.APIBaseURL,
+			Path:    "/me",
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil

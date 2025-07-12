@@ -1,4 +1,4 @@
-package tool
+package bitrise
 
 import (
 	"bytes"
@@ -13,47 +13,47 @@ import (
 )
 
 const (
-	apiBaseURL   = "https://api.bitrise.io/v0.1"
-	apiRMBaseURL = "https://api.bitrise.io/release-management/v1"
+	APIBaseURL   = "https://api.bitrise.io/v0.1"
+	APIRMBaseURL = "https://api.bitrise.io/release-management/v1"
 	userAgent    = "bitrise-mcp/1.0"
 )
 
-type callAPIParams struct {
-	method  string
-	baseURL string
-	path    string
-	params  map[string]string
-	body    any
+type CallAPIParams struct {
+	Method  string
+	BaseURL string
+	Path    string
+	Params  map[string]string
+	Body    any
 }
 
-func callAPI(ctx context.Context, p callAPIParams) (string, error) {
+func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	apiKey, err := patFromCtx(ctx)
 	if err != nil {
 		return "", errors.New("set authorization header to your bitrise pat")
 	}
 
 	var reqBody io.Reader
-	if p.body != nil {
-		a, err := json.Marshal(p.body)
+	if p.Body != nil {
+		a, err := json.Marshal(p.Body)
 		if err != nil {
 			return "", fmt.Errorf("marshal request body: %w", err)
 		}
 		reqBody = bytes.NewBuffer(a)
 	}
 
-	fullURL := p.baseURL
-	if !strings.HasPrefix(p.path, "/") {
+	fullURL := p.BaseURL
+	if !strings.HasPrefix(p.Path, "/") {
 		fullURL += "/"
 	}
-	fullURL += p.path
+	fullURL += p.Path
 
-	req, err := http.NewRequest(p.method, fullURL, reqBody)
+	req, err := http.NewRequest(p.Method, fullURL, reqBody)
 	if err != nil {
 		return "", fmt.Errorf("create request: %w", err)
 	}
-	if p.params != nil {
+	if p.Params != nil {
 		q := req.URL.Query()
-		for key, value := range p.params {
+		for key, value := range p.Params {
 			q.Add(key, value)
 		}
 		req.URL.RawQuery = q.Encode()

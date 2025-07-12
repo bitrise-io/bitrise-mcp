@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bitrise-io/bitrise-mcp/internal/bitrise"
 	"github.com/bitrise-io/bitrise-mcp/internal/tool"
 	"github.com/jinzhu/configor"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -61,7 +62,7 @@ func run() error {
 		"bitrise",
 		"2.0.0",
 		server.WithToolFilter(func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
-			enabledGroups, err := tool.EnabledGroupsFromCtx(ctx) // http transport only
+			enabledGroups, err := bitrise.EnabledGroupsFromCtx(ctx) // http transport only
 			if err != nil {
 				// stdio transport/no tool filtering in http transport
 				enabledGroups = strings.Split(cfg.EnabledAPIGroups, ",")
@@ -95,7 +96,7 @@ func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
 
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			return fn(tool.ContextWithPAT(ctx, cfg.BitriseToken), request)
+			return fn(bitrise.ContextWithPAT(ctx, cfg.BitriseToken), request)
 		}
 	})(mcpServer)
 	if err := server.ServeStdio(mcpServer); err != nil {
@@ -116,13 +117,13 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			// The tools can use it to auth to the Bitrise API.
 			pat := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 			if pat != "" {
-				ctx = tool.ContextWithPAT(ctx, pat)
+				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
 			// server.WithToolFilter can use it to limit the tools listed.
 			enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
 			if enabledGroups != "" {
 				a := strings.Split(enabledGroups, ",")
-				ctx = tool.ContextWithEnabledGroups(ctx, a)
+				ctx = bitrise.ContextWithEnabledGroups(ctx, a)
 			}
 			return ctx
 		}),

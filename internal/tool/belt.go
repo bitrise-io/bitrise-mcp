@@ -1,108 +1,111 @@
 package tool
 
 import (
-	"context"
 	"slices"
 
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/bitrise-io/bitrise-mcp/internal/bitrise"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/apps"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/artifacts"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/builds"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/cache"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/grouproles"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/pipelines"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/releasemanagement"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/user"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/webhooks"
+	"github.com/bitrise-io/bitrise-mcp/internal/tool/workspaces"
 	"github.com/mark3labs/mcp-go/server"
 )
 
-type Tool struct {
-	APIGroups  []string
-	Definition mcp.Tool
-	Handler    func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
-}
-
 type Belt struct {
-	tools map[string]Tool
+	tools map[string]bitrise.Tool
 }
 
 func NewBelt() *Belt {
-	var toolList = []Tool{
+	var toolList = []bitrise.Tool{
 		// User
-		me,
+		user.Me,
 
 		// Apps
-		listApps,
-		registerApp,
-		finishBitriseApp,
-		getApp,
-		deleteApp,
-		updateApp,
-		getBitriseYML,
-		updateBitriseYML,
-		listBranches,
-		registerSSHKey,
-		registerWebhook,
+		apps.List,
+		apps.Register,
+		apps.Finish,
+		apps.Get,
+		apps.Delete,
+		apps.Update,
+		apps.GetBitriseYML,
+		apps.UpdateBitriseYML,
+		apps.ListBranches,
+		apps.RegisterSSHKey,
+		apps.RegisterWebhook,
 
 		// Builds
-		triggerBitriseBuild,
-		listBuilds,
-		getBuild,
-		abortBuild,
-		getBuildLog,
-		getBuildBitriseYML,
-		listBuildWorkflows,
+		builds.Trigger,
+		builds.List,
+		builds.Get,
+		builds.Abort,
+		builds.GetBuildLog,
+		builds.GetBuildBitriseYML,
+		builds.ListBuildWorkflows,
 
 		// Artifacts
-		listArtifacts,
-		getArtifact,
-		deleteArtifact,
-		updateArtifact,
+		artifacts.List,
+		artifacts.Get,
+		artifacts.Delete,
+		artifacts.Update,
 
 		// Workspaces
-		listWorkspaces,
-		getWorkspace,
-		getWorkspaceGroups,
-		createWorkspaceGroup,
-		getWorkspaceMembers,
-		inviteMemberToWorkspace,
-		addMemberToGroup,
+		workspaces.List,
+		workspaces.Get,
+		workspaces.GetWorkspaceGroups,
+		workspaces.CreateWorkspaceGroup,
+		workspaces.GetWorkspaceMembers,
+		workspaces.InviteMemberToWorkspace,
+		workspaces.AddMemberToGroup,
 
 		// Webhooks
-		listOutgoingWebhooks,
-		deleteOutgoingWebhook,
-		createOutgoingWebhook,
-		updateOutgoingWebhook,
+		webhooks.ListOutgoing,
+		webhooks.DeleteOutgoing,
+		webhooks.CreateOutgoing,
+		webhooks.UpdateOutgoing,
 
 		// Cache
-		listCacheItems,
-		deleteAllCacheItems,
-		deleteCacheItem,
-		getCacheItemDownloadURL,
+		cache.ListItems,
+		cache.DeleteAllItems,
+		cache.DeleteItem,
+		cache.GetItemDownloadURL,
 
 		// Pipelines
-		listPipelines,
-		getPipeline,
-		abortPipeline,
-		rebuildPipeline,
+		pipelines.List,
+		pipelines.Get,
+		pipelines.Abort,
+		pipelines.Rebuild,
 
 		// Group Roles
-		listGroupRoles,
-		replaceGroupRoles,
+		grouproles.List,
+		grouproles.Replace,
 
 		// Release Management
-		createConnectedApp,
-		updateConnectedApp,
-		listConnectedApps,
-		getConnectedApp,
-		listInstallableArtifacts,
-		generateInstallableArtifactUploadURL,
-		getInstallableArtifactUploadAndProcessingStatus,
-		setInstallableArtifactPublicInstallPage,
-		listBuildDistributionVersions,
-		listBuildDistributionVersionTestBuilds,
-		createTesterGroup,
-		notifyTesterGroup,
-		addTestersToTesterGroup,
-		updateTesterGroup,
-		listTesterGroups,
-		getTesterGroup,
-		getPotentialTesters,
-		getTesters,
+		releasemanagement.CreateConnectedApp,
+		releasemanagement.UpdateConnectedApp,
+		releasemanagement.ListConnectedApps,
+		releasemanagement.GetConnectedApp,
+		releasemanagement.ListInstallableArtifacts,
+		releasemanagement.GenerateInstallableArtifactUploadURL,
+		releasemanagement.GetInstallableArtifactUploadAndProcessingStatus,
+		releasemanagement.SetInstallableArtifactPublicInstallPage,
+		releasemanagement.ListBuildDistributionVersions,
+		releasemanagement.ListBuildDistributionVersionTestBuilds,
+		releasemanagement.CreateTesterGroup,
+		releasemanagement.NotifyTesterGroup,
+		releasemanagement.AddTestersToTesterGroup,
+		releasemanagement.UpdateTesterGroup,
+		releasemanagement.ListTesterGroups,
+		releasemanagement.GetTesterGroup,
+		releasemanagement.GetPotentialTesters,
+		releasemanagement.GetTesters,
 	}
-	belt := &Belt{tools: make(map[string]Tool)}
+	belt := &Belt{tools: make(map[string]bitrise.Tool)}
 	for _, tool := range toolList {
 		belt.tools[tool.Definition.Name] = tool
 	}
