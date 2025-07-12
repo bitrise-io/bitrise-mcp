@@ -237,6 +237,7 @@ Save the config file and restart Claude Desktop. If everything is set up correct
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `branch` (optional): The branch to build (default: main)
+      - `pipeline_id` (optional): The pipeline to build
       - `workflow_id` (optional): The workflow to build
       - `pipeline_id` (optional): The pipeline to build
       - `commit_message` (optional): The commit message for the build
