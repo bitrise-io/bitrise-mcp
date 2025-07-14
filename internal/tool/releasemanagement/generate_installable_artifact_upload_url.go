@@ -74,7 +74,7 @@ var GenerateInstallableArtifactUploadURL = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIBaseURL,
+			BaseURL: bitrise.APIRMBaseURL,
 			Path:    fmt.Sprintf("/v1/connected-apps/%s/installable-artifacts/%s/upload-url", connectedAppID, installableArtifactID),
 			Params:  params,
 		})
