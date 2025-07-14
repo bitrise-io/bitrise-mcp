@@ -49,7 +49,7 @@ var UpdateTesterGroup = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPut,
-			BaseURL: bitrise.APIBaseURL,
+			BaseURL: bitrise.APIRMBaseURL,
 			Path:    fmt.Sprintf("/v1/connected-apps/%s/tester-groups/%s", connectedAppID, id),
 			Body:    body,
 		})

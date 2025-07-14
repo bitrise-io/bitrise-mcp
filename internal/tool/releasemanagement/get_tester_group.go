@@ -34,7 +34,7 @@ var GetTesterGroup = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIBaseURL,
+			BaseURL: bitrise.APIRMBaseURL,
 			Path:    fmt.Sprintf("/v1/connected-apps/%s/tester-groups/%s", connectedAppID, id),
 		})
 		if err != nil {
