@@ -50,7 +50,7 @@ var GetTesters = bitrise.Tool{
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/v1/connected-apps/%s/testers", connectedAppID),
+			Path:    fmt.Sprintf("/connected-apps/%s/testers", connectedAppID),
 			Params:  params,
 		})
 		if err != nil {

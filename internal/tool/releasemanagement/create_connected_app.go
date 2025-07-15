@@ -80,7 +80,7 @@ var CreateConnectedApp = bitrise.Tool{
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
 			BaseURL: bitrise.APIRMBaseURL,
-			Path:    "/v1/connected-apps",
+			Path:    "/connected-apps",
 			Body:    body,
 		})
 		if err != nil {
