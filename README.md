@@ -1,6 +1,6 @@
 # Bitrise MCP Server
 
-MCP Server for the Bitrise API, enabling app management, build operations, artifact management and more.
+MCP Server for the Bitrise API, enabling app management, build operations, artifact management, and more.
 
 ### Features
 
@@ -8,22 +8,7 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 - **Authentication Support**: Secure API token-based access to Bitrise resources.
 - **Detailed Documentation**: Well-documented tools with parameter descriptions.
 
-## Setup
-
-### Environment Setup
-- Python 3.12.6 required (you can use [pyenv](https://github.com/pyenv/pyenv)).
-- Use [uv](https://docs.astral.sh/uv/getting-started/installation/) for dependency management.
-
-#### Example setting up the environment
-> Please read the official documentation for uv and pylint for more options.
-```bash
-# Install pyenv and python 3.12.6
-curl -fsSL https://pyenv.run | bash
-pyenv install 3.12.6
-
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+## Connect to remote server
 
 ### Bitrise API Token
 [Create a Bitrise API Token](https://devcenter.bitrise.io/api/authentication):
@@ -31,35 +16,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
 
-### Use with [Claude Desktop](https://claude.ai/download)
-
-_This guide uses Claude Desktop as the MCP client, but you can use any other MCP-compatible client and adapt the following config options to your preferred client._
-
-Open Claude settings, then navigate to the Developer tab.
-
-Click _Edit config_. This creates a config file called `claude_desktop_config.json`. Open this file with your preferred editor and add the Bitrise MCP server:
-
-```json
-{
-  "mcpServers": {
-    "bitrise": {
-      "command": "uvx",
-      "env": {
-        "BITRISE_TOKEN": "<YOUR_TOKEN>"
-      },
-      "args": [
-        "--from",
-        "git+https://github.com/bitrise-io/bitrise-mcp@v1.1.0",
-        "bitrise-mcp"
-      ]
-    }
-  }
-}
-```
-
-Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
-
-### Use with [VS Code](https://code.visualstudio.com/Download)
+### Example usage with [VS Code](https://code.visualstudio.com/Download)
 
 Follow the [official guide](https://code.visualstudio.com/blogs/2025/04/07/agentMode) to enable Agent mode in Copilot Chat.
 
@@ -78,23 +35,59 @@ Then, open VSCode's `settings.json` (either the workspace level or the user leve
     ],
     "servers": {
       "bitrise": {
-        "command": "uvx",
-        "args": [
-          "--from",
-          "git+https://github.com/bitrise-io/bitrise-mcp@v1.0.1",
-          "bitrise-mcp"
-        ],
-        "type": "stdio",
-        "env": {
-          "BITRISE_TOKEN": "${input:bitrise-workspace-token}"
+        "type": "http",
+        "url": "https://mcp.bitrise.io",
+        "headers": {
+          "Authorization": "Bearer ${input:bitrise-workspace-token}"
         }
-      },
+      }
     }
   }
 }
 ```
 
 Save the configuration. VS Code will automatically recognize the change and load the tools into Copilot Chat.
+
+### Example usage with [Claude Desktop](https://claude.ai/download)
+
+Claude Desktop doesn't natively support remote MCP servers but you can use [mcp-remote](https://www.npmjs.com/package/mcp-remote) as an adapter.
+
+Open Claude settings, then navigate to the Developer tab.
+
+Click _Edit config_. This creates a config file called `claude_desktop_config.json`. Open this file with your preferred editor and add the Bitrise MCP server:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.bitrise.io",
+        "--header",
+        "Authorization: <YOUR_PAT>"
+      ]
+    }
+  }
+}
+```
+
+Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
+
+In case `npx` is not found by Claude (`ENOENT`), you can specify the path to the `npx` binary in the `env` section of the configuration like this:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      ...
+      "env": {
+        "PATH": "<PATH to bin of npx>"
+      }
+    }
+  }
+}
+```
 
 ### Advanced configuration
 
@@ -109,21 +102,54 @@ Example configuration:
 {
   "mcpServers": {
     "bitrise": {
-      "command": "uvx",
-      "env": {
-        "BITRISE_TOKEN": "<YOUR_PAT>"
-      },
+      "command": "npx",
       "args": [
-        "--from",
-        "git+https://github.com/bitrise-io/bitrise-mcp@v1.1.0",
-        "bitrise-mcp",
-        "--enabled-api-groups",
-        "cache-items,pipelines"
+        "mcp-remote",
+        "https://mcp.bitrise.io",
+        "--header",
+        "Authorization: <YOUR_PAT>",
+        "--header",
+        "x-bitrise-enabled-api-groups: cache-items,pipelines,user"
       ]
-    },
+    }
   }
 }
 ```
+
+## Connect to local server
+
+If you want to run the MCP server locally, you need to install
+[Go](https://go.dev/) (>=1.23), generate a Bitrise API token, and then
+configure the client to start the MCP server in local (stdio) mode.
+
+### Example usage with [Claude Desktop](https://claude.ai/download)
+
+Open Claude settings, then navigate to the Developer tab.
+
+Click _Edit config_. This creates a config file called `claude_desktop_config.json`. Open this file with your preferred editor and add the Bitrise MCP server:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "command": "go",
+      "args": [
+        "run",
+        "github.com/bitrise-io/bitrise-mcp@208be93fcfe99a32accb4e31f1d13dbf7ba87daf"
+      ],
+      "env": {
+        "BITRISE_TOKEN": "<YOUR_PAT>",
+        "PATH": "<PATH to bin directory of go>",
+        "GOPATH": "<your GOPATH>",
+        "GOCACHE": "<your GOCACHE>",
+        "ENABLED_API_GROUPS": "apps,builds" // optional
+      }
+    }
+  }
+}
+```
+
+Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
 ## Tools
 
@@ -222,6 +248,7 @@ Example configuration:
       - `branch` (optional): The branch to build (default: main)
       - `pipeline_id` (optional): The pipeline to build
       - `workflow_id` (optional): The workflow to build
+      - `pipeline_id` (optional): The pipeline to build
       - `commit_message` (optional): The commit message for the build
       - `commit_hash` (optional): The commit hash for the build
 
@@ -427,8 +454,6 @@ Example configuration:
 
 ### Release Management
 
-# MCP Tools
-
 45. `create_connected_app`
    - Add a new Release Management connected app to Bitrise.
    - Arguments:
@@ -572,6 +597,14 @@ Example configuration:
      - `page`: (Optional) Page number to return.
      - `search`: (Optional) Search for testers by email or username.
 
+62. `get_testers`
+   - Gets a list of testers that have been associated with a tester group related to a specific connected app.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `tester_group_id`: (Optional) The uuidV4 identifier of a tester group. If given, only testers within this specific tester group will be returned.
+     - `items_per_page`: (Optional) Maximum number of testers per page (default: 10).
+     - `page`: (Optional) Page number to return (default: 1).
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
@@ -623,21 +656,22 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | add_member_to_group | | | ✅ | | | | | | | | |
 | me | | | | | | | | | ✅ | ✅ | |
 | create_connected_app | | | | | | | | | | | ✅ |
-| list_connected_apps | | | | | | | | | | | ✅ |
-| get_connected_app | | | | | | | | | | | ✅ |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ |
+| get_connected_app | | | | | | | | | | ✅ | ✅ |
 | update_connected_app | | | | | | | | | | | ✅ |
-| list_installable_artifacts | | | | | | | | | | | ✅ |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ |
 | generate_installable_artifact_upload_url | | | | | | | | | | | ✅ |
-| get_installable_artifact_upload_and_processing_status | | | | | | | | | | | ✅ |
+| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ |
 | set_installable_artifact_public_install_page | | | | | | | | | | | ✅ |
-| list_build_distribution_versions | | | | | | | | | | | ✅ |
-| list_build_distribution_version_test_builds | | | | | | | | | | | ✅ |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ |
 | create_tester_group | | | | | | | | | | | ✅ |
 | notify_tester_group | | | | | | | | | | | ✅ |
 | add_testers_to_tester_group | | | | | | | | | | | ✅ |
 | update_tester_group | | | | | | | | | | | ✅ |
-| list_tester_groups | | | | | | | | | | | ✅ |
-| get_tester_group | | | | | | | | | | | ✅ |
-| get_potential_testers | | | | | | | | | | | ✅ |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ |
+| get_tester_group | | | | | | | | | | ✅ | ✅ |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ |
+| get_testers | | | | | | | | | | ✅ | ✅ |
 
-By default, all API groups are enabled. You can specify which groups to enable using the `--enabled-api-groups` command-line argument with a comma-separated list of group names.
+By default, all API groups are enabled. You can specify which groups to enable using the `--enabled-api-groups` command-line argument or the `x-bitrise-enabled-api-groups` HTTP header with a comma-separated list of group names.
