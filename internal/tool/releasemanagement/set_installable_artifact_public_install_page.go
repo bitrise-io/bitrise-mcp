@@ -47,7 +47,7 @@ var SetInstallableArtifactPublicInstallPage = bitrise.Tool{
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPatch,
 			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/v1/connected-apps/%s/installable-artifacts/%s/public-install-page", connectedAppID, installableArtifactID),
+			Path:    fmt.Sprintf("/connected-apps/%s/installable-artifacts/%s/public-install-page", connectedAppID, installableArtifactID),
 			Body:    body,
 		})
 		if err != nil {

@@ -44,7 +44,7 @@ var ListBuildDistributionVersions = bitrise.Tool{
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/v1/connected-apps/%s/build-distributions", connectedAppID),
+			Path:    fmt.Sprintf("/connected-apps/%s/build-distributions", connectedAppID),
 			Params:  params,
 		})
 		if err != nil {
