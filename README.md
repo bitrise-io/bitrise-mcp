@@ -66,7 +66,21 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
         "https://mcp.bitrise.io",
         "--header",
         "Authorization: <YOUR_PAT>"
-      ],
+      ]
+    }
+  }
+}
+```
+
+Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
+
+In case `npx` is not found by Claude (`ENOENT`), you can specify the path to the `npx` binary in the `env` section of the configuration like this:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      ...
       "env": {
         "PATH": "<PATH to bin of npx>"
       }
@@ -74,8 +88,6 @@ Click _Edit config_. This creates a config file called `claude_desktop_config.js
   }
 }
 ```
-
-Save the config file and restart Claude Desktop. If everything is set up correctly, you should see a hammer icon next to the message composer.
 
 ### Advanced configuration
 
@@ -98,10 +110,7 @@ Example configuration:
         "Authorization: <YOUR_PAT>",
         "--header",
         "x-bitrise-enabled-api-groups: cache-items,pipelines,user"
-      ],
-      "env": {
-        "PATH": "<PATH to bin of npx>"
-      }
+      ]
     }
   }
 }
