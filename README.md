@@ -1,5 +1,7 @@
 # Bitrise MCP Server
 
+
+[![smithery badge](https://smithery.ai/badge/@bitrise-io/bitrise-mcp)](https://smithery.ai/server/@bitrise-io/bitrise-mcp)
 MCP Server for the Bitrise API, enabling app management, build operations, artifact management and more.
 
 ### Features
@@ -641,3 +643,4 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | get_potential_testers | | | | | | | | | | | ✅ |
 
 By default, all API groups are enabled. You can specify which groups to enable using the `--enabled-api-groups` command-line argument with a comma-separated list of group names.
+
