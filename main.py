@@ -6,6 +6,7 @@ from functools import partial
 from typing import Any, Dict, List, Union
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
+from utils import process_build_log
 
 mcp = FastMCP("bitrise")
 
@@ -473,9 +474,40 @@ async def get_build_log(
     build_slug: str = Field(
         description="Identifier of the Bitrise build",
     ),
+    compact_logs: int = Field(
+        default=1,
+        description="Log compaction level: 0=disabled (full logs), 1=first failed step, 2=second failed step, 3=third failed step, etc. If no failures exist or index exceeds failed step count, returns build summary. IMPORTANT: When user asks for 'next error' or 'second error' after seeing step 1, use compact_logs=2. For 'third error', use compact_logs=3.",
+    ),
 ) -> str:
     url = f"{BITRISE_API_BASE}/apps/{app_slug}/builds/{build_slug}/log"
-    return await call_api("GET", url)
+    response = await call_api("GET", url)
+    
+    # Process the log if compaction is enabled (compact_logs > 0)
+    if compact_logs > 0:
+        try:
+            # Default filter patterns for log compaction
+            log_filter_patterns = {
+                "xcode": ["error:", "fatal error:", "FAILED", "BUILD FAILED", "ASSERT", "XCTAssert", "Compile error", "Link error", "exception"],
+                "android": ["BUILD FAILED", "FAILURE:", "Error:", "Exception", "Failed to", "Compilation failed"], 
+                "git": ["CONFLICT", "fatal:", "Merge failed", "refusing to merge", "unrelated histories", "Auto-merging", "error:"]
+            }
+            
+            return await process_build_log(
+                response, 
+                get_log_of_failed_step_only=True,
+                enable_log_filtering=True,
+                log_filter_patterns=log_filter_patterns,
+                log_filter_context_lines=2,
+                failed_step_index=compact_logs,
+                show_summary_if_no_failures=True,
+                app_slug=app_slug,
+                build_slug=build_slug
+            )
+        except Exception:
+            # Return raw response if processing fails
+            return response
+    
+    return response
 
 
 @mcp_tool(
