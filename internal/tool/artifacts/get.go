@@ -10,7 +10,7 @@ import (
 )
 
 var Get = bitrise.Tool{
-	APIGroups: []string{"build-artifacts", "read-only"},
+	APIGroups: []string{"artifacts", "read-only"},
 	Definition: mcp.NewTool("get_artifact",
 		mcp.WithDescription("Get a specific build artifact."),
 		mcp.WithString("app_slug",

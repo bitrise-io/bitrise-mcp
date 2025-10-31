@@ -10,7 +10,7 @@ import (
 )
 
 var ListOutgoing = bitrise.Tool{
-	APIGroups: []string{"webhooks", "read-only"},
+	APIGroups: []string{"outgoing-webhooks", "read-only"},
 	Definition: mcp.NewTool("list_outgoing_webhooks",
 		mcp.WithDescription("List the outgoing webhooks of an app."),
 		mcp.WithString("app_slug",

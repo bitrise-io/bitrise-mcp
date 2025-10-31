@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteOutgoing = bitrise.Tool{
-	APIGroups: []string{"webhooks"},
+	APIGroups: []string{"outgoing-webhooks"},
 	Definition: mcp.NewTool("delete_outgoing_webhook",
 		mcp.WithDescription("Delete the outgoing webhook of an app."),
 		mcp.WithString("app_slug",

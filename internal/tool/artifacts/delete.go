@@ -10,7 +10,7 @@ import (
 )
 
 var Delete = bitrise.Tool{
-	APIGroups: []string{"build-artifacts"},
+	APIGroups: []string{"artifacts"},
 	Definition: mcp.NewTool("delete_artifact",
 		mcp.WithDescription("Delete a build artifact."),
 		mcp.WithString("app_slug",

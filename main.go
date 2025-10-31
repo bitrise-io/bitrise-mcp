@@ -35,7 +35,7 @@ type config struct {
 	// ignored.
 	BitriseToken string `env:"BITRISE_TOKEN"`
 	// EnabledAPIGroups is a comma-separated list of API groups that are enabled.
-	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,webhooks,build-artifacts,group-roles,cache-items,pipelines,account,read-only,release-management"`
+	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
 }

@@ -93,7 +93,7 @@ In case `npx` is not found by Claude (`ENOENT`), you can specify the path to the
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, webhooks, build-artifacts, group-roles, cache-items, pipelines, account, read-only, release-management`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 

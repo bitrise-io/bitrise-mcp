@@ -10,7 +10,7 @@ import (
 )
 
 var CreateOutgoing = bitrise.Tool{
-	APIGroups: []string{"webhooks"},
+	APIGroups: []string{"outgoing-webhooks"},
 	Definition: mcp.NewTool("create_outgoing_webhook",
 		mcp.WithDescription("Create an outgoing webhook for an app."),
 		mcp.WithString("app_slug",

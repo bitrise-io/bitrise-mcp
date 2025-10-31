@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateOutgoing = bitrise.Tool{
-	APIGroups: []string{"webhooks"},
+	APIGroups: []string{"outgoing-webhooks"},
 	Definition: mcp.NewTool("update_outgoing_webhook",
 		mcp.WithDescription("Update an outgoing webhook for an app. Even if you do not want to change one of the parameters, you still have to provide that parameter as well: simply use its existing value."),
 		mcp.WithString("app_slug",

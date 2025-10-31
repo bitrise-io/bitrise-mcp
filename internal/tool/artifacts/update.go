@@ -10,7 +10,7 @@ import (
 )
 
 var Update = bitrise.Tool{
-	APIGroups: []string{"build-artifacts"},
+	APIGroups: []string{"artifacts"},
 	Definition: mcp.NewTool("update_artifact",
 		mcp.WithDescription("Update a build artifact."),
 		mcp.WithString("app_slug",

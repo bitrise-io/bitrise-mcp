@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"net/http"
 	"strconv"
 
 	"github.com/yosida95/uritemplate/v3"
@@ -54,6 +55,10 @@ const (
 	// https://modelcontextprotocol.io/specification/2025-03-26/server/utilities/logging
 	MethodSetLogLevel MCPMethod = "logging/setLevel"
 
+	// MethodElicitationCreate requests additional information from the user during interactions.
+	// https://modelcontextprotocol.io/docs/concepts/elicitation
+	MethodElicitationCreate MCPMethod = "elicitation/create"
+
 	// MethodNotificationResourcesListChanged notifies when the list of available resources changes.
 	// https://modelcontextprotocol.io/specification/2025-03-26/server/resources#list-changed-notification
 	MethodNotificationResourcesListChanged = "notifications/resources/list_changed"
@@ -96,12 +101,13 @@ func (t *URITemplate) UnmarshalJSON(data []byte) error {
 type JSONRPCMessage any
 
 // LATEST_PROTOCOL_VERSION is the most recent version of the MCP protocol.
-const LATEST_PROTOCOL_VERSION = "2025-03-26"
+const LATEST_PROTOCOL_VERSION = "2025-06-18"
 
 // ValidProtocolVersions lists all known valid MCP protocol versions.
 var ValidProtocolVersions = []string{
-	"2024-11-05",
 	LATEST_PROTOCOL_VERSION,
+	"2025-03-26",
+	"2024-11-05",
 }
 
 // JSONRPC_VERSION is the version of JSON-RPC used by MCP.
@@ -148,6 +154,18 @@ func (m *Meta) UnmarshalJSON(data []byte) error {
 	delete(raw, "progressToken")
 	m.AdditionalFields = raw
 	return nil
+}
+
+func NewMetaFromMap(m map[string]any) *Meta {
+	progressToken := m["progressToken"]
+	if progressToken != nil {
+		delete(m, "progressToken")
+	}
+
+	return &Meta{
+		ProgressToken:    progressToken,
+		AdditionalFields: m,
+	}
 }
 
 type Request struct {
@@ -231,7 +249,7 @@ func (p *NotificationParams) UnmarshalJSON(data []byte) error {
 type Result struct {
 	// This result property is reserved by the protocol to allow clients and
 	// servers to attach additional metadata to their responses.
-	Meta map[string]any `json:"_meta,omitempty"`
+	Meta *Meta `json:"_meta,omitempty"`
 }
 
 // RequestId is a uniquely identifying ID for a request in JSON-RPC.
@@ -279,7 +297,6 @@ func (r RequestId) MarshalJSON() ([]byte, error) {
 }
 
 func (r *RequestId) UnmarshalJSON(data []byte) error {
-
 	if string(data) == "null" {
 		r.value = nil
 		return nil
@@ -329,31 +346,48 @@ type JSONRPCResponse struct {
 
 // JSONRPCError represents a non-successful (error) response to a request.
 type JSONRPCError struct {
-	JSONRPC string    `json:"jsonrpc"`
-	ID      RequestId `json:"id"`
-	Error   struct {
-		// The error type that occurred.
-		Code int `json:"code"`
-		// A short description of the error. The message SHOULD be limited
-		// to a concise single sentence.
-		Message string `json:"message"`
-		// Additional information about the error. The value of this member
-		// is defined by the sender (e.g. detailed error information, nested errors etc.).
-		Data any `json:"data,omitempty"`
-	} `json:"error"`
+	JSONRPC string              `json:"jsonrpc"`
+	ID      RequestId           `json:"id"`
+	Error   JSONRPCErrorDetails `json:"error"`
+}
+
+// JSONRPCErrorDetails represents a JSON-RPC error for Go error handling.
+// This is separate from the JSONRPCError type which represents the full JSON-RPC error response structure.
+type JSONRPCErrorDetails struct {
+	// The error type that occurred.
+	Code int `json:"code"`
+	// A short description of the error. The message SHOULD be limited
+	// to a concise single sentence.
+	Message string `json:"message"`
+	// Additional information about the error. The value of this member
+	// is defined by the sender (e.g. detailed error information, nested errors etc.).
+	Data any `json:"data,omitempty"`
 }
 
 // Standard JSON-RPC error codes
 const (
-	PARSE_ERROR      = -32700
-	INVALID_REQUEST  = -32600
+	// PARSE_ERROR indicates invalid JSON was received by the server.
+	PARSE_ERROR = -32700
+
+	// INVALID_REQUEST indicates the JSON sent is not a valid Request object.
+	INVALID_REQUEST = -32600
+
+	// METHOD_NOT_FOUND indicates the method does not exist/is not available.
 	METHOD_NOT_FOUND = -32601
-	INVALID_PARAMS   = -32602
-	INTERNAL_ERROR   = -32603
+
+	// INVALID_PARAMS indicates invalid method parameter(s).
+	INVALID_PARAMS = -32602
+
+	// INTERNAL_ERROR indicates internal JSON-RPC error.
+	INTERNAL_ERROR = -32603
+
+	// REQUEST_INTERRUPTED indicates a request was cancelled or timed out.
+	REQUEST_INTERRUPTED = -32800
 )
 
 // MCP error codes
 const (
+	// RESOURCE_NOT_FOUND indicates a requested resource was not found.
 	RESOURCE_NOT_FOUND = -32002
 )
 
@@ -399,6 +433,7 @@ type CancelledNotificationParams struct {
 type InitializeRequest struct {
 	Request
 	Params InitializeParams `json:"params"`
+	Header http.Header      `json:"-"`
 }
 
 type InitializeParams struct {
@@ -446,6 +481,8 @@ type ClientCapabilities struct {
 	} `json:"roots,omitempty"`
 	// Present if the client supports sampling from an LLM.
 	Sampling *struct{} `json:"sampling,omitempty"`
+	// Present if the client supports elicitation requests from the server.
+	Elicitation *struct{} `json:"elicitation,omitempty"`
 }
 
 // ServerCapabilities represents capabilities that a server may support. Known
@@ -469,11 +506,15 @@ type ServerCapabilities struct {
 		// list.
 		ListChanged bool `json:"listChanged,omitempty"`
 	} `json:"resources,omitempty"`
+	// Present if the server supports sending sampling requests to clients.
+	Sampling *struct{} `json:"sampling,omitempty"`
 	// Present if the server offers any tools to call.
 	Tools *struct {
 		// Whether this server supports notifications for changes to the tool list.
 		ListChanged bool `json:"listChanged,omitempty"`
 	} `json:"tools,omitempty"`
+	// Present if the server supports elicitation requests to the client.
+	Elicitation *struct{} `json:"elicitation,omitempty"`
 }
 
 // Implementation describes the name and version of an MCP implementation.
@@ -489,6 +530,7 @@ type Implementation struct {
 // or else may be disconnected.
 type PingRequest struct {
 	Request
+	Header http.Header `json:"-"`
 }
 
 /* Progress notifications */
@@ -541,6 +583,7 @@ type PaginatedResult struct {
 // the server has.
 type ListResourcesRequest struct {
 	PaginatedRequest
+	Header http.Header `json:"-"`
 }
 
 // ListResourcesResult is the server's response to a resources/list request
@@ -554,6 +597,7 @@ type ListResourcesResult struct {
 // resource templates the server has.
 type ListResourceTemplatesRequest struct {
 	PaginatedRequest
+	Header http.Header `json:"-"`
 }
 
 // ListResourceTemplatesResult is the server's response to a
@@ -567,6 +611,7 @@ type ListResourceTemplatesResult struct {
 // specific resource URI.
 type ReadResourceRequest struct {
 	Request
+	Header http.Header        `json:"-"`
 	Params ReadResourceParams `json:"params"`
 }
 
@@ -598,6 +643,7 @@ type ResourceListChangedNotification struct {
 type SubscribeRequest struct {
 	Request
 	Params SubscribeParams `json:"params"`
+	Header http.Header     `json:"-"`
 }
 
 type SubscribeParams struct {
@@ -612,6 +658,7 @@ type SubscribeParams struct {
 type UnsubscribeRequest struct {
 	Request
 	Params UnsubscribeParams `json:"params"`
+	Header http.Header       `json:"-"`
 }
 
 type UnsubscribeParams struct {
@@ -635,6 +682,8 @@ type ResourceUpdatedNotificationParams struct {
 // Resource represents a known resource that the server is capable of reading.
 type Resource struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 	// A human-readable name for this resource.
@@ -659,6 +708,8 @@ func (r Resource) GetName() string {
 // on the server.
 type ResourceTemplate struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// A URI template (according to RFC 6570) that can be used to construct
 	// resource URIs.
 	URITemplate *URITemplate `json:"uriTemplate"`
@@ -688,6 +739,9 @@ type ResourceContents interface {
 }
 
 type TextResourceContents struct {
+	// Raw per‑resource metadata; pass‑through as defined by MCP. Not the same as mcp.Meta.
+	// Allows _meta to be used for MCP-UI features for example. Does not assume any specific format.
+	Meta map[string]any `json:"_meta,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 	// The MIME type of this resource, if known.
@@ -700,6 +754,9 @@ type TextResourceContents struct {
 func (TextResourceContents) isResourceContents() {}
 
 type BlobResourceContents struct {
+	// Raw per‑resource metadata; pass‑through as defined by MCP. Not the same as mcp.Meta.
+	// Allows _meta to be used for MCP-UI features for example. Does not assume any specific format.
+	Meta map[string]any `json:"_meta,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 	// The MIME type of this resource, if known.
@@ -717,6 +774,7 @@ func (BlobResourceContents) isResourceContents() {}
 type SetLevelRequest struct {
 	Request
 	Params SetLevelParams `json:"params"`
+	Header http.Header    `json:"-"`
 }
 
 type SetLevelParams struct {
@@ -759,6 +817,70 @@ const (
 	LoggingLevelCritical  LoggingLevel = "critical"
 	LoggingLevelAlert     LoggingLevel = "alert"
 	LoggingLevelEmergency LoggingLevel = "emergency"
+)
+
+var levelToInt = map[LoggingLevel]int{
+	LoggingLevelDebug:     0,
+	LoggingLevelInfo:      1,
+	LoggingLevelNotice:    2,
+	LoggingLevelWarning:   3,
+	LoggingLevelError:     4,
+	LoggingLevelCritical:  5,
+	LoggingLevelAlert:     6,
+	LoggingLevelEmergency: 7,
+}
+
+func (l LoggingLevel) ShouldSendTo(minLevel LoggingLevel) bool {
+	ia, oka := levelToInt[l]
+	ib, okb := levelToInt[minLevel]
+	if !oka || !okb {
+		return false
+	}
+	return ia >= ib
+}
+
+/* Elicitation */
+
+// ElicitationRequest is a request from the server to the client to request additional
+// information from the user during an interaction.
+type ElicitationRequest struct {
+	Request
+	Params ElicitationParams `json:"params"`
+}
+
+// ElicitationParams contains the parameters for an elicitation request.
+type ElicitationParams struct {
+	// A human-readable message explaining what information is being requested and why.
+	Message string `json:"message"`
+	// A JSON Schema defining the expected structure of the user's response.
+	RequestedSchema any `json:"requestedSchema"`
+}
+
+// ElicitationResult represents the result of an elicitation request.
+type ElicitationResult struct {
+	Result
+	ElicitationResponse
+}
+
+// ElicitationResponse represents the user's response to an elicitation request.
+type ElicitationResponse struct {
+	// Action indicates whether the user accepted, declined, or cancelled.
+	Action ElicitationResponseAction `json:"action"`
+	// Content contains the user's response data if they accepted.
+	// Should conform to the requestedSchema from the ElicitationRequest.
+	Content any `json:"content,omitempty"`
+}
+
+// ElicitationResponseAction indicates how the user responded to an elicitation request.
+type ElicitationResponseAction string
+
+const (
+	// ElicitationResponseActionAccept indicates the user provided the requested information.
+	ElicitationResponseActionAccept ElicitationResponseAction = "accept"
+	// ElicitationResponseActionDecline indicates the user explicitly declined to provide information.
+	ElicitationResponseActionDecline ElicitationResponseAction = "decline"
+	// ElicitationResponseActionCancel indicates the user cancelled without making a choice.
+	ElicitationResponseActionCancel ElicitationResponseAction = "cancel"
 )
 
 /* Sampling */
@@ -837,6 +959,8 @@ type Content interface {
 // It must have Type set to "text".
 type TextContent struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta  `json:"_meta,omitempty"`
 	Type string `json:"type"` // Must be "text"
 	// The text content of the message.
 	Text string `json:"text"`
@@ -848,6 +972,8 @@ func (TextContent) isContent() {}
 // It must have Type set to "image".
 type ImageContent struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta  `json:"_meta,omitempty"`
 	Type string `json:"type"` // Must be "image"
 	// The base64-encoded image data.
 	Data string `json:"data"`
@@ -861,6 +987,8 @@ func (ImageContent) isContent() {}
 // It must have Type set to "audio".
 type AudioContent struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta  `json:"_meta,omitempty"`
 	Type string `json:"type"` // Must be "audio"
 	// The base64-encoded audio data.
 	Data string `json:"data"`
@@ -892,6 +1020,8 @@ func (ResourceLink) isContent() {}
 // benefit of the LLM and/or the user.
 type EmbeddedResource struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta     *Meta            `json:"_meta,omitempty"`
 	Type     string           `json:"type"`
 	Resource ResourceContents `json:"resource"`
 }
@@ -960,6 +1090,7 @@ type ModelHint struct {
 type CompleteRequest struct {
 	Request
 	Params CompleteParams `json:"params"`
+	Header http.Header    `json:"-"`
 }
 
 type CompleteParams struct {
@@ -1012,6 +1143,7 @@ type PromptReference struct {
 // structure or access specific locations that the client has permission to read from.
 type ListRootsRequest struct {
 	Request
+	Header http.Header `json:"-"`
 }
 
 // ListRootsResult is the client's response to a roots/list request from the server.
@@ -1024,6 +1156,8 @@ type ListRootsResult struct {
 
 // Root represents a root directory or file that the server can operate on.
 type Root struct {
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// The URI identifying the root. This *must* start with file:// for now.
 	// This restriction may be relaxed in future versions of the protocol to allow
 	// other URI schemes.
@@ -1062,4 +1196,47 @@ type ServerResult any
 
 type Named interface {
 	GetName() string
+}
+
+// MarshalJSON implements custom JSON marshaling for Content interface
+func MarshalContent(content Content) ([]byte, error) {
+	return json.Marshal(content)
+}
+
+// UnmarshalContent implements custom JSON unmarshaling for Content interface
+func UnmarshalContent(data []byte) (Content, error) {
+	var raw map[string]any
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	contentType, ok := raw["type"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid type field")
+	}
+
+	switch contentType {
+	case ContentTypeText:
+		var content TextContent
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeImage:
+		var content ImageContent
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeAudio:
+		var content AudioContent
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeLink:
+		var content ResourceLink
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeResource:
+		var content EmbeddedResource
+		err := json.Unmarshal(data, &content)
+		return content, err
+	default:
+		return nil, fmt.Errorf("unknown content type: %s", contentType)
+	}
 }

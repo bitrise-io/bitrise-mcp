@@ -11,7 +11,7 @@ import (
 )
 
 var List = bitrise.Tool{
-	APIGroups: []string{"build-artifacts", "read-only"},
+	APIGroups: []string{"artifacts", "read-only"},
 	Definition: mcp.NewTool("list_artifacts",
 		mcp.WithDescription("Get a list of all build artifacts."),
 		mcp.WithString("app_slug",
