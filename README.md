@@ -13,3 +13,4 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 - **[VS Code](/docs/install-vscode.md)** - Installation for VS Code IDE
 - **[Claude Applications](/docs/install-claude.md)** - Installation guide for Claude Desktop and Claude Code CLI
 - **[Cursor](/docs/install-cursor.md)** - Installation guide for Cursor IDE
+- **[Windsurf](/docs/install-windsurf.md)** - Installation guide for Windsurf IDE
