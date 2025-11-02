@@ -47,12 +47,12 @@ claude mcp add --transport http bitrise https://mcp.bitrise.io -H "Authorization
 
 1. Run the following command in the Claude Code CLI:
 ```bash
-claude mcp add bitrise -e BITRISE_TOKEN=YOUR_BITRISE_PAT -- go run github.com/bitrise-io/bitrise-mcp@latest
+claude mcp add bitrise -e BITRISE_TOKEN=YOUR_BITRISE_PAT -- go run github.com/bitrise-io/bitrise-mcp@v2
 ```
 
 With an environment variable:
 ```bash
-claude mcp add bitrise -e BITRISE_TOKEN=$(grep BITRISE_PAT .env | cut -d '=' -f2) -- go run github.com/bitrise-io/bitrise-mcp@latest
+claude mcp add bitrise -e BITRISE_TOKEN=$(grep BITRISE_PAT .env | cut -d '=' -f2) -- go run github.com/bitrise-io/bitrise-mcp@v2
 ```
 2. Restart Claude Code
 3. Run `claude mcp list` to see if the Bitrise server is configured
@@ -131,7 +131,7 @@ Add this codeblock to your `claude_desktop_config.json`:
       "command": "go",
       "args": [
         "run",
-        "github.com/bitrise-io/bitrise-mcp@latest"
+        "github.com/bitrise-io/bitrise-mcp@v2"
       ],
       "env": {
         "BITRISE_TOKEN": "YOUR_BITRISE_PAT",

@@ -37,7 +37,7 @@ Windsurf supports Streamable HTTP servers with a `serverUrl` field:
       "command": "go",
       "args": [
         "run",
-        "github.com/bitrise-io/bitrise-mcp@latest"
+        "github.com/bitrise-io/bitrise-mcp@v2"
       ],
       "env": {
         "BITRISE_TOKEN": "YOUR_BITRISE_PAT"
