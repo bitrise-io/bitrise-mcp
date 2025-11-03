@@ -40,7 +40,7 @@ Uses Bitrise's hosted server at https://mcp.bitrise.io. Requires Cursor v0.48.0+
 
 ## Local Server Setup
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=bitrise&config=eyJlbnYiOnsiQklUUklTRV9UT0tFTiI6IllPVVJfQklUUklTRV9QQVQifSwiY29tbWFuZCI6ImdvIHJ1biBnaXRodWIuY29tL2JpdHJpc2UtaW8vYml0cmlzZS1tY3BAbGF0ZXN0In0%3D)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=bitrise&config=eyJlbnYiOnsiQklUUklTRV9UT0tFTiI6IllPVVJfQklUUklTRV9QQVQifSwiY29tbWFuZCI6ImdvIHJ1biBnaXRodWIuY29tL2JpdHJpc2UtaW8vYml0cmlzZS1tY3AvdjJAdjIifQo%3D)
 
 The local Bitrise MCP server runs via Go and requires Go to be installed.
 
