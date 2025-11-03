@@ -48,7 +48,7 @@ Do the same as above, but use the following configuration instead:
 			"command": "go",
 			"args": [
 				"run",
-				"github.com/bitrise-io/bitrise-mcp@v2"
+				"github.com/bitrise-io/bitrise-mcp/v2@v2"
 			],
 			"env": {
 				"BITRISE_TOKEN": "${input:bitrise-token}"
