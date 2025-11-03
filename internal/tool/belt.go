@@ -3,17 +3,17 @@ package tool
 import (
 	"slices"
 
-	"github.com/bitrise-io/bitrise-mcp/internal/bitrise"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/apps"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/artifacts"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/builds"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/cache"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/grouproles"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/pipelines"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/releasemanagement"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/user"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/webhooks"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool/workspaces"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/apps"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/artifacts"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/builds"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/cache"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/user"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/webhooks"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/workspaces"
 	"github.com/mark3labs/mcp-go/server"
 )
 

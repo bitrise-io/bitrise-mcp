@@ -1,4 +1,4 @@
-module github.com/bitrise-io/bitrise-mcp
+module github.com/bitrise-io/bitrise-mcp/v2
 
 go 1.23.0
 

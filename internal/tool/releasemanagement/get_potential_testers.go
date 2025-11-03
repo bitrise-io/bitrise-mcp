@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bitrise-io/bitrise-mcp/internal/bitrise"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 

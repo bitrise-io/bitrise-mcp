@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bitrise-io/bitrise-mcp/internal/bitrise"
-	"github.com/bitrise-io/bitrise-mcp/internal/tool"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool"
 	"github.com/jinzhu/configor"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
