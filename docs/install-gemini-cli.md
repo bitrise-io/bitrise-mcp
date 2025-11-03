@@ -68,7 +68,7 @@ You can also connect to the hosted MCP server directly. After securely storing y
             "command": "go",
             "args": [
                 "run",
-                "github.com/bitrise-io/bitrise-mcp@v2"
+                "github.com/bitrise-io/bitrise-mcp/v2@v2"
             ],
             "env": {
                 "BITRISE_TOKEN": "$BITRISE_PAT"
