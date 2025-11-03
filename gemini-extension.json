@@ -2,7 +2,7 @@
 	"name": "bitrise",
 	"version": "1.0.0",
 	"mcpServers": {
-		"github": {
+		"bitrise": {
 			"description": "Connect AI assistants to Bitrise - manage apps, builds, artifacts, and more through natural language",
 			"httpUrl": "https://mcp.bitrise.io",
 			"headers": {

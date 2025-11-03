@@ -68,8 +68,13 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("execute request: %w", err)
 	}
+	defer res.Body.Close()
 	if res.StatusCode >= 400 {
-		return "", fmt.Errorf("unexpected status code %d", res.StatusCode)
+		resBody, _ := io.ReadAll(res.Body)
+		return "", fmt.Errorf(
+			"unexpected status code %d; response body: %s",
+			res.StatusCode, resBody,
+		)
 	}
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
