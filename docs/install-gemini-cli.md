@@ -7,7 +7,7 @@
    - Go to your [Bitrise Account Settings/Security](https://app.bitrise.io/me/account/security).
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
-3. For local setup: [Go](https://go.dev/) (>=1.23) installed
+3. For local setup: [Go](https://go.dev/) (>=1.25) installed
 
 <details>
 <summary><b>Storing Your PAT Securely</b></summary>

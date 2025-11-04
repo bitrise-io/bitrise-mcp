@@ -6,7 +6,7 @@
    - Go to your [Bitrise Account Settings/Security](https://app.bitrise.io/me/account/security).
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
-- For local setup: [Go](https://go.dev/) (>=1.23) installed
+- For local setup: [Go](https://go.dev/) (>=1.25) installed
 
 ## Remote Server Setup (Streamable HTTP)
 

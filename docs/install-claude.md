@@ -8,7 +8,7 @@
    - Go to your [Bitrise Account Settings/Security](https://app.bitrise.io/me/account/security).
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
-- For local setup: [Go](https://go.dev/) (>=1.23) installed
+- For local setup: [Go](https://go.dev/) (>=1.25) installed
 - Open Claude Code inside the directory for your project (recommended for best experience and clear scope of configuration)
 
 <details>
@@ -73,7 +73,7 @@ claude mcp get bitrise
    - Go to your [Bitrise Account Settings/Security](https://app.bitrise.io/me/account/security).
    - Navigate to the "Personal access tokens" section.
    - Copy the generated token.
-- For local setup: [Go](https://go.dev/) (>=1.23) installed
+- For local setup: [Go](https://go.dev/) (>=1.25) installed
 
 ### Configuration File Location
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
