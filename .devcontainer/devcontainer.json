@@ -6,13 +6,42 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
-	"postCreateCommand": "go mod tidy && go mod vendor",
+	"postCreateCommand": "go mod tidy && go mod vendor && make install-golangci-lint",
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"golang.go",
 				"ms-azuretools.vscode-containers"
-			]
+			],
+			"settings": {
+				"[go]": {
+					"editor.formatOnSave": true,
+					"editor.defaultFormatter": "golang.go",
+					"editor.codeActionsOnSave": {
+						"source.organizeImports": "explicit",
+						"source.fixAll": "explicit"
+					}
+				},
+				"go.useLanguageServer": true,
+				"gopls": {
+					"ui.semanticTokens": true,
+					"ui.completion.usePlaceholders": true
+				},
+				"go.lintTool": "golangci-lint",
+				"go.lintFlags": [
+					"--path-mode=abs",
+					"--fast-only"
+				],
+				"go.formatTool": "custom",
+				"go.alternateTools": {
+					"customFormatter": "golangci-lint"
+				},
+				"go.formatFlags": [
+					"fmt",
+					"--stdin"
+				],
+				"go.coverOnSave": false
+			}
 		}
 	}
 }
