@@ -1,5 +1,7 @@
 # Bitrise MCP Server
 
+[![Build Status](https://app.bitrise.io/app/37d1538c-d2d6-4b20-a2cc-78862be22342/status.svg?token=QQWdHofHMTWA2EIkXT4rcA&branch=main)](https://app.bitrise.io/app/37d1538c-d2d6-4b20-a2cc-78862be22342)
+
 MCP Server for the Bitrise API, enabling app management, build operations, artifact management, and more.
 
 ## Features
