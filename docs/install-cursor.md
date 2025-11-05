@@ -85,7 +85,7 @@ The local Bitrise MCP server runs via Go and requires Go to be installed.
 
 ## Advanced configuration
 
-See [Tools](tools.md) for enabling/disabling specific API groups.
+See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
 
 ## Troubleshooting
 
