@@ -133,7 +133,16 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	mux := http.NewServeMux()
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
-	mux.HandleFunc("/", mcpHandler.ServeHTTP)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// If the request looks like it's from a browser (Sec-Fetch-Mode: navigate),
+		// redirect to the documentation instead of handling as MCP request.
+		if r.Header.Get("Sec-Fetch-Mode") == "navigate" {
+			http.Redirect(w, r, "https://github.com/bitrise-io/bitrise-mcp/blob/main/README.md", http.StatusTemporaryRedirect)
+			return
+		}
+		// Otherwise, handle as MCP request
+		mcpHandler.ServeHTTP(w, r)
+	})
 
 	httpServer := &http.Server{
 		Addr:    cfg.Addr,
