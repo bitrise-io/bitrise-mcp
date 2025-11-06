@@ -68,4 +68,4 @@ Do the same as above, but use the following configuration instead:
 
 ## Advanced configuration
 
-See [Tools](tools.md) for enabling/disabling specific API groups.
+See [Tools](/docs/tools.md) for enabling/disabling specific API groups.

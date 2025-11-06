@@ -63,8 +63,6 @@ claude mcp list
 claude mcp get bitrise
 ```
 
----
-
 ## Claude Desktop
 
 ### Prerequisites
@@ -159,9 +157,7 @@ Add this codeblock to your `claude_desktop_config.json`:
 
 ### Advanced configuration
 
-See [Tools](tools.md) for enabling/disabling specific API groups.
-
----
+See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
 
 ## Troubleshooting
 
@@ -181,8 +177,6 @@ See [Tools](tools.md) for enabling/disabling specific API groups.
 - Check logs:
   - Claude Code: Use `/mcp` command
   - Claude Desktop: `ls ~/Library/Logs/Claude/` and `cat ~/Library/Logs/Claude/mcp-server-*.log` (macOS) or `%APPDATA%\Claude\logs\` (Windows)
-
----
 
 ## Important Notes
 
