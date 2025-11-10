@@ -43,6 +43,7 @@ func NewBelt() *Belt {
 		builds.Trigger,
 		builds.List,
 		builds.Get,
+		builds.GetSteps,
 		builds.Abort,
 		builds.GetBuildLog,
 		builds.GetBuildBitriseYML,
