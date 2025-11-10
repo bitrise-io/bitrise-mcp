@@ -56,6 +56,9 @@ var GetBuildLog = bitrise.Tool{
 		stepUUID := request.GetString("step_uuid", "")
 		offset := request.GetInt("offset", 0)
 		limit := request.GetInt("limit", 2000)
+		if limit <= 0 {
+			return mcp.NewToolResultError("limit must be greater than 0"), nil
+		}
 
 		path := fmt.Sprintf("/apps/%s/builds/%s/log", appSlug, buildSlug)
 		if stepUUID != "" {
@@ -181,9 +184,13 @@ func (lw logWindow) Peek() GetBuildLogResponse {
 		if end > len(lines) {
 			end = len(lines)
 		}
+		nextOffset := end
+		if nextOffset >= len(lines) {
+			nextOffset = 0
+		}
 		return GetBuildLogResponse{
 			LogLines:   strings.Join(lines[lw.Offset:end], "\n"),
-			NextOffset: end,
+			NextOffset: nextOffset,
 			TotalLines: len(lines),
 		}
 	}
@@ -193,9 +200,13 @@ func (lw logWindow) Peek() GetBuildLogResponse {
 	if start < 0 {
 		start = 0
 	}
+	nextOffset := lw.Offset - lw.Limit
+	if nextOffset < -len(lines) {
+		nextOffset = 0
+	}
 	return GetBuildLogResponse{
 		LogLines:   strings.Join(lines[start:end], "\n"),
-		NextOffset: lw.Offset - lw.Limit,
+		NextOffset: nextOffset,
 		TotalLines: len(lines),
 	}
 }
