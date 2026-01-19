@@ -25,9 +25,14 @@ AWS Kiro supports installing the Bitrise MCP server as a Power, which provides a
    https://github.com/bitrise-io/bitrise-mcp/tree/main/power
    ```
 
-4. **Configure Authentication**
-   - When prompted, configure your `BITRISE_TOKEN` environment variable
-   - Enter the Personal Access Token you created in the prerequisites
+4. **Set Up Authentication**
+   - Before starting Kiro, set the `BITRISE_TOKEN` environment variable in your shell profile (`.zshrc` or `.bashrc`):
+     ```bash
+     export BITRISE_TOKEN="your-actual-token-here"
+     ```
+   - Restart your terminal or run `source ~/.zshrc` (or `source ~/.bashrc`)
+   - Start Kiro - it will read the environment variable on startup
+   - When Kiro starts, a popup may ask if you trust the environment variable - accept it to allow access
 
 5. **Verify Installation**
    - The Bitrise Power should now appear in your Powers list
@@ -69,25 +74,31 @@ By default, all groups are enabled. To customize, modify the Power configuration
 
 ### Environment Variable Not Working
 
-If Kiro is not picking up your `BITRISE_TOKEN` from your shell environment (.zshrc, .bashrc), this is a known issue. Here are solutions:
+Kiro IDE can only read environment variables that are set in your shell profile (`.zshrc` or `.bashrc`) **before** Kiro starts. Unlike VS Code, Kiro does not prompt you to enter the token value - it expects the environment variable to already be available.
 
-**Option 1: Manual Configuration (Recommended)**
-After installing the power, manually edit the MCP configuration:
+**Option 1: Set in Shell Profile (Recommended)**
+1. Add the export to your shell profile:
+   ```bash
+   # Add to ~/.zshrc or ~/.bashrc
+   export BITRISE_TOKEN="your-actual-token-here"
+   ```
+2. Restart your terminal or source the profile: `source ~/.zshrc`
+3. **Restart Kiro** - this is required for Kiro to pick up the new environment variable
+4. When prompted, accept the popup asking if you trust the environment variable
+
+**Option 2: Manual Configuration**
+If the environment variable approach doesn't work, you can hardcode the token:
 1. Open `~/.kiro/settings/mcp.json` (user level) or `.kiro/settings/mcp.json` (workspace level)
 2. Find the Bitrise server entry
 3. Replace `${BITRISE_TOKEN}` with your actual token value
 4. Save the file and restart Kiro
 
-**Option 2: Export Before Starting Kiro**
-Make sure the environment variable is exported before starting Kiro:
-```bash
-export BITRISE_TOKEN="your-actual-token-here"
-kiro .  # or however you start Kiro
-```
+**Note on Environment Variable Syntax**
+The syntax for environment variables differs between Kiro CLI and IDE:
+- **Kiro CLI**: Use `${env:BITRISE_TOKEN}` (with `env:` prefix)
+- **Kiro IDE**: Use `${BITRISE_TOKEN}` (without prefix)
 
-**Option 3: Check Environment Variable Syntax**
-- For Kiro CLI: Use `${env:BITRISE_TOKEN}`
-- For Kiro IDE: Use `${BITRISE_TOKEN}`
+This inconsistency is a known issue. The Power is configured with `${BITRISE_TOKEN}` which works for the IDE.
 
 ### Power Not Activating
 - Ensure you've entered the correct repository URL with `/tree/main/power` path
