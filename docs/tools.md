@@ -108,6 +108,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `pipeline_id` (optional): The pipeline to build
       - `commit_message` (optional): The commit message for the build
       - `commit_hash` (optional): The commit hash for the build
+      - `environments` (optional): Custom environment variables for the build (array of objects with `mapped_to`, `value`, and optional `is_expand` properties)
 
 14. `get_build`
     - Get a specific build of a given app

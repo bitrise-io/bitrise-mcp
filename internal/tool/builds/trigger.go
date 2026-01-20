@@ -33,6 +33,27 @@ var Trigger = bitrise.Tool{
 		mcp.WithString("commit_hash",
 			mcp.Description("The commit hash for the build"),
 		),
+		mcp.WithArray("environments",
+			mcp.Description(`Custom environment variables for the build.`),
+			mcp.Items(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"mapped_to": map[string]any{
+						"type":        "string",
+						"description": "The name of the environment variable",
+					},
+					"value": map[string]any{
+						"type":        "string",
+						"description": "The value of the environment variable",
+					},
+					"is_expand": map[string]any{
+						"type":        "boolean",
+						"description": "Whether to expand environment variable references in the value",
+					},
+				},
+				"required": []string{"mapped_to", "value"},
+			}),
+		),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")
@@ -40,7 +61,7 @@ var Trigger = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		buildParams := map[string]string{
+		buildParams := map[string]any{
 			"branch": request.GetString("branch", "main"),
 		}
 		if v := request.GetString("workflow_id", ""); v != "" {
@@ -54,6 +75,9 @@ var Trigger = bitrise.Tool{
 		}
 		if v := request.GetString("commit_hash", ""); v != "" {
 			buildParams["commit_hash"] = v
+		}
+		if v, ok := request.GetArguments()["environments"]; ok {
+			buildParams["environments"] = v
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

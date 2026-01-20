@@ -102,6 +102,7 @@ The Bitrise MCP server provides 63 tools organized into the following categories
     - `workflow_id` (optional): The workflow to build
     - `commit_message` (optional): The commit message for the build
     - `commit_hash` (optional): The commit hash for the build
+    - `environments` (optional): Custom environment variables for the build (array of objects with `mapped_to`, `value`, and optional `is_expand` properties)
 
 14. **get_build** - Get a specific build of a given app
     - `app_slug`: Identifier of the Bitrise app
