@@ -26,7 +26,7 @@ var ValidateBitriseYML = bitrise.Tool{
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
 			BaseURL: bitrise.APIBaseURL,
-			Path:    "/validate/bitrise_yml",
+			Path:    "/validate-bitrise-yml",
 			Body: map[string]any{
 				"bitrise_yml": ymlContent, // CallAPI adds Content-Type: application/json so have to use that format
 			},
