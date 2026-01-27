@@ -9,7 +9,7 @@ import (
 )
 
 var ValidateBitriseYML = bitrise.Tool{
-	APIGroups: []string{"read-only"},
+	APIGroups: []string{"apps", "read-only"},
 	Definition: mcp.NewTool("validate_bitrise_yml",
 		mcp.WithDescription("Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid."),
 		mcp.WithString("bitrise_yml",

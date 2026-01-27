@@ -485,7 +485,7 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | list_branches | ✅ | | | | | | | | | ✅ | |
 | register_ssh_key | ✅ | | | | | | | | | | |
 | register_webhook | ✅ | | | | | | | | | | |
-| validate_bitrise_yml | | | | | | | | | | ✅ | |
+| validate_bitrise_yml | ✅ | | | | | | | | | ✅ | |
 | list_builds | | ✅ | | | | | | | | ✅ | |
 | trigger_bitrise_build | | ✅ | | | | | | | | | |
 | get_build | | ✅ | | | | | | | | ✅ | |
