@@ -38,6 +38,7 @@ func NewBelt() *Belt {
 		apps.ListBranches,
 		apps.RegisterSSHKey,
 		apps.RegisterWebhook,
+		apps.ValidateBitriseYML,
 
 		// Builds
 		builds.Trigger,
