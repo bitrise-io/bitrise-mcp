@@ -11,10 +11,13 @@ import (
 var ValidateBitriseYML = bitrise.Tool{
 	APIGroups: []string{"apps", "read-only"},
 	Definition: mcp.NewTool("validate_bitrise_yml",
-		mcp.WithDescription("Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid."),
+		mcp.WithDescription("Validate a Bitrise YML config file. Use this tool to verify any changes made in bitrise.yml."),
 		mcp.WithString("bitrise_yml",
 			mcp.Description("The Bitrise YML config file content to be validated. It must be a string."),
 			mcp.Required(),
+		),
+		mcp.WithString("app_slug",
+			mcp.Description("Slug of a Bitrise app (as returned by the list_apps tool). Specifying this value allows for validating the YML against workspace-specific settings like available stacks, machine types, license pools etc."),
 		),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
