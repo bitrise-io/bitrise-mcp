@@ -85,9 +85,14 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
+12. `validate_bitrise_yml`
+    - Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid.
+    - Arguments:
+      - `bitrise_yml`: The Bitrise YML config file content to be validated. It must be a string.
+
 ### Builds
 
-12. `list_builds`
+13. `list_builds`
     - List all the builds of a specified Bitrise app or all accessible builds
     - Arguments:
       - `app_slug` (optional): Identifier of the Bitrise app
@@ -98,7 +103,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `next` (optional): Slug of the first build in the response
       - `limit` (optional): Max number of elements per page (default: 50)
 
-13. `trigger_bitrise_build`
+14. `trigger_bitrise_build`
     - Trigger a new build/pipeline for a specified Bitrise app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -110,39 +115,39 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `commit_hash` (optional): The commit hash for the build
       - `environments` (optional): Custom environment variables for the build (array of objects with `mapped_to`, `value`, and optional `is_expand` properties)
 
-14. `get_build`
+15. `get_build`
     - Get a specific build of a given app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
 
-15. `abort_build`
+16. `abort_build`
     - Abort a specific build
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
       - `reason` (optional): Reason for aborting the build
 
-16. `get_build_log`
+17. `get_build_log`
     - Get the build log of a specified build of a Bitrise app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the Bitrise build
 
-17. `get_build_bitrise_yml`
+18. `get_build_bitrise_yml`
     - Get the bitrise.yml of a build
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
 
-18. `list_build_workflows`
+19. `list_build_workflows`
     - List the workflows of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
 ### Artifacts
 
-19. `list_artifacts`
+20. `list_artifacts`
     - Get a list of all build artifacts
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -150,21 +155,21 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `next` (optional): Slug of the first artifact in the response
       - `limit` (optional): Max number of elements per page (default: 50)
 
-20. `get_artifact`
+21. `get_artifact`
     - Get a specific build artifact
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
       - `artifact_slug`: Identifier of the artifact
 
-21. `delete_artifact`
+22. `delete_artifact`
     - Delete a build artifact
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
       - `artifact_slug`: Identifier of the artifact
 
-22. `update_artifact`
+23. `update_artifact`
     - Update a build artifact
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -174,18 +179,18 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Outgoing Webhooks
 
-23. `list_outgoing_webhooks`
+24. `list_outgoing_webhooks`
     - List the outgoing webhooks of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-24. `delete_outgoing_webhook`
+25. `delete_outgoing_webhook`
     - Delete the outgoing webhook of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `webhook_slug`: Identifier of the webhook
 
-25. `update_outgoing_webhook`
+26. `update_outgoing_webhook`
     - Update an outgoing webhook for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -194,7 +199,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `url`: URL of the webhook
       - `headers` (optional): Headers to be sent with the webhook
 
-26. `create_outgoing_webhook`
+27. `create_outgoing_webhook`
     - Create an outgoing webhook for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -204,23 +209,23 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Cache Items
 
-27. `list_cache_items`
+28. `list_cache_items`
     - List the key-value cache items belonging to an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-28. `delete_all_cache_items`
+29. `delete_all_cache_items`
     - Delete all key-value cache items belonging to an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-29. `delete_cache_item`
+30. `delete_cache_item`
     - Delete a key-value cache item
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `cache_item_id`: Identifier of the cache item
 
-30. `get_cache_item_download_url`
+31. `get_cache_item_download_url`
     - Get the download URL of a key-value cache item
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -228,25 +233,25 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Pipelines
 
-31. `list_pipelines`
+32. `list_pipelines`
     - List all pipelines and standalone builds of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-32. `get_pipeline`
+33. `get_pipeline`
     - Get a pipeline of a given app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `pipeline_id`: Identifier of the pipeline
 
-33. `abort_pipeline`
+34. `abort_pipeline`
     - Abort a pipeline
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `pipeline_id`: Identifier of the pipeline
       - `reason` (optional): Reason for aborting the pipeline
 
-34. `rebuild_pipeline`
+35. `rebuild_pipeline`
     - Rebuild a pipeline
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -254,13 +259,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Group Roles
 
-35. `list_group_roles`
+36. `list_group_roles`
     - List group roles for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `role_name`: Name of the role
 
-36. `replace_group_roles`
+37. `replace_group_roles`
     - Replace group roles for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -269,37 +274,37 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Workspaces
 
-37. `list_workspaces`
+38. `list_workspaces`
     - List the workspaces the user has access to
 
-38. `get_workspace`
+39. `get_workspace`
     - Get details for one workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
 
-39. `get_workspace_groups`
+40. `get_workspace_groups`
     - Get the groups in a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
 
-40. `create_workspace_group`
+41. `create_workspace_group`
     - Create a group in a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
       - `group_name`: Name of the group
 
-41. `get_workspace_members`
+42. `get_workspace_members`
     - Get the members in a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
 
-42. `invite_member_to_workspace`
+43. `invite_member_to_workspace`
     - Invite a member to a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
       - `email`: Email address of the user
 
-43. `add_member_to_group`
+44. `add_member_to_group`
     - Add a member to a group
     - Arguments:
       - `group_slug`: Slug of the group
@@ -307,12 +312,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Account
 
-44. `me`
+45. `me`
     - Get info from the currently authenticated user account
 
 ### Release Management
 
-45. `create_connected_app`
+46. `create_connected_app`
    - Add a new Release Management connected app to Bitrise.
    - Arguments:
      - `platform`: The mobile platform for the connected app (ios/android).
@@ -324,7 +329,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `store_app_name`: (Optional) App name for manual connections.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
 
-46. `list_connected_apps`
+47. `list_connected_apps`
    - List Release Management connected apps available for the authenticated account within a workspace.
    - Arguments:
      - `workspace_slug`: Identifier of the Bitrise workspace.
@@ -334,12 +339,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `project_id`: (Optional) Filter for a specific Bitrise Project.
      - `search`: (Optional) Search by bundle ID, package name, or app title.
 
-47. `get_connected_app`
+48. `get_connected_app`
    - Gives back a Release Management connected app for the authenticated account.
    - Arguments:
      - `id`: Identifier of the Release Management connected app.
 
-48. `update_connected_app`
+49. `update_connected_app`
    - Updates a connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier for your connected app.
@@ -347,7 +352,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `connect_to_store`: (Optional) Check validity against the App Store or Google Play.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
 
-49. `list_installable_artifacts`
+50. `list_installable_artifacts`
    - List Release Management installable artifacts of a connected app.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -365,7 +370,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `version`: (Optional) Filter for a specific version.
      - `workflow`: (Optional) Filter for a specific Bitrise CI workflow.
 
-50. `generate_installable_artifact_upload_url`
+51. `generate_installable_artifact_upload_url`
    - Generates a signed upload URL for an installable artifact to be uploaded to Bitrise.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -376,27 +381,27 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `with_public_page`: (Optional) Enable public install page.
      - `workflow`: (Optional) Name of the CI workflow.
 
-51. `get_installable_artifact_upload_and_processing_status`
+52. `get_installable_artifact_upload_and_processing_status`
    - Gets the processing and upload status of an installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: The uuidv4 identifier for the installable artifact.
 
-52. `set_installable_artifact_public_install_page`
+53. `set_installable_artifact_public_install_page`
    - Changes whether public install page should be available for the installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: The uuidv4 identifier for the installable artifact.
      - `with_public_page`: Boolean flag for enabling/disabling public install page.
 
-53. `list_build_distribution_versions`
+54. `list_build_distribution_versions`
    - Lists Build Distribution versions available for testers.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of versions per page.
      - `page`: (Optional) Page number to return.
 
-54. `list_build_distribution_version_test_builds`
+55. `list_build_distribution_version_test_builds`
    - Gives back a list of test builds for the given build distribution version.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -404,28 +409,28 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `items_per_page`: (Optional) Maximum number of test builds per page.
      - `page`: (Optional) Page number to return.
 
-55. `create_tester_group`
+56. `create_tester_group`
    - Creates a tester group for a Release Management connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `name`: The name for the new tester group.
      - `auto_notify`: (Optional) Indicates automatic notifications for the group.
 
-56. `notify_tester_group`
+57. `notify_tester_group`
    - Notifies a tester group about a new test build.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
      - `test_build_id`: The unique identifier of the test build.
 
-57. `add_testers_to_tester_group`
+58. `add_testers_to_tester_group`
    - Adds testers to a tester group of a connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
      - `user_slugs`: The list of users identified by slugs to be added.
 
-58. `update_tester_group`
+59. `update_tester_group`
    - Updates the given tester group settings.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -433,20 +438,20 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `auto_notify`: (Optional) Setting for automatic email notifications.
      - `name`: (Optional) The new name for the tester group.
 
-59. `list_tester_groups`
+60. `list_tester_groups`
    - Gives back a list of tester groups related to a specific connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of tester groups per page.
      - `page`: (Optional) Page number to return.
 
-60. `get_tester_group`
+61. `get_tester_group`
    - Gives back the details of the selected tester group.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
 
-61. `get_potential_testers`
+62. `get_potential_testers`
    - Gets a list of potential testers who can be added to a specific tester group.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -455,7 +460,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `page`: (Optional) Page number to return.
      - `search`: (Optional) Search for testers by email or username.
 
-62. `get_testers`
+63. `get_testers`
    - Gets a list of testers that have been associated with a tester group related to a specific connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -480,6 +485,7 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | list_branches | ✅ | | | | | | | | | ✅ | |
 | register_ssh_key | ✅ | | | | | | | | | | |
 | register_webhook | ✅ | | | | | | | | | | |
+| validate_bitrise_yml | ✅ | | | | | | | | | ✅ | |
 | list_builds | | ✅ | | | | | | | | ✅ | |
 | trigger_bitrise_build | | ✅ | | | | | | | | | |
 | get_build | | ✅ | | | | | | | | ✅ | |
