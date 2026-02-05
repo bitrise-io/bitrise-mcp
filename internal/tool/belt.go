@@ -8,6 +8,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/artifacts"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/builds"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/cache"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/configuration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
@@ -38,7 +39,6 @@ func NewBelt() *Belt {
 		apps.ListBranches,
 		apps.RegisterSSHKey,
 		apps.RegisterWebhook,
-		apps.ValidateBitriseYML,
 
 		// Builds
 		builds.Trigger,
@@ -106,6 +106,9 @@ func NewBelt() *Belt {
 		releasemanagement.GetTesterGroup,
 		releasemanagement.GetPotentialTesters,
 		releasemanagement.GetTesters,
+
+		// Configuration
+		configuration.ValidateBitriseYML,
 	}
 	belt := &Belt{tools: make(map[string]bitrise.Tool)}
 	for _, tool := range toolList {

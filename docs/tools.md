@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -85,14 +85,9 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-12. `validate_bitrise_yml`
-    - Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid.
-    - Arguments:
-      - `bitrise_yml`: The Bitrise YML config file content to be validated. It must be a string.
-
 ### Builds
 
-13. `list_builds`
+12. `list_builds`
     - List all the builds of a specified Bitrise app or all accessible builds
     - Arguments:
       - `app_slug` (optional): Identifier of the Bitrise app
@@ -103,7 +98,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `next` (optional): Slug of the first build in the response
       - `limit` (optional): Max number of elements per page (default: 50)
 
-14. `trigger_bitrise_build`
+13. `trigger_bitrise_build`
     - Trigger a new build/pipeline for a specified Bitrise app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -115,39 +110,39 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `commit_hash` (optional): The commit hash for the build
       - `environments` (optional): Custom environment variables for the build (array of objects with `mapped_to`, `value`, and optional `is_expand` properties)
 
-15. `get_build`
+14. `get_build`
     - Get a specific build of a given app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
 
-16. `abort_build`
+15. `abort_build`
     - Abort a specific build
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
       - `reason` (optional): Reason for aborting the build
 
-17. `get_build_log`
+16. `get_build_log`
     - Get the build log of a specified build of a Bitrise app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the Bitrise build
 
-18. `get_build_bitrise_yml`
+17. `get_build_bitrise_yml`
     - Get the bitrise.yml of a build
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
 
-19. `list_build_workflows`
+18. `list_build_workflows`
     - List the workflows of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
 ### Artifacts
 
-20. `list_artifacts`
+19. `list_artifacts`
     - Get a list of all build artifacts
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -155,21 +150,21 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `next` (optional): Slug of the first artifact in the response
       - `limit` (optional): Max number of elements per page (default: 50)
 
-21. `get_artifact`
+20. `get_artifact`
     - Get a specific build artifact
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
       - `artifact_slug`: Identifier of the artifact
 
-22. `delete_artifact`
+21. `delete_artifact`
     - Delete a build artifact
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
       - `artifact_slug`: Identifier of the artifact
 
-23. `update_artifact`
+22. `update_artifact`
     - Update a build artifact
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -179,18 +174,18 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Outgoing Webhooks
 
-24. `list_outgoing_webhooks`
+23. `list_outgoing_webhooks`
     - List the outgoing webhooks of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-25. `delete_outgoing_webhook`
+24. `delete_outgoing_webhook`
     - Delete the outgoing webhook of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `webhook_slug`: Identifier of the webhook
 
-26. `update_outgoing_webhook`
+25. `update_outgoing_webhook`
     - Update an outgoing webhook for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -199,7 +194,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `url`: URL of the webhook
       - `headers` (optional): Headers to be sent with the webhook
 
-27. `create_outgoing_webhook`
+26. `create_outgoing_webhook`
     - Create an outgoing webhook for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -209,23 +204,23 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Cache Items
 
-28. `list_cache_items`
+27. `list_cache_items`
     - List the key-value cache items belonging to an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-29. `delete_all_cache_items`
+28. `delete_all_cache_items`
     - Delete all key-value cache items belonging to an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-30. `delete_cache_item`
+29. `delete_cache_item`
     - Delete a key-value cache item
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `cache_item_id`: Identifier of the cache item
 
-31. `get_cache_item_download_url`
+30. `get_cache_item_download_url`
     - Get the download URL of a key-value cache item
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -233,25 +228,25 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Pipelines
 
-32. `list_pipelines`
+31. `list_pipelines`
     - List all pipelines and standalone builds of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
 
-33. `get_pipeline`
+32. `get_pipeline`
     - Get a pipeline of a given app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `pipeline_id`: Identifier of the pipeline
 
-34. `abort_pipeline`
+33. `abort_pipeline`
     - Abort a pipeline
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `pipeline_id`: Identifier of the pipeline
       - `reason` (optional): Reason for aborting the pipeline
 
-35. `rebuild_pipeline`
+34. `rebuild_pipeline`
     - Rebuild a pipeline
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -259,13 +254,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Group Roles
 
-36. `list_group_roles`
+35. `list_group_roles`
     - List group roles for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `role_name`: Name of the role
 
-37. `replace_group_roles`
+36. `replace_group_roles`
     - Replace group roles for an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
@@ -274,37 +269,37 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Workspaces
 
-38. `list_workspaces`
+37. `list_workspaces`
     - List the workspaces the user has access to
 
-39. `get_workspace`
+38. `get_workspace`
     - Get details for one workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
 
-40. `get_workspace_groups`
+39. `get_workspace_groups`
     - Get the groups in a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
 
-41. `create_workspace_group`
+40. `create_workspace_group`
     - Create a group in a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
       - `group_name`: Name of the group
 
-42. `get_workspace_members`
+41. `get_workspace_members`
     - Get the members in a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
 
-43. `invite_member_to_workspace`
+42. `invite_member_to_workspace`
     - Invite a member to a workspace
     - Arguments:
       - `workspace_slug`: Slug of the Bitrise workspace
       - `email`: Email address of the user
 
-44. `add_member_to_group`
+43. `add_member_to_group`
     - Add a member to a group
     - Arguments:
       - `group_slug`: Slug of the group
@@ -312,12 +307,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Account
 
-45. `me`
+44. `me`
     - Get info from the currently authenticated user account
 
 ### Release Management
 
-46. `create_connected_app`
+45. `create_connected_app`
    - Add a new Release Management connected app to Bitrise.
    - Arguments:
      - `platform`: The mobile platform for the connected app (ios/android).
@@ -329,7 +324,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `store_app_name`: (Optional) App name for manual connections.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
 
-47. `list_connected_apps`
+46. `list_connected_apps`
    - List Release Management connected apps available for the authenticated account within a workspace.
    - Arguments:
      - `workspace_slug`: Identifier of the Bitrise workspace.
@@ -339,12 +334,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `project_id`: (Optional) Filter for a specific Bitrise Project.
      - `search`: (Optional) Search by bundle ID, package name, or app title.
 
-48. `get_connected_app`
+47. `get_connected_app`
    - Gives back a Release Management connected app for the authenticated account.
    - Arguments:
      - `id`: Identifier of the Release Management connected app.
 
-49. `update_connected_app`
+48. `update_connected_app`
    - Updates a connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier for your connected app.
@@ -352,7 +347,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `connect_to_store`: (Optional) Check validity against the App Store or Google Play.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
 
-50. `list_installable_artifacts`
+49. `list_installable_artifacts`
    - List Release Management installable artifacts of a connected app.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -370,7 +365,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `version`: (Optional) Filter for a specific version.
      - `workflow`: (Optional) Filter for a specific Bitrise CI workflow.
 
-51. `generate_installable_artifact_upload_url`
+50. `generate_installable_artifact_upload_url`
    - Generates a signed upload URL for an installable artifact to be uploaded to Bitrise.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -381,27 +376,27 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `with_public_page`: (Optional) Enable public install page.
      - `workflow`: (Optional) Name of the CI workflow.
 
-52. `get_installable_artifact_upload_and_processing_status`
+51. `get_installable_artifact_upload_and_processing_status`
    - Gets the processing and upload status of an installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: The uuidv4 identifier for the installable artifact.
 
-53. `set_installable_artifact_public_install_page`
+52. `set_installable_artifact_public_install_page`
    - Changes whether public install page should be available for the installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: The uuidv4 identifier for the installable artifact.
      - `with_public_page`: Boolean flag for enabling/disabling public install page.
 
-54. `list_build_distribution_versions`
+53. `list_build_distribution_versions`
    - Lists Build Distribution versions available for testers.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of versions per page.
      - `page`: (Optional) Page number to return.
 
-55. `list_build_distribution_version_test_builds`
+54. `list_build_distribution_version_test_builds`
    - Gives back a list of test builds for the given build distribution version.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -409,28 +404,28 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `items_per_page`: (Optional) Maximum number of test builds per page.
      - `page`: (Optional) Page number to return.
 
-56. `create_tester_group`
+55. `create_tester_group`
    - Creates a tester group for a Release Management connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `name`: The name for the new tester group.
      - `auto_notify`: (Optional) Indicates automatic notifications for the group.
 
-57. `notify_tester_group`
+56. `notify_tester_group`
    - Notifies a tester group about a new test build.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
      - `test_build_id`: The unique identifier of the test build.
 
-58. `add_testers_to_tester_group`
+57. `add_testers_to_tester_group`
    - Adds testers to a tester group of a connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
      - `user_slugs`: The list of users identified by slugs to be added.
 
-59. `update_tester_group`
+58. `update_tester_group`
    - Updates the given tester group settings.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -438,20 +433,20 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `auto_notify`: (Optional) Setting for automatic email notifications.
      - `name`: (Optional) The new name for the tester group.
 
-60. `list_tester_groups`
+59. `list_tester_groups`
    - Gives back a list of tester groups related to a specific connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of tester groups per page.
      - `page`: (Optional) Page number to return.
 
-61. `get_tester_group`
+60. `get_tester_group`
    - Gives back the details of the selected tester group.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
 
-62. `get_potential_testers`
+61. `get_potential_testers`
    - Gets a list of potential testers who can be added to a specific tester group.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -460,7 +455,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `page`: (Optional) Page number to return.
      - `search`: (Optional) Search for testers by email or username.
 
-63. `get_testers`
+62. `get_testers`
    - Gets a list of testers that have been associated with a tester group related to a specific connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -468,72 +463,80 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `items_per_page`: (Optional) Maximum number of testers per page (default: 10).
      - `page`: (Optional) Page number to return (default: 1).
 
+### Configuration
+
+63. `validate_bitrise_yml`
+    - Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid.
+    - Arguments:
+      - `bitrise_yml`: The Bitrise YML config file content to be validated. It must be a string.
+      - `app_slug` (optional): Slug of a Bitrise app. Specifying this value allows for validating the YML against workspace-specific settings like available stacks, machine types, license pools etc.
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management |
-|------|------|--------|------------|----------|----------------|-------------|-------------|-----------|---------|-----------|-------------------|
-| list_apps | ✅ | | | | | | | | | ✅ | |
-| register_app | ✅ | | | | | | | | | | |
-| finish_bitrise_app | ✅ | | | | | | | | | | |
-| get_app | ✅ | | | | | | | | | ✅ | |
-| delete_app | ✅ | | | | | | | | | | |
-| update_app | ✅ | | | | | | | | | | |
-| get_bitrise_yml | ✅ | | | | | | | | | ✅ | |
-| update_bitrise_yml | ✅ | | | | | | | | | | |
-| list_branches | ✅ | | | | | | | | | ✅ | |
-| register_ssh_key | ✅ | | | | | | | | | | |
-| register_webhook | ✅ | | | | | | | | | | |
-| validate_bitrise_yml | ✅ | | | | | | | | | ✅ | |
-| list_builds | | ✅ | | | | | | | | ✅ | |
-| trigger_bitrise_build | | ✅ | | | | | | | | | |
-| get_build | | ✅ | | | | | | | | ✅ | |
-| abort_build | | ✅ | | | | | | | | | |
-| get_build_log | | ✅ | | | | | | | | ✅ | |
-| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | |
-| list_build_workflows | | ✅ | | | | | | | | ✅ | |
-| list_artifacts | | | | | ✅ | | | | | ✅ | |
-| get_artifact | | | | | ✅ | | | | | ✅ | |
-| delete_artifact | | | | | ✅ | | | | | | |
-| update_artifact | | | | | ✅ | | | | | | |
-| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | |
-| delete_outgoing_webhook | | | | ✅ | | | | | | | |
-| update_outgoing_webhook | | | | ✅ | | | | | | | |
-| create_outgoing_webhook | | | | ✅ | | | | | | | |
-| list_cache_items | | | | | | | ✅ | | | ✅ | |
-| delete_all_cache_items | | | | | | | ✅ | | | | |
-| delete_cache_item | | | | | | | ✅ | | | | |
-| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | |
-| list_pipelines | | | | | | | | ✅ | | ✅ | |
-| get_pipeline | | | | | | | | ✅ | | ✅ | |
-| abort_pipeline | | | | | | | | ✅ | | | |
-| rebuild_pipeline | | | | | | | | ✅ | | | |
-| list_group_roles | | | | | | ✅ | | | | ✅ | |
-| replace_group_roles | | | | | | ✅ | | | | | |
-| list_workspaces | | | ✅ | | | | | | | ✅ | |
-| get_workspace | | | ✅ | | | | | | | ✅ | |
-| get_workspace_groups | | | ✅ | | | | | | | ✅ | |
-| create_workspace_group | | | ✅ | | | | | | | | |
-| get_workspace_members | | | ✅ | | | | | | | ✅ | |
-| invite_member_to_workspace | | | ✅ | | | | | | | | |
-| add_member_to_group | | | ✅ | | | | | | | | |
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|
+| list_apps | ✅ | | | | | | | | | ✅ | | |
+| register_app | ✅ | | | | | | | | | | | |
+| finish_bitrise_app | ✅ | | | | | | | | | | | |
+| get_app | ✅ | | | | | | | | | ✅ | | |
+| delete_app | ✅ | | | | | | | | | | | |
+| update_app | ✅ | | | | | | | | | | | |
+| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | |
+| update_bitrise_yml | ✅ | | | | | | | | | | | |
+| list_branches | ✅ | | | | | | | | | ✅ | | |
+| register_ssh_key | ✅ | | | | | | | | | | | |
+| register_webhook | ✅ | | | | | | | | | | | |
+| list_builds | | ✅ | | | | | | | | ✅ | | |
+| trigger_bitrise_build | | ✅ | | | | | | | | | | |
+| get_build | | ✅ | | | | | | | | ✅ | | |
+| abort_build | | ✅ | | | | | | | | | | |
+| get_build_log | | ✅ | | | | | | | | ✅ | | |
+| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | |
+| list_build_workflows | | ✅ | | | | | | | | ✅ | | |
+| list_artifacts | | | | | ✅ | | | | | ✅ | | |
+| get_artifact | | | | | ✅ | | | | | ✅ | | |
+| delete_artifact | | | | | ✅ | | | | | | | |
+| update_artifact | | | | | ✅ | | | | | | | |
+| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | |
+| delete_outgoing_webhook | | | | ✅ | | | | | | | | |
+| update_outgoing_webhook | | | | ✅ | | | | | | | | |
+| create_outgoing_webhook | | | | ✅ | | | | | | | | |
+| list_cache_items | | | | | | | ✅ | | | ✅ | | |
+| delete_all_cache_items | | | | | | | ✅ | | | | | |
+| delete_cache_item | | | | | | | ✅ | | | | | |
+| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | |
+| list_pipelines | | | | | | | | ✅ | | ✅ | | |
+| get_pipeline | | | | | | | | ✅ | | ✅ | | |
+| abort_pipeline | | | | | | | | ✅ | | | | |
+| rebuild_pipeline | | | | | | | | ✅ | | | | |
+| list_group_roles | | | | | | ✅ | | | | ✅ | | |
+| replace_group_roles | | | | | | ✅ | | | | | | |
+| list_workspaces | | | ✅ | | | | | | | ✅ | | |
+| get_workspace | | | ✅ | | | | | | | ✅ | | |
+| get_workspace_groups | | | ✅ | | | | | | | ✅ | | |
+| create_workspace_group | | | ✅ | | | | | | | | | |
+| get_workspace_members | | | ✅ | | | | | | | ✅ | | |
+| invite_member_to_workspace | | | ✅ | | | | | | | | | |
+| add_member_to_group | | | ✅ | | | | | | | | | |
 | me | | | | | | | | | ✅ | ✅ | |
-| create_connected_app | | | | | | | | | | | ✅ |
-| list_connected_apps | | | | | | | | | | ✅ | ✅ |
-| get_connected_app | | | | | | | | | | ✅ | ✅ |
-| update_connected_app | | | | | | | | | | | ✅ |
-| list_installable_artifacts | | | | | | | | | | ✅ | ✅ |
-| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ |
-| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ |
-| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ |
-| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ |
-| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ |
-| create_tester_group | | | | | | | | | | | ✅ |
-| notify_tester_group | | | | | | | | | | | ✅ |
-| add_testers_to_tester_group | | | | | | | | | | | ✅ |
-| update_tester_group | | | | | | | | | | | ✅ |
-| list_tester_groups | | | | | | | | | | ✅ | ✅ |
-| get_tester_group | | | | | | | | | | ✅ | ✅ |
-| get_potential_testers | | | | | | | | | | ✅ | ✅ |
-| get_testers | | | | | | | | | | ✅ | ✅ |
+| create_connected_app | | | | | | | | | | | ✅ | |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ | |
+| get_connected_app | | | | | | | | | | ✅ | ✅ | |
+| update_connected_app | | | | | | | | | | | ✅ | |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | |
+| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | |
+| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ | |
+| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | |
+| create_tester_group | | | | | | | | | | | ✅ | |
+| notify_tester_group | | | | | | | | | | | ✅ | |
+| add_testers_to_tester_group | | | | | | | | | | | ✅ | |
+| update_tester_group | | | | | | | | | | | ✅ | |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ | |
+| get_tester_group | | | | | | | | | | ✅ | ✅ | |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ | |
+| get_testers | | | | | | | | | | ✅ | ✅ | |
+| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ |
