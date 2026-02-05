@@ -22,7 +22,7 @@ type CallAPIParams struct {
 	Method  string
 	BaseURL string
 	Path    string
-	Params  map[string]string
+	Params  map[string]any
 	Body    any
 }
 
@@ -54,7 +54,16 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	if p.Params != nil {
 		q := req.URL.Query()
 		for key, value := range p.Params {
-			q.Add(key, value)
+			switch v := value.(type) {
+			case string:
+				q.Add(key, v)
+			case []string:
+				for _, item := range v {
+					q.Add(key, item)
+				}
+			default:
+				q.Add(key, fmt.Sprintf("%v", v))
+			}
 		}
 		req.URL.RawQuery = q.Encode()
 	}

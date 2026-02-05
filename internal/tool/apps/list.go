@@ -31,7 +31,7 @@ var List = bitrise.Tool{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    "/apps",
-			Params: map[string]string{
+			Params: map[string]any{
 				"sort_by": request.GetString("sort_by", "last_build_at"),
 				"next":    request.GetString("next", ""),
 				"limit":   strconv.Itoa(request.GetInt("limit", 50)),

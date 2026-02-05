@@ -477,6 +477,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `bitrise_yml`: The Bitrise YML config file content to be validated. It must be a string.
       - `app_slug` (optional): Slug of a Bitrise app. Specifying this value allows for validating the YML against workspace-specific settings like available stacks, machine types, license pools etc.
 
+65. `step_search`
+    - Find steps for building workflows or step bundles in a Bitrise YML config file. Finds steps based on name, description, tags or maintainers.
+    - Arguments:
+      - `query`: The phrase to search steps for like `clone`, `npm`, `deploy` etc.
+      - `categories` (optional): Categories to filter steps. Available values: `build`, `code-sign`, `test`, `deploy`, `notification`, `access-control`, `artifact-info`, `installer`, `dependency`, `utility`
+      - `maintainers` (optional): Filter steps by maintainers. Available values: `bitrise`, `verified`, `community`
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
@@ -547,3 +554,4 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | get_potential_testers | | | | | | | | | | ✅ | ✅ | |
 | get_testers | | | | | | | | | | ✅ | ✅ | |
 | validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ |
+| step_search | | | | | | | | | | ✅ | | ✅ |

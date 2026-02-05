@@ -41,7 +41,7 @@ var ListBuildDistributionVersionTestBuilds = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{
+		params := map[string]any{
 			"version": version,
 		}
 		if v := request.GetInt("items_per_page", 10); v != 10 {

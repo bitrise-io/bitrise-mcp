@@ -33,7 +33,7 @@ var ListBuildDistributionVersions = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{}
+		params := map[string]any{}
 		if v := request.GetInt("items_per_page", 10); v != 10 {
 			params["items_per_page"] = strconv.Itoa(v)
 		}

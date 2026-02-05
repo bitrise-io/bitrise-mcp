@@ -42,7 +42,7 @@ var ListConnectedApps = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{
+		params := map[string]any{
 			"workspace_slug": workspaceSlug,
 		}
 		if v := request.GetString("project_id", ""); v != "" {

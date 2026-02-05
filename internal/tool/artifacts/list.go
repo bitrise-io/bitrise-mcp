@@ -39,7 +39,7 @@ var List = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{}
+		params := map[string]any{}
 		if v := request.GetString("next", ""); v != "" {
 			params["next"] = v
 		}

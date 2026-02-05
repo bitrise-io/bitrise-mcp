@@ -69,7 +69,7 @@ var ListInstallableArtifacts = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{}
+		params := map[string]any{}
 		if v := request.GetString("after_date", ""); v != "" {
 			params["after_date"] = v
 		}

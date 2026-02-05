@@ -109,6 +109,7 @@ func NewBelt() *Belt {
 
 		// Configuration
 		configuration.ValidateBitriseYML,
+		configuration.StepSearch,
 	}
 	belt := &Belt{tools: make(map[string]bitrise.Tool)}
 	for _, tool := range toolList {

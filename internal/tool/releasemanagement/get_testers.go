@@ -36,7 +36,7 @@ var GetTesters = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{}
+		params := map[string]any{}
 		if v := request.GetString("tester_group_id", ""); v != "" {
 			params["tester_group_id"] = v
 		}
