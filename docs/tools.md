@@ -484,6 +484,11 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `categories` (optional): Categories to filter steps. Available values: `build`, `code-sign`, `test`, `deploy`, `notification`, `access-control`, `artifact-info`, `installer`, `dependency`, `utility`
       - `maintainers` (optional): Filter steps by maintainers. Available values: `bitrise`, `verified`, `community`
 
+66. `step_inputs`
+    - List inputs of a step with their defaults, allowed values etc.
+    - Arguments:
+      - `cvs`: Step reference formatted as `step_lib_source::step_id@version`. Only `step_id` is required, `version` should be added when known, `step_lib_source` is only necessary for custom step sources.
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
@@ -555,3 +560,4 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | get_testers | | | | | | | | | | ✅ | ✅ | |
 | validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ |
 | step_search | | | | | | | | | | ✅ | | ✅ |
+| step_inputs | | | | | | | | | | ✅ | | ✅ |
