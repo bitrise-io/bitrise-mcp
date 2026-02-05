@@ -1,4 +1,4 @@
-package apps
+package configuration
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 var ValidateBitriseYML = bitrise.Tool{
-	APIGroups: []string{"apps", "read-only"},
+	APIGroups: []string{"configuration", "read-only"},
 	Definition: mcp.NewTool("validate_bitrise_yml",
 		mcp.WithDescription("Validate a Bitrise YML config file. Use this tool to verify any changes made in bitrise.yml."),
 		mcp.WithString("bitrise_yml",

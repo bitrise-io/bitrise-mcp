@@ -58,7 +58,7 @@ var GenerateInstallableArtifactUploadURL = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]string{
+		params := map[string]any{
 			"file_name":       fileName,
 			"file_size_bytes": fileSizeBytes,
 		}

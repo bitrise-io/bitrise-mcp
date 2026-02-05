@@ -40,7 +40,7 @@ var List = bitrise.Tool{
 		),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		params := map[string]string{}
+		params := map[string]any{}
 		if v := request.GetString("sort_by", ""); v != "" {
 			params["sort_by"] = v
 		}
