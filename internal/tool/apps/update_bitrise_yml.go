@@ -22,7 +22,7 @@ var UpdateBitriseYML = bitrise.Tool{
 			mcp.Required(),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
