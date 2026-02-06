@@ -25,9 +25,9 @@ var Abort = bitrise.Tool{
 			mcp.Description("Reason for aborting the build"),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
-		mcp.WithIdempotentHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")
