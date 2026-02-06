@@ -17,6 +17,10 @@ var GetWorkspaceGroups = bitrise.Tool{
 			mcp.Description("Slug of the Bitrise workspace"),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		workspaceSlug, err := request.RequireString("workspace_slug")

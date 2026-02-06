@@ -21,6 +21,10 @@ var DeleteOutgoing = bitrise.Tool{
 			mcp.Description("Identifier of the webhook"),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")

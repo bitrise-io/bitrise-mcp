@@ -21,6 +21,10 @@ var InviteMemberToWorkspace = bitrise.Tool{
 			mcp.Description("Email address of the user"),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		workspaceSlug, err := request.RequireString("workspace_slug")

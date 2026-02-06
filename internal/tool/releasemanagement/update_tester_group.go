@@ -28,6 +28,10 @@ var UpdateTesterGroup = bitrise.Tool{
 			mcp.Description("If set to true it indicates the tester group will receive email notifications automatically from now on about new installable builds."),
 			mcp.DefaultBool(false),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		connectedAppID, err := request.RequireString("connected_app_id")

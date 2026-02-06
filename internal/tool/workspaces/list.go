@@ -12,6 +12,10 @@ var List = bitrise.Tool{
 	APIGroups: []string{"workspaces", "read-only"},
 	Definition: mcp.NewTool("list_workspaces",
 		mcp.WithDescription("List the workspaces the user has access to"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

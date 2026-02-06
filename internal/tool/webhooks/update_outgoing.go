@@ -31,6 +31,10 @@ var UpdateOutgoing = bitrise.Tool{
 		mcp.WithObject("headers",
 			mcp.Description("Headers to be sent with the webhook"),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")
