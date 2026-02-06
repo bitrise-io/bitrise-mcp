@@ -9,6 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
+// TODO the params are not in sync with the docs
 var Update = bitrise.Tool{
 	APIGroups: []string{"apps"},
 	Definition: mcp.NewTool("update_app",
@@ -32,6 +33,7 @@ var Update = bitrise.Tool{
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")
