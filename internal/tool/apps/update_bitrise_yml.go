@@ -21,6 +21,9 @@ var UpdateBitriseYML = bitrise.Tool{
 			mcp.Description("The new Bitrise YML config file content to be updated. It must be a string."),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")

@@ -21,6 +21,9 @@ var GetBuildBitriseYML = bitrise.Tool{
 			mcp.Description("Identifier of the build"),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")

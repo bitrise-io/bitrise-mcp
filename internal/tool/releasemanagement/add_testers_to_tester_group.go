@@ -26,6 +26,9 @@ var AddTestersToTesterGroup = bitrise.Tool{
 			mcp.Required(),
 			mcp.WithStringItems(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		connectedAppID, err := request.RequireString("connected_app_id")

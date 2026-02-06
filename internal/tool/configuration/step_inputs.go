@@ -17,6 +17,9 @@ var StepInputs = bitrise.Tool{
 			mcp.Description("Step reference formatted as `step_lib_source::step_id@version`. Only `step_id` is required, `version` should be added when known, `step_lib_source` is only necessary for custom step sources."),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		query, err := request.RequireString("cvs")

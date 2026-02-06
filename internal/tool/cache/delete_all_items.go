@@ -17,6 +17,9 @@ var DeleteAllItems = bitrise.Tool{
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")

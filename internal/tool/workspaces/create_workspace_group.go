@@ -21,6 +21,9 @@ var CreateWorkspaceGroup = bitrise.Tool{
 			mcp.Description("Name of the group"),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		workspaceSlug, err := request.RequireString("workspace_slug")

@@ -25,6 +25,9 @@ var NotifyTesterGroup = bitrise.Tool{
 			mcp.Description("The unique identifier of the test build what will be sent in the notification of the tester group."),
 			mcp.Required(),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		connectedAppID, err := request.RequireString("connected_app_id")

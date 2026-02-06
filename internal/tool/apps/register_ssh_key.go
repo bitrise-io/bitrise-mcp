@@ -28,6 +28,9 @@ var RegisterSSHKey = bitrise.Tool{
 		mcp.WithBoolean("is_register_key_into_provider_service",
 			mcp.Description("Register the key in the provider service"),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")

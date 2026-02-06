@@ -32,6 +32,9 @@ var Register = bitrise.Tool{
 			mcp.Description("Repository provider"),
 			mcp.DefaultString("github"),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		repoURL, err := request.RequireString("repo_url")

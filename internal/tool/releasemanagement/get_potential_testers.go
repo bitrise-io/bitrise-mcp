@@ -33,6 +33,9 @@ var GetPotentialTesters = bitrise.Tool{
 		mcp.WithString("search",
 			mcp.Description("Searches for potential testers based on email or username using a case-insensitive approach."),
 		),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		connectedAppID, err := request.RequireString("connected_app_id")

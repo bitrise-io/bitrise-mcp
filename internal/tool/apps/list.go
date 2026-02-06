@@ -25,6 +25,9 @@ var List = bitrise.Tool{
 			mcp.Description("Max number of elements per page (default: 50)"),
 			mcp.DefaultNumber(50),
 		),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

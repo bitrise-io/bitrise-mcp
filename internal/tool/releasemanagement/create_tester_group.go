@@ -24,6 +24,9 @@ var CreateTesterGroup = bitrise.Tool{
 			mcp.Description("If set to true it indicates that the tester group will receive notifications automatically."),
 			mcp.DefaultBool(false),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		connectedAppID, err := request.RequireString("connected_app_id")

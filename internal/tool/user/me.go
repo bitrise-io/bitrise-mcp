@@ -12,6 +12,9 @@ var Me = bitrise.Tool{
 	APIGroups: []string{"user", "read-only"},
 	Definition: mcp.NewTool("me",
 		mcp.WithDescription("Get user info for the currently authenticated user account"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
