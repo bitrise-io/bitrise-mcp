@@ -34,7 +34,7 @@ var Finish = bitrise.Tool{
 			mcp.DefaultString("other-config"),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(false),
 	),

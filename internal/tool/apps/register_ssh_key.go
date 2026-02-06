@@ -29,7 +29,7 @@ var RegisterSSHKey = bitrise.Tool{
 			mcp.Description("Register the key in the provider service"),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(false),
 	),
