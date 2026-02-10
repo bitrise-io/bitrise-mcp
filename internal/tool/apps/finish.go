@@ -33,6 +33,10 @@ var Finish = bitrise.Tool{
 			mcp.Description("The configuration to use for the app (default is \"other-config\", other valid values are \"default-android-config\", \"default-ios-config\", \"default-macos-config\", etc)."),
 			mcp.DefaultString("other-config"),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		appSlug, err := request.RequireString("app_slug")
