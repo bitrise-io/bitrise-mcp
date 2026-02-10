@@ -19,6 +19,7 @@ var CreateTesterGroup = bitrise.Tool{
 		),
 		mcp.WithString("name",
 			mcp.Description("The name for the new tester group. Must be unique in the scope of the connected app."),
+			mcp.Required(),
 		),
 		mcp.WithBoolean("auto_notify",
 			mcp.Description("If set to true it indicates that the tester group will receive notifications automatically."),
@@ -34,10 +35,13 @@ var CreateTesterGroup = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
+		name, err := request.RequireString("name")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
 
-		body := map[string]any{}
-		if v := request.GetString("name", ""); v != "" {
-			body["name"] = v
+		body := map[string]any{
+			"name": name,
 		}
 		if v := request.GetBool("auto_notify", false); v {
 			body["auto_notify"] = v
