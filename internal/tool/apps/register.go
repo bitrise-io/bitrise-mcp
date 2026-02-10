@@ -24,12 +24,20 @@ var Register = bitrise.Tool{
 			mcp.Description("The organization (aka workspace) the app to add to"),
 			mcp.Required(),
 		),
-		mcp.WithString("project_type",
-			mcp.Description("Type of project (ios, android, etc.)"),
-			mcp.DefaultString("other"),
+		mcp.WithString("title",
+			mcp.Description("The title of the application (if not specified, will use the git repository's name)"),
+		),
+		mcp.WithString("default_branch_name",
+			mcp.Description("The default branch of the repository"),
+			mcp.DefaultString("master"),
+		),
+		mcp.WithBoolean("manual_approval_enabled",
+			mcp.Description("Toggles whether manual approval should be enabled for the app's builds"),
+			mcp.DefaultBool(true),
 		),
 		mcp.WithString("provider",
-			mcp.Description("Repository provider"),
+			mcp.Description("The git provider of the repository"),
+			mcp.Enum("bitbucket", "bitbucket-server", "custom", "github", "github-app", "github-self-hosted", "gitlab", "gitlab-self-hosted"),
 			mcp.DefaultString("github"),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
@@ -51,17 +59,27 @@ var Register = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		body := map[string]any{
+			"repo_url":          repoURL,
+			"is_public":         isPublic,
+			"organization_slug": orgSlug,
+			"provider":          request.GetString("provider", "github"),
+		}
+		if v := request.GetString("title", ""); v != "" {
+			body["title"] = v
+		}
+		if v := request.GetString("default_branch_name", ""); v != "" {
+			body["default_branch_name"] = v
+		}
+		if _, ok := request.GetArguments()["manual_approval_enabled"]; ok {
+			body["manual_approval_enabled"] = request.GetBool("manual_approval_enabled", true)
+		}
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    "/apps/register",
-			Body: map[string]any{
-				"repo_url":          repoURL,
-				"is_public":         isPublic,
-				"organization_slug": orgSlug,
-				"project_type":      request.GetString("project_type", "other"),
-				"provider":          request.GetString("provider", "github"),
-			},
+			Body:    body,
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
