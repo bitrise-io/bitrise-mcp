@@ -26,6 +26,9 @@ var CreateOutgoing = bitrise.Tool{
 			mcp.Description("URL of the webhook"),
 			mcp.Required(),
 		),
+		mcp.WithString("secret",
+			mcp.Description("Secret for webhook signature verification"),
+		),
 		mcp.WithObject("headers",
 			mcp.Description("Headers to be sent with the webhook"),
 		),
@@ -47,10 +50,12 @@ var CreateOutgoing = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
+		secret := request.GetString("secret", "")
 
 		body := map[string]any{
 			"events": events,
 			"url":    url,
+			"secret": secret,
 		}
 		if v, ok := request.GetArguments()["headers"]; ok {
 			body["headers"] = v

@@ -21,6 +21,13 @@ var Rebuild = bitrise.Tool{
 			mcp.Description("Identifier of the pipeline"),
 			mcp.Required(),
 		),
+		mcp.WithBoolean("partial",
+			mcp.Description("Whether to rebuild only unsuccessful workflows and their dependents"),
+			mcp.DefaultBool(false),
+		),
+		mcp.WithString("triggered_by",
+			mcp.Description("Who triggered the rebuild"),
+		),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
@@ -36,11 +43,19 @@ var Rebuild = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		body := map[string]any{}
+		if _, ok := request.GetArguments()["partial"]; ok {
+			body["partial"] = request.GetBool("partial", false)
+		}
+		if v := request.GetString("triggered_by", ""); v != "" {
+			body["triggered_by"] = v
+		}
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    fmt.Sprintf("/apps/%s/pipelines/%s/rebuild", appSlug, pipelineID),
-			Body:    map[string]any{},
+			Body:    body,
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil

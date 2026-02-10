@@ -14,7 +14,7 @@ var List = bitrise.Tool{
 	Definition: mcp.NewTool("list_apps",
 		mcp.WithDescription("List all apps for the currently authenticated user account"),
 		mcp.WithString("sort_by",
-			mcp.Description("Order of the apps: last_build_at (default) or created_at. If set, you should accept the response as sorted"),
+			mcp.Description("Order of the apps. If set, you should accept the response as sorted"),
 			mcp.Enum("last_build_at", "created_at"),
 			mcp.DefaultString("last_build_at"),
 		),
@@ -25,21 +25,37 @@ var List = bitrise.Tool{
 			mcp.Description("Max number of elements per page (default: 50)"),
 			mcp.DefaultNumber(50),
 		),
+		mcp.WithString("title",
+			mcp.Description("Filter apps by title"),
+		),
+		mcp.WithString("project_type",
+			mcp.Description("Filter apps by project type (e.g., 'ios', 'android')"),
+		),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		params := map[string]any{
+			"sort_by": request.GetString("sort_by", "last_build_at"),
+			"limit":   strconv.Itoa(request.GetInt("limit", 50)),
+		}
+		if v := request.GetString("next", ""); v != "" {
+			params["next"] = v
+		}
+		if v := request.GetString("title", ""); v != "" {
+			params["title"] = v
+		}
+		if v := request.GetString("project_type", ""); v != "" {
+			params["project_type"] = v
+		}
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    "/apps",
-			Params: map[string]any{
-				"sort_by": request.GetString("sort_by", "last_build_at"),
-				"next":    request.GetString("next", ""),
-				"limit":   strconv.Itoa(request.GetInt("limit", 50)),
-			},
+			Params:  params,
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
