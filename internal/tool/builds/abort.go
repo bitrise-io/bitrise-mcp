@@ -21,8 +21,20 @@ var Abort = bitrise.Tool{
 			mcp.Description("Identifier of the build"),
 			mcp.Required(),
 		),
-		mcp.WithString("reason",
+		mcp.WithString("abort_reason",
 			mcp.Description("Reason for aborting the build"),
+		),
+		mcp.WithBoolean("abort_with_success",
+			mcp.Description("If set to true, the aborted build will be marked as successful"),
+			mcp.DefaultBool(false),
+		),
+		mcp.WithBoolean("skip_git_status_report",
+			mcp.Description("If set to true, skip sending git status report"),
+			mcp.DefaultBool(false),
+		),
+		mcp.WithBoolean("skip_notifications",
+			mcp.Description("If set to true, skip sending notifications"),
+			mcp.DefaultBool(false),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
@@ -38,10 +50,16 @@ var Abort = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
+		abortReason := request.GetString("abort_reason", "aborted via MCP")
+		abortWithSuccess := request.GetBool("abort_with_success", false)
+		skipGitStatusReport := request.GetBool("skip_git_status_report", false)
+		skipNotifications := request.GetBool("skip_notifications", false)
 
-		body := map[string]any{}
-		if v := request.GetString("reason", ""); v != "" {
-			body["abort_reason"] = v
+		body := map[string]any{
+			"abort_reason":           abortReason,
+			"abort_with_success":     abortWithSuccess,
+			"skip_git_status_report": skipGitStatusReport,
+			"skip_notifications":     skipNotifications,
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

@@ -18,19 +18,41 @@ var Finish = bitrise.Tool{
 			mcp.Required(),
 		),
 		mcp.WithString("project_type",
-			mcp.Description("The type of project (e.g., android, ios, flutter, etc.)."),
+			mcp.Description("The type of project"),
+			mcp.Required(),
+			mcp.Enum("android", "cordova", "fastlane", "flutter", "ios", "ionic", "java", "kotlin-multiplatform", "macos", "node-js", "react-native", "other"),
 			mcp.DefaultString("other"),
 		),
 		mcp.WithString("stack_id",
 			mcp.Description("The stack ID to use for the app."),
 			mcp.DefaultString("linux-docker-android-22.04"),
-		),
-		mcp.WithString("mode",
-			mcp.Description("The mode of setup."),
-			mcp.DefaultString("manual"),
+			mcp.Required(),
 		),
 		mcp.WithString("config",
-			mcp.Description("The configuration to use for the app (default is \"other-config\", other valid values are \"default-android-config\", \"default-ios-config\", \"default-macos-config\", etc)."),
+			mcp.Description("The configuration preset to use for the app."),
+			mcp.Enum(
+				"default-android-config",
+				"default-android-config-kts",
+				"default-cordova-config",
+				"default-fastlane-android-config",
+				"default-fastlane-ios-config",
+				"flutter-config-test-android-2",
+				"flutter-config-test-both-0",
+				"flutter-config-test-ios-1",
+				"default-ionic-config",
+				"default-ios-config",
+				"default-java-gradle-config",
+				"default-java-maven-config",
+				"default-kotlin-multiplatform-config",
+				"default-kotlin-multiplatform-config-ios",
+				"default-kotlin-multiplatform-config-android",
+				"default-kotlin-multiplatform-config-android-ios",
+				"default-macos-config",
+				"default-node-js-npm-config",
+				"default-node-js-yarn-config",
+				"default-react-native-config",
+				"default-react-native-expo-config",
+			),
 			mcp.DefaultString("other-config"),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
@@ -43,17 +65,27 @@ var Finish = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
+		projectType, err := request.RequireString("project_type")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+		stackID, err := request.RequireString("stack_id")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+
+		body := map[string]any{
+			"project_type": projectType,
+			"stack_id":     stackID,
+			"mode":         "manual",
+			"config":       request.GetString("config", "other-config"),
+		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    fmt.Sprintf("/apps/%s/finish", appSlug),
-			Body: map[string]any{
-				"project_type": request.GetString("project_type", "other"),
-				"stack_id":     request.GetString("stack_id", "linux-docker-android-22.04"),
-				"mode":         request.GetString("mode", "manual"),
-				"config":       request.GetString("config", "other-config"),
-			},
+			Body:    body,
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
