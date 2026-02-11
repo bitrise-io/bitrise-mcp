@@ -487,7 +487,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
 66. `step_inputs`
     - List inputs of a step with their defaults, allowed values etc.
     - Arguments:
-      - `cvs`: Step reference formatted as `step_lib_source::step_id@version`. Only `step_id` is required, `version` should be added when known, `step_lib_source` is only necessary for custom step sources.
+      - `step_ref`: Step reference formatted as `step_lib_source::step_id@version`. `step_id` and an exact `version` are required, `step_lib_source` is only necessary for custom step sources.
 
 ## API Groups
 
