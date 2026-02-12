@@ -489,6 +489,11 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `step_ref`: Step reference formatted as `step_lib_source::step_id@version`. `step_id` and an exact `version` are required, `step_lib_source` is only necessary for custom step sources.
 
+67. `list_available_stacks`
+    - List available stacks with their machine configurations and version information. When a workspace_slug is provided, returns stacks available for that workspace including any custom stacks. When omitted, returns globally available stacks.
+    - Arguments:
+      - `workspace_slug` (optional): Slug of the Bitrise workspace. When provided, lists stacks available for that workspace (including custom stacks). When omitted, lists globally available stacks.
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
@@ -561,3 +566,4 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ |
 | step_search | | | | | | | | | | ✅ | | ✅ |
 | step_inputs | | | | | | | | | | ✅ | | ✅ |
+| list_available_stacks | | | | | | | | | | ✅ | | ✅ |
