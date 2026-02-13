@@ -12,7 +12,7 @@ import (
 var UpdateBitriseYML = bitrise.Tool{
 	APIGroups: []string{"apps"},
 	Definition: mcp.NewTool("update_bitrise_yml",
-		mcp.WithDescription("Update the Bitrise YML config file of a specified Bitrise app."),
+		mcp.WithDescription("Update the Bitrise YML config stored on Bitrise. This has no effect if it is stored in the repository."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app (e.g., \"d8db74e2675d54c4\" or \"8eb495d0-f653-4eed-910b-8d6b56cc0ec7\")"),
 			mcp.Required(),
