@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.bitrise-io/bitrise-mcp",
-  "title": "Bitrise CI/CD",
+  "title": "Bitrise",
   "description": "MCP Server for Bitrise, enabling app management, build operations, artifact management, and more.",
-  "version": "2.4.1",
+  "version": "",
   "remotes": [
     {
       "type": "streamable-http",
