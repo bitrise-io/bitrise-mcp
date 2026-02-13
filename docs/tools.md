@@ -62,11 +62,10 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `app_slug`: Identifier of the Bitrise app
 
 8. `update_bitrise_yml`
-   - Update the Bitrise YML config file of a specified Bitrise app. For large files, prefer using `file_path` parameter for better performance.
+   - Update the Bitrise YML config file of a specified Bitrise app
    - Arguments:
      - `app_slug`: Identifier of the Bitrise app
-     - `bitrise_yml_as_json` (optional): The new Bitrise YML config file content. Either this or `file_path` must be provided, but not both.
-     - `file_path` (optional): Path to the Bitrise YML config file to be updated. Either this or `bitrise_yml_as_json` must be provided, but not both. Recommended for large files as it's more performant.
+     - `bitrise_yml_as_json`: The new Bitrise YML config file content
 
 9. `list_branches`
    - List the branches with existing builds of an app's repository
@@ -473,10 +472,9 @@ By default, all API groups are enabled. You can specify which groups to enable u
 ### Configuration
 
 64. `validate_bitrise_yml`
-    - Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid. For large files, prefer using `file_path` parameter for better performance.
+    - Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid.
     - Arguments:
-      - `bitrise_yml` (optional): The Bitrise YML config file content to be validated. It must be a string. Either this or `file_path` must be provided, but not both.
-      - `file_path` (optional): Path to the Bitrise YML config file to be validated. Either this or `bitrise_yml` must be provided, but not both. Recommended for large files as it's more performant.
+      - `bitrise_yml`: The Bitrise YML config file content to be validated. It must be a string.
       - `app_slug` (optional): Slug of a Bitrise app. Specifying this value allows for validating the YML against workspace-specific settings like available stacks, machine types, license pools etc.
 
 65. `step_search`
