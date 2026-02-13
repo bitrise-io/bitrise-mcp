@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.bitrise-io/bitrise-mcp",
+  "title": "Bitrise",
+  "description": "MCP Server for Bitrise, enabling app management, build operations, artifact management, and more.",
+  "version": "",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.bitrise.io/",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bitrise Personal Access Token (format: 'Bearer YOUR_TOKEN'). Get your token from https://app.bitrise.io/me/account/security",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "x-bitrise-enabled-api-groups",
+          "description": "Comma-separated list of API groups to enable (e.g., 'apps,builds,workspaces'). Leave empty to enable all groups.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ],
+  "homepage": "https://github.com/bitrise-io/bitrise-mcp",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/bitrise-io/bitrise-mcp",
+    "source": "github"
+  }
+}
