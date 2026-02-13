@@ -28,7 +28,7 @@ var Register = bitrise.Tool{
 			mcp.Description("The title of the application (if not specified, will use the git repository's name)"),
 		),
 		mcp.WithString("default_branch_name",
-			mcp.Description("The default branch of the repository"),
+			mcp.Description("The default branch of the repository. Verify this branch exists in the remote repository."),
 			mcp.DefaultString("master"),
 		),
 		mcp.WithBoolean("manual_approval_enabled",
