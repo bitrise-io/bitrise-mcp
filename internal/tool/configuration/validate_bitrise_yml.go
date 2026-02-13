@@ -13,7 +13,7 @@ var ValidateBitriseYML = bitrise.Tool{
 	Definition: mcp.NewTool("validate_bitrise_yml",
 		mcp.WithDescription("Validate a Bitrise YML config file. Use this tool to verify any changes made in bitrise.yml."),
 		mcp.WithString("bitrise_yml",
-			mcp.Description("The Bitrise YML config file content to be validated. It must be a string."),
+			mcp.Description("The Bitrise YML config file content to be validated. It must be a string. Important: these configs are large files, so get these by running: cat <filepath> via the Bash tool."),
 			mcp.Required(),
 		),
 		mcp.WithString("app_slug",
