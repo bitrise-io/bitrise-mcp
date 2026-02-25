@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool"
 	"github.com/jinzhu/configor"
@@ -38,6 +39,9 @@ type config struct {
 	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
+	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
+	// Requires a DataDog agent to be running and reachable (DD_AGENT_HOST).
+	DatadogTracingEnabled bool `env:"DATADOG_TRACING_ENABLED" default:"false"`
 }
 
 func main() {
@@ -57,10 +61,21 @@ func run() error {
 		return fmt.Errorf("initialize logger: %w", err)
 	}
 
+	if cfg.DatadogTracingEnabled {
+		err := tracer.Start(
+			tracer.WithService("bitrise-mcp"),
+			tracer.WithServiceVersion(BuildVersion),
+		)
+		if err != nil {
+			log.Fatalf("Unable to start tracing: %s", err)
+		}
+		defer tracer.Stop()
+	}
+
 	toolBelt := tool.NewBelt()
 	mcpServer := server.NewMCPServer(
 		"bitrise",
-		"2.0.0",
+		BuildVersion,
 		server.WithToolFilter(func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
 			enabledGroups, err := bitrise.EnabledGroupsFromCtx(ctx) // http transport only
 			if err != nil {
@@ -80,6 +95,36 @@ func run() error {
 		server.WithLogging(),
 	)
 	toolBelt.RegisterAll(mcpServer)
+
+	if cfg.DatadogTracingEnabled {
+		transport := "http"
+		if cfg.Addr == "" {
+			transport = "stdio"
+		}
+		server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
+			return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				span, ctx := tracer.StartSpanFromContext(ctx, "mcp.tool",
+					tracer.ResourceName(request.Params.Name),
+					tracer.Tag("mcp.tool", request.Params.Name),
+					tracer.Tag("mcp.transport", transport),
+				)
+
+				result, err := fn(ctx, request)
+
+				if err != nil {
+					span.Finish(tracer.WithError(err))
+					return result, err
+				}
+				// Call itself was successful but the result is an error
+				if result != nil && result.IsError {
+					span.SetTag("mcp.tool.is_error", true)
+				}
+				span.Finish()
+
+				return result, nil
+			}
+		})(mcpServer)
+	}
 
 	if cfg.Addr == "" {
 		logger.Info("no address specified, starting stdio transport")

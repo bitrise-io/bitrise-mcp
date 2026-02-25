@@ -2,24 +2,252 @@
 ## explicit; go 1.18
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
+# github.com/DataDog/datadog-agent/comp/core/tagger/origindetection v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/comp/core/tagger/origindetection
+# github.com/DataDog/datadog-agent/pkg/obfuscate v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/obfuscate
+# github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes
+github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/azure
+github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/ec2
+github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/gcp
+github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/source
+# github.com/DataDog/datadog-agent/pkg/proto v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace
+# github.com/DataDog/datadog-agent/pkg/remoteconfig/state v0.73.0-rc.1
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/remoteconfig/state
+# github.com/DataDog/datadog-agent/pkg/trace v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/trace/config
+github.com/DataDog/datadog-agent/pkg/trace/log
+github.com/DataDog/datadog-agent/pkg/trace/sampler
+github.com/DataDog/datadog-agent/pkg/trace/stats
+github.com/DataDog/datadog-agent/pkg/trace/traceutil
+github.com/DataDog/datadog-agent/pkg/trace/traceutil/normalize
+github.com/DataDog/datadog-agent/pkg/trace/transform
+github.com/DataDog/datadog-agent/pkg/trace/version
+github.com/DataDog/datadog-agent/pkg/trace/watchdog
+# github.com/DataDog/datadog-agent/pkg/util/log v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/util/log
+# github.com/DataDog/datadog-agent/pkg/util/scrubber v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/util/scrubber
+# github.com/DataDog/datadog-agent/pkg/version v0.71.0
+## explicit; go 1.24.0
+github.com/DataDog/datadog-agent/pkg/version
+# github.com/DataDog/datadog-go/v5 v5.6.0
+## explicit; go 1.13
+github.com/DataDog/datadog-go/v5/statsd
+# github.com/DataDog/dd-trace-go/v2 v2.6.0
+## explicit; go 1.24.0
+github.com/DataDog/dd-trace-go/v2/appsec/events
+github.com/DataDog/dd-trace-go/v2/datastreams/options
+github.com/DataDog/dd-trace-go/v2/ddtrace
+github.com/DataDog/dd-trace-go/v2/ddtrace/ext
+github.com/DataDog/dd-trace-go/v2/ddtrace/internal
+github.com/DataDog/dd-trace-go/v2/ddtrace/internal/tracerstats
+github.com/DataDog/dd-trace-go/v2/ddtrace/tracer
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/dyngo
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/graphqlsec
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/grpcsec
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/httpsec
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/ossec
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/sqlsec
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/waf/actions
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/waf/addresses
+github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/trace
+github.com/DataDog/dd-trace-go/v2/instrumentation/env
+github.com/DataDog/dd-trace-go/v2/instrumentation/errortrace
+github.com/DataDog/dd-trace-go/v2/instrumentation/options
+github.com/DataDog/dd-trace-go/v2/internal
+github.com/DataDog/dd-trace-go/v2/internal/appsec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/apisec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/apisec/internal/config
+github.com/DataDog/dd-trace-go/v2/internal/appsec/apisec/internal/timed
+github.com/DataDog/dd-trace-go/v2/internal/appsec/body
+github.com/DataDog/dd-trace-go/v2/internal/appsec/body/json
+github.com/DataDog/dd-trace-go/v2/internal/appsec/config
+github.com/DataDog/dd-trace-go/v2/internal/appsec/emitter/usersec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/emitter/waf
+github.com/DataDog/dd-trace-go/v2/internal/appsec/limiter
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/graphqlsec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/grpcsec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/httpsec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/ossec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/sqlsec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/trace
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/usersec
+github.com/DataDog/dd-trace-go/v2/internal/appsec/listener/waf
+github.com/DataDog/dd-trace-go/v2/internal/civisibility/constants
+github.com/DataDog/dd-trace-go/v2/internal/civisibility/utils
+github.com/DataDog/dd-trace-go/v2/internal/civisibility/utils/telemetry
+github.com/DataDog/dd-trace-go/v2/internal/config
+github.com/DataDog/dd-trace-go/v2/internal/datastreams
+github.com/DataDog/dd-trace-go/v2/internal/env
+github.com/DataDog/dd-trace-go/v2/internal/globalconfig
+github.com/DataDog/dd-trace-go/v2/internal/hostname
+github.com/DataDog/dd-trace-go/v2/internal/hostname/azure
+github.com/DataDog/dd-trace-go/v2/internal/hostname/cachedfetch
+github.com/DataDog/dd-trace-go/v2/internal/hostname/ec2
+github.com/DataDog/dd-trace-go/v2/internal/hostname/ecs
+github.com/DataDog/dd-trace-go/v2/internal/hostname/gce
+github.com/DataDog/dd-trace-go/v2/internal/hostname/httputils
+github.com/DataDog/dd-trace-go/v2/internal/hostname/validate
+github.com/DataDog/dd-trace-go/v2/internal/llmobs
+github.com/DataDog/dd-trace-go/v2/internal/llmobs/config
+github.com/DataDog/dd-trace-go/v2/internal/llmobs/transport
+github.com/DataDog/dd-trace-go/v2/internal/locking
+github.com/DataDog/dd-trace-go/v2/internal/locking/assert
+github.com/DataDog/dd-trace-go/v2/internal/log
+github.com/DataDog/dd-trace-go/v2/internal/namingschema
+github.com/DataDog/dd-trace-go/v2/internal/normalizer
+github.com/DataDog/dd-trace-go/v2/internal/orchestrion
+github.com/DataDog/dd-trace-go/v2/internal/osinfo
+github.com/DataDog/dd-trace-go/v2/internal/processtags
+github.com/DataDog/dd-trace-go/v2/internal/remoteconfig
+github.com/DataDog/dd-trace-go/v2/internal/samplernames
+github.com/DataDog/dd-trace-go/v2/internal/stableconfig
+github.com/DataDog/dd-trace-go/v2/internal/stacktrace
+github.com/DataDog/dd-trace-go/v2/internal/telemetry
+github.com/DataDog/dd-trace-go/v2/internal/telemetry/internal
+github.com/DataDog/dd-trace-go/v2/internal/telemetry/internal/knownmetrics
+github.com/DataDog/dd-trace-go/v2/internal/telemetry/internal/mapper
+github.com/DataDog/dd-trace-go/v2/internal/telemetry/internal/transport
+github.com/DataDog/dd-trace-go/v2/internal/telemetry/log
+github.com/DataDog/dd-trace-go/v2/internal/traceprof
+github.com/DataDog/dd-trace-go/v2/internal/urlsanitizer
+github.com/DataDog/dd-trace-go/v2/internal/version
+# github.com/DataDog/go-libddwaf/v4 v4.8.0
+## explicit; go 1.23.0
+github.com/DataDog/go-libddwaf/v4
+github.com/DataDog/go-libddwaf/v4/internal/bindings
+github.com/DataDog/go-libddwaf/v4/internal/lib
+github.com/DataDog/go-libddwaf/v4/internal/log
+github.com/DataDog/go-libddwaf/v4/internal/pin
+github.com/DataDog/go-libddwaf/v4/internal/ruleset
+github.com/DataDog/go-libddwaf/v4/internal/support
+github.com/DataDog/go-libddwaf/v4/internal/unsafe
+github.com/DataDog/go-libddwaf/v4/timer
+github.com/DataDog/go-libddwaf/v4/waferrors
+# github.com/DataDog/go-runtime-metrics-internal v0.0.4-0.20250721125240-fdf1ef85b633
+## explicit; go 1.23
+github.com/DataDog/go-runtime-metrics-internal/pkg/runtimemetrics
+# github.com/DataDog/go-sqllexer v0.1.8
+## explicit; go 1.21
+github.com/DataDog/go-sqllexer
+# github.com/DataDog/go-tuf v1.1.1-0.5.2
+## explicit; go 1.18
+github.com/DataDog/go-tuf/client
+github.com/DataDog/go-tuf/data
+github.com/DataDog/go-tuf/internal/roles
+github.com/DataDog/go-tuf/internal/sets
+github.com/DataDog/go-tuf/pkg/keys
+github.com/DataDog/go-tuf/pkg/targets
+github.com/DataDog/go-tuf/util
+github.com/DataDog/go-tuf/verify
+# github.com/DataDog/sketches-go v1.4.7
+## explicit; go 1.18
+github.com/DataDog/sketches-go/ddsketch
+github.com/DataDog/sketches-go/ddsketch/encoding
+github.com/DataDog/sketches-go/ddsketch/mapping
+github.com/DataDog/sketches-go/ddsketch/pb/sketchpb
+github.com/DataDog/sketches-go/ddsketch/stat
+github.com/DataDog/sketches-go/ddsketch/store
+# github.com/Microsoft/go-winio v0.6.2
+## explicit; go 1.21
+github.com/Microsoft/go-winio
+github.com/Microsoft/go-winio/internal/fs
+github.com/Microsoft/go-winio/internal/socket
+github.com/Microsoft/go-winio/internal/stringbuffer
+github.com/Microsoft/go-winio/pkg/guid
 # github.com/bahlo/generic-list-go v0.2.0
 ## explicit; go 1.18
 github.com/bahlo/generic-list-go
 # github.com/buger/jsonparser v1.1.1
 ## explicit; go 1.13
 github.com/buger/jsonparser
-# github.com/davecgh/go-spew v1.1.1
+# github.com/cenkalti/backoff/v5 v5.0.3
+## explicit; go 1.23
+github.com/cenkalti/backoff/v5
+# github.com/cespare/xxhash/v2 v2.3.0
+## explicit; go 1.11
+github.com/cespare/xxhash/v2
+# github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
+## explicit
+github.com/cihub/seelog
+github.com/cihub/seelog/archive
+github.com/cihub/seelog/archive/gzip
+github.com/cihub/seelog/archive/tar
+github.com/cihub/seelog/archive/zip
+# github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 ## explicit
 github.com/davecgh/go-spew/spew
+# github.com/dustin/go-humanize v1.0.1
+## explicit; go 1.16
+github.com/dustin/go-humanize
+# github.com/ebitengine/purego v0.8.4
+## explicit; go 1.18
+github.com/ebitengine/purego
+github.com/ebitengine/purego/internal/cgo
+github.com/ebitengine/purego/internal/fakecgo
+github.com/ebitengine/purego/internal/strings
+# github.com/go-logr/logr v1.4.3
+## explicit; go 1.18
+github.com/go-logr/logr
+github.com/go-logr/logr/funcr
+# github.com/go-logr/stdr v1.2.2
+## explicit; go 1.16
+github.com/go-logr/stdr
+# github.com/go-ole/go-ole v1.3.0
+## explicit; go 1.12
+github.com/go-ole/go-ole
+github.com/go-ole/go-ole/oleutil
+# github.com/golang/protobuf v1.5.4
+## explicit; go 1.17
+github.com/golang/protobuf/proto
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
+# github.com/hashicorp/go-version v1.7.0
+## explicit
+github.com/hashicorp/go-version
 # github.com/invopop/jsonschema v0.13.0
 ## explicit; go 1.18
 github.com/invopop/jsonschema
 # github.com/jinzhu/configor v1.2.2
 ## explicit; go 1.16
 github.com/jinzhu/configor
+# github.com/json-iterator/go v1.1.12
+## explicit; go 1.12
+github.com/json-iterator/go
+# github.com/klauspost/compress v1.18.0
+## explicit; go 1.22
+github.com/klauspost/compress
+github.com/klauspost/compress/fse
+github.com/klauspost/compress/huff0
+github.com/klauspost/compress/internal/cpuinfo
+github.com/klauspost/compress/internal/le
+github.com/klauspost/compress/internal/race
+github.com/klauspost/compress/internal/snapref
+github.com/klauspost/compress/s2
+github.com/klauspost/compress/zstd
+github.com/klauspost/compress/zstd/internal/xxhash
+# github.com/klauspost/cpuid/v2 v2.2.3
+## explicit; go 1.15
+github.com/klauspost/cpuid/v2
+# github.com/linkdata/deadlock v0.5.5
+## explicit; go 1.12
+github.com/linkdata/deadlock
+# github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35
+## explicit; go 1.21
+github.com/lufia/plan9stats
 # github.com/mailru/easyjson v0.9.1
 ## explicit; go 1.20
 github.com/mailru/easyjson/buffer
@@ -29,9 +257,52 @@ github.com/mailru/easyjson/jwriter
 github.com/mark3labs/mcp-go/mcp
 github.com/mark3labs/mcp-go/server
 github.com/mark3labs/mcp-go/util
-# github.com/pmezard/go-difflib v1.0.0
+# github.com/minio/simdjson-go v0.4.5
+## explicit; go 1.18
+github.com/minio/simdjson-go
+# github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+## explicit
+github.com/modern-go/concurrent
+# github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
+## explicit; go 1.12
+github.com/modern-go/reflect2
+# github.com/outcaste-io/ristretto v0.2.3
+## explicit; go 1.12
+github.com/outcaste-io/ristretto
+github.com/outcaste-io/ristretto/z
+github.com/outcaste-io/ristretto/z/simd
+# github.com/petermattis/goid v0.0.0-20250813065127-a731cc31b4fe
+## explicit; go 1.17
+github.com/petermattis/goid
+# github.com/philhofer/fwd v1.2.0
+## explicit; go 1.20
+github.com/philhofer/fwd
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
+# github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10
+## explicit; go 1.20
+github.com/planetscale/vtprotobuf/protohelpers
+# github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
 ## explicit
 github.com/pmezard/go-difflib/difflib
+# github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55
+## explicit; go 1.14
+github.com/power-devops/perfstat
+# github.com/puzpuzpuz/xsync/v3 v3.5.1
+## explicit; go 1.18
+github.com/puzpuzpuz/xsync/v3
+# github.com/secure-systems-lab/go-securesystemslib v0.9.0
+## explicit; go 1.20
+github.com/secure-systems-lab/go-securesystemslib/cjson
+# github.com/shirou/gopsutil/v4 v4.25.8-0.20250809033336-ffcdc2b7662f
+## explicit; go 1.23.0
+github.com/shirou/gopsutil/v4/common
+github.com/shirou/gopsutil/v4/cpu
+github.com/shirou/gopsutil/v4/internal/common
+github.com/shirou/gopsutil/v4/mem
+github.com/shirou/gopsutil/v4/net
+github.com/shirou/gopsutil/v4/process
 # github.com/spf13/cast v1.10.0
 ## explicit; go 1.21.0
 github.com/spf13/cast
@@ -40,12 +311,102 @@ github.com/spf13/cast/internal
 ## explicit; go 1.17
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/assert/yaml
+# github.com/tinylib/msgp v1.3.0
+## explicit; go 1.20
+github.com/tinylib/msgp/msgp
+# github.com/tklauser/go-sysconf v0.3.15
+## explicit; go 1.23.0
+github.com/tklauser/go-sysconf
+# github.com/tklauser/numcpus v0.10.0
+## explicit; go 1.23.0
+github.com/tklauser/numcpus
+# github.com/trailofbits/go-mutexasserts v0.0.0-20250514102930-c1f3d2e37561
+## explicit; go 1.20
+github.com/trailofbits/go-mutexasserts
 # github.com/wk8/go-ordered-map/v2 v2.1.8
 ## explicit; go 1.18
 github.com/wk8/go-ordered-map/v2
 # github.com/yosida95/uritemplate/v3 v3.0.2
 ## explicit; go 1.14
 github.com/yosida95/uritemplate/v3
+# github.com/yusufpapurcu/wmi v1.2.4
+## explicit; go 1.16
+github.com/yusufpapurcu/wmi
+# go.opentelemetry.io/auto/sdk v1.1.0
+## explicit; go 1.22.0
+go.opentelemetry.io/auto/sdk
+go.opentelemetry.io/auto/sdk/internal/telemetry
+# go.opentelemetry.io/collector/component v1.39.0
+## explicit; go 1.24
+go.opentelemetry.io/collector/component
+# go.opentelemetry.io/collector/featuregate v1.46.0
+## explicit; go 1.24.0
+go.opentelemetry.io/collector/featuregate
+# go.opentelemetry.io/collector/internal/telemetry v0.133.0
+## explicit; go 1.24
+go.opentelemetry.io/collector/internal/telemetry
+go.opentelemetry.io/collector/internal/telemetry/componentattribute
+# go.opentelemetry.io/collector/pdata v1.46.0
+## explicit; go 1.24.0
+go.opentelemetry.io/collector/pdata/internal
+go.opentelemetry.io/collector/pdata/internal/json
+go.opentelemetry.io/collector/pdata/internal/otlp
+go.opentelemetry.io/collector/pdata/internal/proto
+go.opentelemetry.io/collector/pdata/pcommon
+go.opentelemetry.io/collector/pdata/ptrace
+# go.opentelemetry.io/collector/pdata/pprofile v0.140.0
+## explicit; go 1.24.0
+go.opentelemetry.io/collector/pdata/pprofile
+# go.opentelemetry.io/contrib/bridges/otelzap v0.12.0
+## explicit; go 1.23.0
+go.opentelemetry.io/contrib/bridges/otelzap
+# go.opentelemetry.io/otel v1.38.0
+## explicit; go 1.23.0
+go.opentelemetry.io/otel
+go.opentelemetry.io/otel/attribute
+go.opentelemetry.io/otel/attribute/internal
+go.opentelemetry.io/otel/baggage
+go.opentelemetry.io/otel/codes
+go.opentelemetry.io/otel/internal/baggage
+go.opentelemetry.io/otel/internal/global
+go.opentelemetry.io/otel/propagation
+go.opentelemetry.io/otel/semconv/internal
+go.opentelemetry.io/otel/semconv/v1.17.0
+go.opentelemetry.io/otel/semconv/v1.26.0
+go.opentelemetry.io/otel/semconv/v1.27.0
+go.opentelemetry.io/otel/semconv/v1.34.0
+go.opentelemetry.io/otel/semconv/v1.37.0
+go.opentelemetry.io/otel/semconv/v1.37.0/otelconv
+go.opentelemetry.io/otel/semconv/v1.6.1
+# go.opentelemetry.io/otel/log v0.13.0
+## explicit; go 1.23.0
+go.opentelemetry.io/otel/log
+go.opentelemetry.io/otel/log/embedded
+go.opentelemetry.io/otel/log/global
+go.opentelemetry.io/otel/log/internal/global
+# go.opentelemetry.io/otel/metric v1.38.0
+## explicit; go 1.23.0
+go.opentelemetry.io/otel/metric
+go.opentelemetry.io/otel/metric/embedded
+go.opentelemetry.io/otel/metric/noop
+# go.opentelemetry.io/otel/sdk v1.38.0
+## explicit; go 1.23.0
+go.opentelemetry.io/otel/sdk
+go.opentelemetry.io/otel/sdk/instrumentation
+go.opentelemetry.io/otel/sdk/internal/env
+go.opentelemetry.io/otel/sdk/internal/x
+go.opentelemetry.io/otel/sdk/resource
+go.opentelemetry.io/otel/sdk/trace
+go.opentelemetry.io/otel/sdk/trace/internal/x
+# go.opentelemetry.io/otel/trace v1.38.0
+## explicit; go 1.23.0
+go.opentelemetry.io/otel/trace
+go.opentelemetry.io/otel/trace/embedded
+go.opentelemetry.io/otel/trace/internal/telemetry
+go.opentelemetry.io/otel/trace/noop
+# go.uber.org/atomic v1.11.0
+## explicit; go 1.18
+go.uber.org/atomic
 # go.uber.org/multierr v1.11.0
 ## explicit; go 1.19
 go.uber.org/multierr
@@ -60,6 +421,66 @@ go.uber.org/zap/internal/exit
 go.uber.org/zap/internal/pool
 go.uber.org/zap/internal/stacktrace
 go.uber.org/zap/zapcore
+# go.yaml.in/yaml/v3 v3.0.4
+## explicit; go 1.16
+go.yaml.in/yaml/v3
+# golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
+## explicit; go 1.23.0
+golang.org/x/exp/constraints
+# golang.org/x/mod v0.29.0
+## explicit; go 1.24.0
+golang.org/x/mod/semver
+# golang.org/x/sys v0.37.0
+## explicit; go 1.24.0
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+golang.org/x/sys/windows/registry
+# golang.org/x/time v0.12.0
+## explicit; go 1.23.0
+golang.org/x/time/rate
+# golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
+## explicit; go 1.18
+golang.org/x/xerrors
+golang.org/x/xerrors/internal
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20250825161204-c5933d9347a5
+## explicit; go 1.23.0
+google.golang.org/genproto/googleapis/rpc/code
+# google.golang.org/protobuf v1.36.10
+## explicit; go 1.23
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/editiondefaults
+google.golang.org/protobuf/internal/editionssupport
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genid
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/order
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/protolazy
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protodesc
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
+google.golang.org/protobuf/types/descriptorpb
+google.golang.org/protobuf/types/gofeaturespb
+# gopkg.in/ini.v1 v1.67.0
+## explicit
+gopkg.in/ini.v1
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
