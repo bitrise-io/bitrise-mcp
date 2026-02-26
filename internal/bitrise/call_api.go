@@ -47,7 +47,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	}
 	fullURL += p.Path
 
-	req, err := http.NewRequest(p.Method, fullURL, reqBody)
+	req, err := http.NewRequestWithContext(ctx, p.Method, fullURL, reqBody)
 	if err != nil {
 		return "", fmt.Errorf("create request: %w", err)
 	}
