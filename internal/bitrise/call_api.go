@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	httptrace "github.com/DataDog/dd-trace-go/contrib/net/http/v2"
 )
 
 const (
@@ -48,6 +50,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	fullURL += p.Path
 
 	req, err := http.NewRequestWithContext(ctx, p.Method, fullURL, reqBody)
+
 	if err != nil {
 		return "", fmt.Errorf("create request: %w", err)
 	}
@@ -72,7 +75,8 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", apiKey)
 
-	client := http.Client{Timeout: 30 * time.Second}
+	httpClient := http.Client{Timeout: 30 * time.Second}
+	client := httptrace.WrapClient(&httpClient)
 	res, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("execute request: %w", err)

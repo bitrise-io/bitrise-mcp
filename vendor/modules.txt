@@ -44,15 +44,25 @@ github.com/DataDog/datadog-agent/pkg/version
 # github.com/DataDog/datadog-go/v5 v5.6.0
 ## explicit; go 1.13
 github.com/DataDog/datadog-go/v5/statsd
+# github.com/DataDog/dd-trace-go/contrib/net/http/v2 v2.6.0
+## explicit; go 1.24.0
+github.com/DataDog/dd-trace-go/contrib/net/http/v2
+github.com/DataDog/dd-trace-go/contrib/net/http/v2/client
+github.com/DataDog/dd-trace-go/contrib/net/http/v2/internal/config
+github.com/DataDog/dd-trace-go/contrib/net/http/v2/internal/orchestrion
+github.com/DataDog/dd-trace-go/contrib/net/http/v2/internal/pattern
+github.com/DataDog/dd-trace-go/contrib/net/http/v2/internal/wrap
 # github.com/DataDog/dd-trace-go/v2 v2.6.0
 ## explicit; go 1.24.0
 github.com/DataDog/dd-trace-go/v2/appsec/events
 github.com/DataDog/dd-trace-go/v2/datastreams/options
 github.com/DataDog/dd-trace-go/v2/ddtrace
+github.com/DataDog/dd-trace-go/v2/ddtrace/baggage
 github.com/DataDog/dd-trace-go/v2/ddtrace/ext
 github.com/DataDog/dd-trace-go/v2/ddtrace/internal
 github.com/DataDog/dd-trace-go/v2/ddtrace/internal/tracerstats
 github.com/DataDog/dd-trace-go/v2/ddtrace/tracer
+github.com/DataDog/dd-trace-go/v2/instrumentation
 github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/dyngo
 github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/graphqlsec
 github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/grpcsec
@@ -64,6 +74,7 @@ github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/emitter/waf/addresses
 github.com/DataDog/dd-trace-go/v2/instrumentation/appsec/trace
 github.com/DataDog/dd-trace-go/v2/instrumentation/env
 github.com/DataDog/dd-trace-go/v2/instrumentation/errortrace
+github.com/DataDog/dd-trace-go/v2/instrumentation/httptrace
 github.com/DataDog/dd-trace-go/v2/instrumentation/options
 github.com/DataDog/dd-trace-go/v2/internal
 github.com/DataDog/dd-trace-go/v2/internal/appsec

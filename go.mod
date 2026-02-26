@@ -3,6 +3,7 @@ module github.com/bitrise-io/bitrise-mcp/v2
 go 1.25.0
 
 require (
+	github.com/DataDog/dd-trace-go/contrib/net/http/v2 v2.6.0
 	github.com/DataDog/dd-trace-go/v2 v2.6.0
 	github.com/jinzhu/configor v1.2.2
 	github.com/mark3labs/mcp-go v0.43.0

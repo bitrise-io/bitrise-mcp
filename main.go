@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	httptrace "github.com/DataDog/dd-trace-go/contrib/net/http/v2"
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool"
@@ -175,7 +176,17 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		server.WithLogger(logger),
 	)
 
-	mux := http.NewServeMux()
+	type router interface {
+		http.Handler
+		HandleFunc(string, func(http.ResponseWriter, *http.Request))
+	}
+
+	var mux router
+	if cfg.DatadogTracingEnabled {
+		mux = httptrace.NewServeMux()
+	} else {
+		mux = http.NewServeMux()
+	}
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
