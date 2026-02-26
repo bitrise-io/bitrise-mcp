@@ -106,6 +106,7 @@ func run() error {
 			return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 				span, ctx := tracer.StartSpanFromContext(ctx, "mcp.tool",
 					tracer.ResourceName(request.Params.Name),
+					tracer.SpanType("rpc"),
 					tracer.Tag("mcp.tool", request.Params.Name),
 					tracer.Tag("mcp.transport", transport),
 				)
