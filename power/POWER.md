@@ -1,7 +1,7 @@
 ---
 name: "bitrise-ci"
 displayName: "Bitrise CI/CD Platform"
-description: "Control Bitrise CI/CD platform with 63 tools for app management, builds, artifacts, workspaces, pipelines, and more"
+description: "Control Bitrise CI/CD platform with 67 tools for app management, builds, artifacts, workspaces, pipelines, and more"
 keywords: ["bitrise", "ci", "cd", "build", "mobile", "ios", "android", "pipeline", "workflow", "artifact", "test", "release", "app", "workspace"]
 author: "Bitrise"
 ---
@@ -29,27 +29,30 @@ The Bitrise MCP server requires a Personal Access Token (PAT) for authentication
 
 ## Available Tools
 
-The Bitrise MCP server provides 63 tools organized into the following categories:
+The Bitrise MCP server provides 67 tools organized into the following categories:
 
 ### Apps (11 tools)
 
-1. **list_apps** - List all the apps available for the authenticated account
-   - `sort_by` (optional): Order of the apps: last_build_at (default) or created_at
+1. **list_apps** - List all apps for the currently authenticated user account
+   - `sort_by` (optional): Order of apps: last_build_at (default) or created_at
    - `next` (optional): Slug of the first app in the response
    - `limit` (optional): Max number of elements per page (default: 50)
+   - `title` (optional): Filter apps by title
+   - `project_type` (optional): Filter apps by project type (e.g., 'ios', 'android')
 
 2. **register_app** - Add a new app to Bitrise
    - `repo_url`: Repository URL
    - `is_public`: Whether the app's builds visibility is "public"
    - `organization_slug`: The organization (aka workspace) the app to add to
-   - `project_type` (optional): Type of project (ios, android, etc.)
-   - `provider` (optional): github
+   - `title` (optional): The title of the application
+   - `default_branch_name` (optional): The default branch of the repository (default: master)
+   - `manual_approval_enabled` (optional): Toggles whether manual approval should be enabled (default: true)
+   - `provider` (optional): The git provider (bitbucket, bitbucket-server, custom, github, github-app, github-self-hosted, gitlab, gitlab-self-hosted)
 
 3. **finish_bitrise_app** - Finish the setup of a Bitrise app
    - `app_slug`: The slug of the Bitrise app to finish setup for
-   - `project_type` (optional): The type of project (e.g., android, ios, flutter, etc.)
-   - `stack_id` (optional): The stack ID to use for the app
-   - `mode` (optional): The mode of setup
+   - `project_type` (optional): The type of project (android, cordova, fastlane, flutter, ios, ionic, java, kotlin-multiplatform, macos, node-js, react-native, other) (default: other)
+   - `stack_id` (optional): The stack ID to use for the app (default: linux-docker-android-22.04)
    - `config` (optional): The configuration to use for the app
 
 4. **get_app** - Get the details of a specific app
@@ -58,17 +61,16 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 5. **delete_app** - Delete an app from Bitrise
    - `app_slug`: Identifier of the Bitrise app
 
-6. **update_app** - Update an app
+6. **update_app** - Update an app. Only app_slug is required, add only fields you wish to update
    - `app_slug`: Identifier of the Bitrise app
-   - `is_public`: Whether the app's builds visibility is "public"
-   - `project_type`: Type of project
-   - `provider`: Repository provider
-   - `repo_url`: Repository URL
+   - `title` (optional): The new title of the application
+   - `default_branch` (optional): The new default branch for the application
+   - `repository_url` (optional): The new repository URL for the application
 
 7. **get_bitrise_yml** - Get the current Bitrise YML config file of a specified Bitrise app
    - `app_slug`: Identifier of the Bitrise app
 
-8. **update_bitrise_yml** - Update the Bitrise YML config file of a specified Bitrise app
+8. **update_bitrise_yml** - Update the Bitrise YML config stored on Bitrise
    - `app_slug`: Identifier of the Bitrise app
    - `bitrise_yml_as_json`: The new Bitrise YML config file content
 
@@ -79,7 +81,7 @@ The Bitrise MCP server provides 63 tools organized into the following categories
     - `app_slug`: Identifier of the Bitrise app
     - `auth_ssh_private_key`: Private SSH key
     - `auth_ssh_public_key`: Public SSH key
-    - `is_register_key_into_provider_service`: Register the key in the provider service
+    - `is_register_key_into_provider_service` (optional): Register the key in the provider service
 
 11. **register_webhook** - Register an incoming webhook for a specific application
     - `app_slug`: Identifier of the Bitrise app
@@ -111,11 +113,17 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 15. **abort_build** - Abort a specific build
     - `app_slug`: Identifier of the Bitrise app
     - `build_slug`: Identifier of the build
-    - `reason` (optional): Reason for aborting the build
+    - `abort_reason` (optional): Reason for aborting the build
+    - `abort_with_success` (optional): Mark the build as successful when aborting (default: false)
+    - `skip_git_status_report` (optional): Skip sending git status report (default: false)
+    - `skip_notifications` (optional): Skip sending notifications (default: false)
 
 16. **get_build_log** - Get the build log of a specified build of a Bitrise app
     - `app_slug`: Identifier of the Bitrise app
     - `build_slug`: Identifier of the Bitrise build
+    - `step_uuid` (optional): UUID of the step to get the log for
+    - `offset` (optional): The line number to start reading from (default: 0)
+    - `limit` (optional): The number of lines to read (default: 2000)
 
 17. **get_build_bitrise_yml** - Get the bitrise.yml of a build
     - `app_slug`: Identifier of the Bitrise app
@@ -156,6 +164,8 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 
 24. **list_outgoing_webhooks** - List the outgoing webhooks of an app
     - `app_slug`: Identifier of the Bitrise app
+    - `next` (optional): Slug of the first outgoing webhook in the response
+    - `limit` (optional): Max number of elements per page
 
 25. **delete_outgoing_webhook** - Delete the outgoing webhook of an app
     - `app_slug`: Identifier of the Bitrise app
@@ -164,36 +174,49 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 26. **update_outgoing_webhook** - Update an outgoing webhook for an app
     - `app_slug`: Identifier of the Bitrise app
     - `webhook_slug`: Identifier of the webhook
-    - `events`: List of events to trigger the webhook
-    - `url`: URL of the webhook
+    - `events` (optional): List of events to trigger the webhook
+    - `url` (optional): URL of the webhook
     - `headers` (optional): Headers to be sent with the webhook
 
 27. **create_outgoing_webhook** - Create an outgoing webhook for an app
     - `app_slug`: Identifier of the Bitrise app
     - `events`: List of events to trigger the webhook
     - `url`: URL of the webhook
+    - `secret` (optional): Secret for webhook signature verification
     - `headers` (optional): Headers to be sent with the webhook
 
 ### Cache Items (4 tools)
 
 28. **list_cache_items** - List the key-value cache items belonging to an app
     - `app_slug`: Identifier of the Bitrise app
+    - `next` (optional): Getting cache items created before the given parameter (RFC3339 format)
+    - `limit` (optional): Max number of elements per page (default: 100)
 
 29. **delete_all_cache_items** - Delete all key-value cache items belonging to an app
     - `app_slug`: Identifier of the Bitrise app
 
 30. **delete_cache_item** - Delete a key-value cache item
     - `app_slug`: Identifier of the Bitrise app
-    - `cache_item_id`: Identifier of the cache item
+    - `cache_item_id`: Key of the cache item
 
 31. **get_cache_item_download_url** - Get the download URL of a key-value cache item
     - `app_slug`: Identifier of the Bitrise app
-    - `cache_item_id`: Identifier of the cache item
+    - `cache_item_id`: Key of the cache item
 
 ### Pipelines (4 tools)
 
 32. **list_pipelines** - List all pipelines and standalone builds of an app
     - `app_slug`: Identifier of the Bitrise app
+    - `after` (optional): List pipelines/builds run after a given date (RFC3339 format)
+    - `before` (optional): List pipelines/builds run before a given date (RFC3339 format)
+    - `branch` (optional): Filter by the branch which was built
+    - `build_number` (optional): Filter by the pipeline/standalone build number
+    - `commit_message` (optional): Filter by the commit message
+    - `limit` (optional): Max number of elements per page
+    - `pipeline` (optional): Filter by the name of the pipeline
+    - `status` (optional): Filter by status (on_hold, running, succeeded, failed, aborted, succeeded_with_abort)
+    - `trigger_event_type` (optional): Filter by event type (push, pull-request, tag)
+    - `workflow` (optional): Filter by the name of the workflow
 
 33. **get_pipeline** - Get a pipeline of a given app
     - `app_slug`: Identifier of the Bitrise app
@@ -202,11 +225,15 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 34. **abort_pipeline** - Abort a pipeline
     - `app_slug`: Identifier of the Bitrise app
     - `pipeline_id`: Identifier of the pipeline
-    - `reason` (optional): Reason for aborting the pipeline
+    - `abort_reason` (optional): Reason for aborting the pipeline
+    - `abort_with_success` (optional): Mark the pipeline as successful when aborting (default: false)
+    - `skip_notifications` (optional): Skip sending notifications (default: false)
 
 35. **rebuild_pipeline** - Rebuild a pipeline
     - `app_slug`: Identifier of the Bitrise app
     - `pipeline_id`: Identifier of the pipeline
+    - `partial` (optional): Rebuild only unsuccessful workflows and their dependents (default: false)
+    - `triggered_by` (optional): Who triggered the rebuild
 
 ### Group Roles (2 tools)
 
@@ -248,118 +275,135 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 
 45. **me** - Get info from the currently authenticated user account
 
+### Configuration (4 tools)
+
+46. **validate_bitrise_yml** - Validate a Bitrise YML config file
+    - `bitrise_yml`: The Bitrise YML config file content
+    - `app_slug` (optional): Slug of a Bitrise app for workspace-specific validation
+
+47. **step_search** - Find steps for building workflows or step bundles in a Bitrise YML config file
+    - `query`: The phrase to search steps for
+    - `categories` (optional): Categories to filter steps (build, code-sign, test, deploy, notification, access-control, artifact-info, installer, dependency, utility)
+    - `maintainers` (optional): Filter steps by maintainers (bitrise, verified, community)
+
+48. **step_inputs** - List inputs of a step with their defaults, allowed values, etc.
+    - `step_ref`: Step reference formatted as `step_lib_source::step_id@version`
+
+49. **list_available_stacks** - List available stacks with their machine configurations and version information
+    - `workspace_slug` (optional): Slug of the Bitrise workspace
+
 ### Release Management (18 tools)
 
-46. **create_connected_app** - Add a new Release Management connected app to Bitrise
+50. **create_connected_app** - Add a new Release Management connected app to Bitrise
     - `platform`: The mobile platform for the connected app (ios/android)
     - `store_app_id`: The app store identifier for the connected app
     - `workspace_slug`: Identifier of the Bitrise workspace
     - `id` (optional): An uuidV4 identifier for your new connected app
-    - `manual_connection` (optional): Indicates a manual connection
+    - `manual_connection` (optional): Indicates a manual connection (default: false)
     - `project_id` (optional): Specifies which Bitrise Project to associate with
     - `store_app_name` (optional): App name for manual connections
     - `store_credential_id` (optional): Selection of credentials added on Bitrise
 
-47. **list_connected_apps** - List Release Management connected apps available for the authenticated account within a workspace
+51. **list_connected_apps** - List Release Management connected apps available for the authenticated account within a workspace
     - `workspace_slug`: Identifier of the Bitrise workspace
-    - `items_per_page` (optional): Maximum number of connected apps per page
-    - `page` (optional): Page number to return
-    - `platform` (optional): Filter for a specific mobile platform
+    - `items_per_page` (optional): Maximum number of connected apps per page (default: 10)
+    - `page` (optional): Page number to return (default: 1)
+    - `platform` (optional): Filter for a specific mobile platform (ios/android)
     - `project_id` (optional): Filter for a specific Bitrise Project
     - `search` (optional): Search by bundle ID, package name, or app title
 
-48. **get_connected_app** - Gives back a Release Management connected app for the authenticated account
+52. **get_connected_app** - Gives back a Release Management connected app for the authenticated account
     - `id`: Identifier of the Release Management connected app
 
-49. **update_connected_app** - Updates a connected app
+53. **update_connected_app** - Updates a connected app
     - `connected_app_id`: The uuidV4 identifier for your connected app
-    - `store_app_id`: The store identifier for your app
-    - `connect_to_store` (optional): Check validity against the App Store or Google Play
+    - `connect_to_store` (optional): Check validity against the App Store or Google Play (default: false)
+    - `store_app_id` (optional): The store identifier for your app
     - `store_credential_id` (optional): Selection of credentials added on Bitrise
 
-50. **list_installable_artifacts** - List Release Management installable artifacts of a connected app
+54. **list_installable_artifacts** - List Release Management installable artifacts of a connected app
     - `connected_app_id`: Identifier of the Release Management connected app
-    - `after_date` (optional): Start of the interval for artifact creation/upload
-    - `artifact_type` (optional): Filter for a specific artifact type
-    - `before_date` (optional): End of the interval for artifact creation/upload
+    - `after_date` (optional): Start of the interval for artifact creation/upload (ISO 8601 format)
+    - `artifact_type` (optional): Filter for a specific artifact type (aab, apk, ipa)
+    - `before_date` (optional): End of the interval for artifact creation/upload (ISO 8601 format)
     - `branch` (optional): Filter for the Bitrise CI branch
     - `distribution_ready` (optional): Filter for distribution ready artifacts
-    - `items_per_page` (optional): Maximum number of artifacts per page
-    - `page` (optional): Page number to return
-    - `platform` (optional): Filter for a specific mobile platform
+    - `items_per_page` (optional): Maximum number of artifacts per page (default: 10)
+    - `page` (optional): Page number to return (default: 1)
+    - `platform` (optional): Filter for a specific mobile platform (ios/android)
     - `search` (optional): Search by version, filename or build number
-    - `source` (optional): Filter for the source of installable artifacts
+    - `source` (optional): Filter for the source of installable artifacts (api, ci)
     - `store_signed` (optional): Filter for store ready installable artifacts
     - `version` (optional): Filter for a specific version
     - `workflow` (optional): Filter for a specific Bitrise CI workflow
 
-51. **generate_installable_artifact_upload_url** - Generates a signed upload URL for an installable artifact to be uploaded to Bitrise
+55. **generate_installable_artifact_upload_url** - Generates a signed upload URL for an installable artifact to be uploaded to Bitrise
     - `connected_app_id`: Identifier of the Release Management connected app
     - `installable_artifact_id`: An uuidv4 identifier for the installable artifact
     - `file_name`: The name of the installable artifact file
     - `file_size_bytes`: The byte size of the installable artifact file
     - `branch` (optional): Name of the CI branch
-    - `with_public_page` (optional): Enable public install page
+    - `with_public_page` (optional): Enable public install page (default: false)
     - `workflow` (optional): Name of the CI workflow
 
-52. **get_installable_artifact_upload_and_proc_status** - Gets the processing and upload status of an installable artifact
+56. **get_installable_artifact_upload_and_proc_status** - Gets the processing and upload status of an installable artifact
     - `connected_app_id`: Identifier of the Release Management connected app
     - `installable_artifact_id`: The uuidv4 identifier for the installable artifact
 
-53. **set_installable_artifact_public_install_page** - Changes whether public install page should be available for the installable artifact
+57. **set_installable_artifact_public_install_page** - Changes whether public install page should be available for the installable artifact
     - `connected_app_id`: Identifier of the Release Management connected app
     - `installable_artifact_id`: The uuidv4 identifier for the installable artifact
     - `with_public_page`: Boolean flag for enabling/disabling public install page
 
-54. **list_build_distribution_versions** - Lists Build Distribution versions available for testers
+58. **list_build_distribution_versions** - Lists Build Distribution versions available for testers
     - `connected_app_id`: The uuidV4 identifier of the connected app
-    - `items_per_page` (optional): Maximum number of versions per page
-    - `page` (optional): Page number to return
+    - `items_per_page` (optional): Maximum number of versions per page (default: 10)
+    - `page` (optional): Page number to return (default: 1)
 
-55. **list_build_distribution_version_test_builds** - Gives back a list of test builds for the given build distribution version
+59. **list_build_distribution_version_test_builds** - Gives back a list of test builds for the given build distribution version
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `version`: The version of the build distribution
-    - `items_per_page` (optional): Maximum number of test builds per page
-    - `page` (optional): Page number to return
+    - `items_per_page` (optional): Maximum number of test builds per page (default: 10)
+    - `page` (optional): Page number to return (default: 1)
 
-56. **create_tester_group** - Creates a tester group for a Release Management connected app
+60. **create_tester_group** - Creates a tester group for a Release Management connected app
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `name`: The name for the new tester group
-    - `auto_notify` (optional): Indicates automatic notifications for the group
+    - `auto_notify` (optional): Indicates automatic notifications for the group (default: false)
 
-57. **notify_tester_group** - Notifies a tester group about a new test build
+61. **notify_tester_group** - Notifies a tester group about a new test build
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `id`: The uuidV4 identifier of the tester group
     - `test_build_id`: The unique identifier of the test build
 
-58. **add_testers_to_tester_group** - Adds testers to a tester group of a connected app
+62. **add_testers_to_tester_group** - Adds testers to a tester group of a connected app
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `id`: The uuidV4 identifier of the tester group
     - `user_slugs`: The list of users identified by slugs to be added
 
-59. **update_tester_group** - Updates the given tester group settings
+63. **update_tester_group** - Updates the given tester group settings
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `id`: The uuidV4 identifier of the tester group
-    - `auto_notify` (optional): Setting for automatic email notifications
+    - `auto_notify` (optional): Setting for automatic email notifications (default: false)
     - `name` (optional): The new name for the tester group
 
-60. **list_tester_groups** - Gives back a list of tester groups related to a specific connected app
+64. **list_tester_groups** - Gives back a list of tester groups related to a specific connected app
     - `connected_app_id`: The uuidV4 identifier of the connected app
-    - `items_per_page` (optional): Maximum number of tester groups per page
-    - `page` (optional): Page number to return
+    - `items_per_page` (optional): Maximum number of tester groups per page (default: 10)
+    - `page` (optional): Page number to return (default: 1)
 
-61. **get_tester_group** - Gives back the details of the selected tester group
+65. **get_tester_group** - Gives back the details of the selected tester group
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `id`: The uuidV4 identifier of the tester group
 
-62. **get_potential_testers** - Gets a list of potential testers who can be added to a specific tester group
+66. **get_potential_testers** - Gets a list of potential testers who can be added to a specific tester group
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `id`: The uuidV4 identifier of the tester group
-    - `items_per_page` (optional): Maximum number of potential testers per page
-    - `page` (optional): Page number to return
+    - `items_per_page` (optional): Maximum number of potential testers per page (default: 10)
+    - `page` (optional): Page number to return (default: 1)
     - `search` (optional): Search for testers by email or username
 
-63. **get_testers** - Gets a list of testers that have been associated with a tester group related to a specific connected app
+67. **get_testers** - Gets a list of testers that have been associated with a tester group related to a specific connected app
     - `connected_app_id`: The uuidV4 identifier of the connected app
     - `tester_group_id` (optional): The uuidV4 identifier of a tester group. If given, only testers within this specific tester group will be returned
     - `items_per_page` (optional): Maximum number of testers per page (default: 10)
@@ -369,7 +413,7 @@ The Bitrise MCP server provides 63 tools organized into the following categories
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
