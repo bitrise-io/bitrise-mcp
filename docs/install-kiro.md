@@ -22,7 +22,7 @@ AWS Kiro supports installing the Bitrise MCP server as a Power, which provides a
 3. **Enter the Repository URL**
    - Enter the following URL:
    ```
-   https://github.com/bitrise-io/bitrise-mcp/tree/main/power
+   https://github.com/bitrise-io/bitrise-mcp/tree/main/kiro-powers/bitrise-ci
    ```
 
 4. **Set Up Authentication**
