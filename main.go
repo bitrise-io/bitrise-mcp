@@ -175,6 +175,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			return ctx
 		}),
 		server.WithLogger(logger),
+		server.WithDisableStreaming(true),
 	)
 
 	type router interface {
