@@ -10,6 +10,10 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 - **Authentication Support**: Secure API token-based access to Bitrise resources.
 - **Detailed Documentation**: [Well-documented tools with parameter descriptions](/docs/tools.md).
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/bitrise-io-bitrise-mcp).
+
 ## Installation
 
 - **[VS Code](/docs/install-vscode.md)** - Installation for VS Code IDE
