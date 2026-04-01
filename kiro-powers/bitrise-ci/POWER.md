@@ -424,3 +424,9 @@ By default, all API groups are enabled. You can specify which groups to enable u
 - [Bitrise API Documentation](https://devcenter.bitrise.io/api/api-index/)
 - [Bitrise Account Settings](https://app.bitrise.io/me/account/security)
 - [MCP Server Repository](https://github.com/bitrise-io/bitrise-mcp)
+
+
+## License and support
+This power integrates with Bitrise MCP (MIT License). https://github.com/bitrise-io/bitrise-mcp/tree/main?tab=MIT-1-ov-file#MIT-1-ov-file
+- [Privacy Policy](https://bitrise.io/legal/privacy-policy)
+- [Support](https://support.bitrise.io/en/)
