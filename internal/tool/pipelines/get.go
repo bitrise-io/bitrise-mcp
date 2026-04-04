@@ -2,6 +2,7 @@ package pipelines
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -20,6 +21,9 @@ var Get = bitrise.Tool{
 		mcp.WithString("pipeline_id",
 			mcp.Description("Identifier of the pipeline"),
 			mcp.Required(),
+		),
+		mcp.WithBoolean("verbose",
+			mcp.Description("Include all pipeline details. Default: false"),
 		),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
@@ -44,6 +48,44 @@ var Get = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
 		}
-		return mcp.NewToolResultText(res), nil
+
+		var response map[string]any
+		if err := json.Unmarshal([]byte(res), &response); err != nil {
+			return mcp.NewToolResultText(res), nil
+		}
+
+		// app.slug is the caller's own input argument — redundant in the response.
+		delete(response, "app")
+		// Internal implementation details with no diagnostic value.
+		delete(response, "number_in_app_scope")
+		delete(response, "put_on_hold_at")
+		// credit_cost is billing metadata, not relevant for pipeline inspection.
+		delete(response, "credit_cost")
+
+		verbose := request.GetBool("verbose", false)
+		if !verbose {
+			// trigger_params overlaps with top-level trigger fields; the
+			// environments array inside it could carry large amount of strings.
+			delete(response, "trigger_params")
+			// attempts tracks retry history; current_attempt_id at the top level
+			// is sufficient for the common case.
+			delete(response, "attempts")
+		}
+
+		// Clean up per-workflow fields that are either noise or billing metadata.
+		if workflows, ok := response["workflows"].([]any); ok {
+			for _, wf := range workflows {
+				if wfMap, ok := wf.(map[string]any); ok {
+					delete(wfMap, "credit_cost")
+					// startFailureReason appears on every workflow regardless of
+					// whether startup failed; only meaningful when non-empty.
+					if v, ok := wfMap["startFailureReason"].(string); ok && v == "" {
+						delete(wfMap, "startFailureReason")
+					}
+				}
+			}
+		}
+
+		return mcp.NewToolResultStructuredOnly(response), nil
 	},
 }

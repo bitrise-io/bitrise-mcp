@@ -2,6 +2,7 @@ package pipelines
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -49,6 +50,9 @@ var List = bitrise.Tool{
 		),
 		mcp.WithString("workflow",
 			mcp.Description("Filter by the name of the workflow used for the pipeline/standalone build"),
+		),
+		mcp.WithBoolean("verbose",
+			mcp.Description("Include all pipeline details. Default: false"),
 		),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
@@ -102,6 +106,40 @@ var List = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
 		}
-		return mcp.NewToolResultText(res), nil
+
+		var response map[string]any
+		if err := json.Unmarshal([]byte(res), &response); err != nil {
+			return mcp.NewToolResultText(res), nil
+		}
+
+		verbose := request.GetBool("verbose", false)
+		if pipelines, ok := response["data"].([]any); ok {
+			for _, item := range pipelines {
+				pipeline, ok := item.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				// credit_cost is billing metadata — not useful when scanning a list
+				// of pipelines for status or debugging.
+				delete(pipeline, "credit_cost")
+				// Internal processing state — not meaningful to the caller.
+				delete(pipeline, "is_processed")
+				// pull_request_id == 0 means this is not a PR build; omit rather than
+				// forcing the caller to distinguish 0 from a real PR number.
+				if v, ok := pipeline["pull_request_id"].(float64); ok && v == 0 {
+					delete(pipeline, "pull_request_id")
+				}
+
+				if !verbose {
+					// trigger_params carries a full copy of the trigger inputs including
+					// an environments array. The top-level branch, commit_hash, and
+					// commit_message fields already surface the essential trigger context.
+					delete(pipeline, "trigger_params")
+				}
+			}
+		}
+
+		return mcp.NewToolResultStructuredOnly(response), nil
 	},
 }
