@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/mark3labs/mcp-go/mcp"
 )
+
+// ansiEscape matches ANSI/VT100 escape sequences (colors, cursor movement, etc.).
+// LLMs receive no benefit from these control codes; stripping them reduces token count.
+var ansiEscape = regexp.MustCompile(`\x1b(?:[@-Z\\-_]|\[[0-9;]*[a-zA-Z])`)
 
 type GetBuildLogResponse struct {
 	LogLines   string `json:"log_lines" jsonschema_description:"The requested lines of the build log."`
@@ -85,6 +90,7 @@ var GetBuildLog = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("get log", err), nil
 		}
+		log = ansiEscape.ReplaceAllString(log, "")
 		logWindow := logWindow{Log: log, Offset: offset, Limit: limit}
 		a, err := json.Marshal(logWindow.Peek())
 		if err != nil {

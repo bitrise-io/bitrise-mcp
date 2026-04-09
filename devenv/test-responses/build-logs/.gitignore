@@ -1,0 +1,2 @@
+# Raw log fixtures may contain sensitive build output
+*.txt
