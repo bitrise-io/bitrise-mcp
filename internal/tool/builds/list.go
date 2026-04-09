@@ -2,6 +2,7 @@ package builds
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -38,6 +39,9 @@ var List = bitrise.Tool{
 		mcp.WithNumber("limit",
 			mcp.Description("Max number of elements per page (default: 50)"),
 		),
+		mcp.WithBoolean("verbose",
+			mcp.Description("Include all build details. Default: false"),
+		),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),
@@ -64,8 +68,9 @@ var List = bitrise.Tool{
 			params["limit"] = strconv.Itoa(request.GetInt("limit", 50))
 		}
 
+		appSlug := request.GetString("app_slug", "")
 		path := "/builds"
-		if appSlug := request.GetString("app_slug", ""); appSlug != "" {
+		if appSlug != "" {
 			path = fmt.Sprintf("/apps/%s/builds", appSlug)
 		}
 
@@ -78,6 +83,63 @@ var List = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
 		}
-		return mcp.NewToolResultText(res), nil
+
+		var response map[string]any
+		if err := json.Unmarshal([]byte(res), &response); err != nil {
+			return mcp.NewToolResultText(res), nil
+		}
+
+		verbose := request.GetBool("verbose", false)
+		if builds, ok := response["data"].([]any); ok {
+			for _, item := range builds {
+				build, ok := item.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				// credit_cost is billing metadata — not useful for understanding build
+				// results and repeated verbatim on every row.
+				delete(build, "credit_cost")
+				// Redundant with commit_hash; the URL can be reconstructed from the repo
+				// URL and hash when needed.
+				delete(build, "commit_view_url")
+				// Internal processing/delivery state — not meaningful to the caller.
+				delete(build, "environment_prepare_finished_at")
+				delete(build, "is_processed")
+				delete(build, "is_status_sent")
+				delete(build, "log_format")
+				// pull_request_id == 0 means this is not a PR build; omit rather than
+				// forcing the caller to distinguish 0 from a real PR number.
+				if v, ok := build["pull_request_id"].(float64); ok && v == 0 {
+					delete(build, "pull_request_id")
+				}
+
+				// original_build_params duplicates branch, commit_hash, commit_message
+				// and adds only internal PR plumbing fields (head/merge branch refs)
+				// that are rarely needed. The pull_request_id at the top level is enough.
+				if !verbose {
+					delete(build, "original_build_params")
+				}
+
+				// When the caller has already scoped by app_slug, the embedded
+				// repository object repeats the same app metadata on every build row.
+				// Without app_slug it at least identifies which app owns the build, so
+				// we keep a minimal subset instead of the full object.
+				if repo, ok := build["repository"].(map[string]any); ok {
+					if appSlug != "" && !verbose {
+						delete(build, "repository")
+					} else if !verbose {
+						build["repository"] = map[string]any{
+							"slug":       repo["slug"],
+							"title":      repo["title"],
+							"repo_owner": repo["repo_owner"],
+							"repo_name":  repo["repo_slug"],
+						}
+					}
+				}
+			}
+		}
+
+		return mcp.NewToolResultStructuredOnly(response), nil
 	},
 }
