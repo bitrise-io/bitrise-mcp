@@ -29,6 +29,7 @@ Uses Bitrise's hosted server at https://mcp.bitrise.io. Requires Cursor v0.48.0+
 {
   "mcpServers": {
     "bitrise": {
+      "type": "http",
       "url": "https://mcp.bitrise.io",
       "headers": {
         "Authorization": "Bearer YOUR_BITRISE_PAT"
