@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, code-push`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -494,76 +494,190 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `workspace_slug` (optional): Slug of the Bitrise workspace. When provided, lists stacks available for that workspace (including custom stacks). When omitted, lists globally available stacks.
 
+### CodePush
+
+68. `codepush_list_deployments`
+   - List CodePush deployments for a Bitrise app.
+   - Arguments:
+     - `app_id`: Identifier of the Bitrise app.
+     - `search`: (Optional) Search deployments by name. The filter is case-sensitive.
+     - `items_per_page`: (Optional) Maximum number of deployments per page (default: 10).
+     - `page`: (Optional) Page number to return (default: 1).
+
+69. `codepush_get_deployment`
+   - Get a specific CodePush deployment by its ID.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush deployment.
+
+70. `codepush_create_deployment`
+   - Create a new CodePush deployment for a Bitrise app.
+   - Arguments:
+     - `name`: Name for the new deployment.
+     - `app_id`: Identifier of the Bitrise app.
+     - `key`: (Optional) Deployment key. Auto-generated if not provided.
+
+71. `codepush_update_deployment`
+   - Update the name of an existing CodePush deployment.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush deployment.
+     - `name`: New name for the deployment.
+
+72. `codepush_delete_deployment`
+   - Delete a CodePush deployment. This action is irreversible.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush deployment to delete.
+
+73. `codepush_promote_deployment`
+   - Promote a package from a source deployment to a target deployment. The most recent package in the source deployment is promoted unless package_id is specified.
+   - Arguments:
+     - `id`: Identifier (UUID) of the source deployment.
+     - `target_deployment_id`: Identifier (UUID) of the target deployment.
+     - `package_id`: (Optional) UUID of a specific package to promote. Defaults to most recent.
+     - `app_version`: (Optional) Semver app version constraint for the promoted package.
+     - `description`: (Optional) Description for the promoted package.
+     - `disabled`: (Optional) If true, clients will not download this update.
+     - `mandatory`: (Optional) If true, clients must install immediately.
+     - `rollout`: (Optional) Percentage (0-100) of users who receive this update.
+
+74. `codepush_rollback_deployment`
+   - Rollback a CodePush deployment to its previous version.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush deployment to rollback.
+     - `package_id`: (Optional) UUID of a specific package to rollback to. Defaults to the previous package.
+
+75. `codepush_list_updates`
+   - List CodePush updates for a specific deployment.
+   - Arguments:
+     - `deployment_id`: Identifier (UUID) of the CodePush deployment.
+     - `search`: (Optional) Search updates by label or description. The filter is case-sensitive.
+     - `items_per_page`: (Optional) Maximum number of updates per page (default: 10).
+     - `page`: (Optional) Page number to return (default: 1).
+
+76. `codepush_get_update`
+   - Get a specific CodePush update by its ID.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush update.
+
+77. `codepush_patch_update`
+   - Patch a CodePush update to change its disabled state, mandatory flag, or rollout percentage. Only include fields you want to change — omitted fields are left unchanged.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush update.
+     - `disabled`: (Optional) Set to 'true' to disable or 'false' to re-enable.
+     - `mandatory`: (Optional) Set to 'true' to make mandatory or 'false' to make optional.
+     - `rollout`: (Optional) Percentage (0-100) of users who receive this update.
+
+78. `codepush_delete_update`
+   - Delete a CodePush update. This action is irreversible.
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush update to delete.
+
+79. `codepush_get_update_status`
+   - Get the processing status of a CodePush update (e.g. pending, ready, failed).
+   - Arguments:
+     - `id`: Identifier (UUID) of the CodePush update.
+
+80. `codepush_generate_update_upload_url`
+   - Generate a signed upload URL (valid 1 hour) for uploading a CodePush update bundle. The response contains the URL, HTTP method, and headers needed for a direct upload. After uploading, check status with `codepush_get_update_status`.
+   - Arguments:
+     - `id`: Client-generated UUID for the new update.
+     - `deployment_id`: Identifier (UUID) of the deployment this update belongs to.
+     - `app_version`: Semver version of the app this update targets (e.g. '1.2.3').
+     - `file_name`: File name of the update bundle to be uploaded (with extension).
+     - `file_size_bytes`: Byte size of the update bundle file as a string.
+     - `description`: (Optional) Description for this update.
+     - `disabled`: (Optional) If true, clients will not download this update after upload.
+     - `mandatory`: (Optional) If true, clients must install this update immediately.
+     - `rollout`: (Optional) Percentage (0-100) of users who receive this update. Defaults to 100.
+
+81. `codepush_get_metrics`
+   - Get workspace-level CodePush usage metrics including data transfer, storage, and monthly active users, along with their limits and billing cycle information.
+   - Arguments:
+     - `workspace_slug`: Slug of the Bitrise workspace.
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration |
-|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|
-| list_apps | ✅ | | | | | | | | | ✅ | | |
-| register_app | ✅ | | | | | | | | | | | |
-| finish_bitrise_app | ✅ | | | | | | | | | | | |
-| get_app | ✅ | | | | | | | | | ✅ | | |
-| delete_app | ✅ | | | | | | | | | | | |
-| update_app | ✅ | | | | | | | | | | | |
-| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | |
-| update_bitrise_yml | ✅ | | | | | | | | | | | |
-| list_branches | ✅ | | | | | | | | | ✅ | | |
-| register_ssh_key | ✅ | | | | | | | | | | | |
-| register_webhook | ✅ | | | | | | | | | | | |
-| list_builds | | ✅ | | | | | | | | ✅ | | |
-| trigger_bitrise_build | | ✅ | | | | | | | | | | |
-| get_build | | ✅ | | | | | | | | ✅ | | |
-| abort_build | | ✅ | | | | | | | | | | |
-| get_build_log | | ✅ | | | | | | | | ✅ | | |
-| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | |
-| list_build_workflows | | ✅ | | | | | | | | ✅ | | |
-| get_build_steps | | ✅ | | | | | | | | ✅ | | |
-| list_artifacts | | | | | ✅ | | | | | ✅ | | |
-| get_artifact | | | | | ✅ | | | | | ✅ | | |
-| delete_artifact | | | | | ✅ | | | | | | | |
-| update_artifact | | | | | ✅ | | | | | | | |
-| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | |
-| delete_outgoing_webhook | | | | ✅ | | | | | | | | |
-| update_outgoing_webhook | | | | ✅ | | | | | | | | |
-| create_outgoing_webhook | | | | ✅ | | | | | | | | |
-| list_cache_items | | | | | | | ✅ | | | ✅ | | |
-| delete_all_cache_items | | | | | | | ✅ | | | | | |
-| delete_cache_item | | | | | | | ✅ | | | | | |
-| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | |
-| list_pipelines | | | | | | | | ✅ | | ✅ | | |
-| get_pipeline | | | | | | | | ✅ | | ✅ | | |
-| abort_pipeline | | | | | | | | ✅ | | | | |
-| rebuild_pipeline | | | | | | | | ✅ | | | | |
-| list_group_roles | | | | | | ✅ | | | | ✅ | | |
-| replace_group_roles | | | | | | ✅ | | | | | | |
-| list_workspaces | | | ✅ | | | | | | | ✅ | | |
-| get_workspace | | | ✅ | | | | | | | ✅ | | |
-| get_workspace_groups | | | ✅ | | | | | | | ✅ | | |
-| create_workspace_group | | | ✅ | | | | | | | | | |
-| get_workspace_members | | | ✅ | | | | | | | ✅ | | |
-| invite_member_to_workspace | | | ✅ | | | | | | | | | |
-| add_member_to_group | | | ✅ | | | | | | | | | |
-| me | | | | | | | | | ✅ | ✅ | |
-| create_connected_app | | | | | | | | | | | ✅ | |
-| list_connected_apps | | | | | | | | | | ✅ | ✅ | |
-| get_connected_app | | | | | | | | | | ✅ | ✅ | |
-| update_connected_app | | | | | | | | | | | ✅ | |
-| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | |
-| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | |
-| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ | |
-| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | |
-| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | |
-| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | |
-| create_tester_group | | | | | | | | | | | ✅ | |
-| notify_tester_group | | | | | | | | | | | ✅ | |
-| add_testers_to_tester_group | | | | | | | | | | | ✅ | |
-| update_tester_group | | | | | | | | | | | ✅ | |
-| list_tester_groups | | | | | | | | | | ✅ | ✅ | |
-| get_tester_group | | | | | | | | | | ✅ | ✅ | |
-| get_potential_testers | | | | | | | | | | ✅ | ✅ | |
-| get_testers | | | | | | | | | | ✅ | ✅ | |
-| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ |
-| step_search | | | | | | | | | | ✅ | | ✅ |
-| step_inputs | | | | | | | | | | ✅ | | ✅ |
-| list_available_stacks | | | | | | | | | | ✅ | | ✅ |
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | code-push |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|-----------|
+| list_apps | ✅ | | | | | | | | | ✅ | | | |
+| register_app | ✅ | | | | | | | | | | | | |
+| finish_bitrise_app | ✅ | | | | | | | | | | | | |
+| get_app | ✅ | | | | | | | | | ✅ | | | |
+| delete_app | ✅ | | | | | | | | | | | | |
+| update_app | ✅ | | | | | | | | | | | | |
+| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | |
+| update_bitrise_yml | ✅ | | | | | | | | | | | | |
+| list_branches | ✅ | | | | | | | | | ✅ | | | |
+| register_ssh_key | ✅ | | | | | | | | | | | | |
+| register_webhook | ✅ | | | | | | | | | | | | |
+| list_builds | | ✅ | | | | | | | | ✅ | | | |
+| trigger_bitrise_build | | ✅ | | | | | | | | | | | |
+| get_build | | ✅ | | | | | | | | ✅ | | | |
+| abort_build | | ✅ | | | | | | | | | | | |
+| get_build_log | | ✅ | | | | | | | | ✅ | | | |
+| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | |
+| list_build_workflows | | ✅ | | | | | | | | ✅ | | | |
+| get_build_steps | | ✅ | | | | | | | | ✅ | | | |
+| list_artifacts | | | | | ✅ | | | | | ✅ | | | |
+| get_artifact | | | | | ✅ | | | | | ✅ | | | |
+| delete_artifact | | | | | ✅ | | | | | | | | |
+| update_artifact | | | | | ✅ | | | | | | | | |
+| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | |
+| delete_outgoing_webhook | | | | ✅ | | | | | | | | | |
+| update_outgoing_webhook | | | | ✅ | | | | | | | | | |
+| create_outgoing_webhook | | | | ✅ | | | | | | | | | |
+| list_cache_items | | | | | | | ✅ | | | ✅ | | | |
+| delete_all_cache_items | | | | | | | ✅ | | | | | | |
+| delete_cache_item | | | | | | | ✅ | | | | | | |
+| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | |
+| list_pipelines | | | | | | | | ✅ | | ✅ | | | |
+| get_pipeline | | | | | | | | ✅ | | ✅ | | | |
+| abort_pipeline | | | | | | | | ✅ | | | | | |
+| rebuild_pipeline | | | | | | | | ✅ | | | | | |
+| list_group_roles | | | | | | ✅ | | | | ✅ | | | |
+| replace_group_roles | | | | | | ✅ | | | | | | | |
+| list_workspaces | | | ✅ | | | | | | | ✅ | | | |
+| get_workspace | | | ✅ | | | | | | | ✅ | | | |
+| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | |
+| create_workspace_group | | | ✅ | | | | | | | | | | |
+| get_workspace_members | | | ✅ | | | | | | | ✅ | | | |
+| invite_member_to_workspace | | | ✅ | | | | | | | | | | |
+| add_member_to_group | | | ✅ | | | | | | | | | | |
+| me | | | | | | | | | ✅ | ✅ | | | |
+| create_connected_app | | | | | | | | | | | ✅ | | |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ | | |
+| get_connected_app | | | | | | | | | | ✅ | ✅ | | |
+| update_connected_app | | | | | | | | | | | ✅ | | |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | |
+| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | |
+| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ | | |
+| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | |
+| create_tester_group | | | | | | | | | | | ✅ | | |
+| notify_tester_group | | | | | | | | | | | ✅ | | |
+| add_testers_to_tester_group | | | | | | | | | | | ✅ | | |
+| update_tester_group | | | | | | | | | | | ✅ | | |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ | | |
+| get_tester_group | | | | | | | | | | ✅ | ✅ | | |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ | | |
+| get_testers | | | | | | | | | | ✅ | ✅ | | |
+| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | |
+| step_search | | | | | | | | | | ✅ | | ✅ | |
+| step_inputs | | | | | | | | | | ✅ | | ✅ | |
+| list_available_stacks | | | | | | | | | | ✅ | | ✅ | |
+| codepush_list_deployments | | | | | | | | | | ✅ | | | ✅ |
+| codepush_get_deployment | | | | | | | | | | ✅ | | | ✅ |
+| codepush_create_deployment | | | | | | | | | | | | | ✅ |
+| codepush_update_deployment | | | | | | | | | | | | | ✅ |
+| codepush_delete_deployment | | | | | | | | | | | | | ✅ |
+| codepush_promote_deployment | | | | | | | | | | | | | ✅ |
+| codepush_rollback_deployment | | | | | | | | | | | | | ✅ |
+| codepush_list_updates | | | | | | | | | | ✅ | | | ✅ |
+| codepush_get_update | | | | | | | | | | ✅ | | | ✅ |
+| codepush_patch_update | | | | | | | | | | | | | ✅ |
+| codepush_delete_update | | | | | | | | | | | | | ✅ |
+| codepush_get_update_status | | | | | | | | | | ✅ | | | ✅ |
+| codepush_generate_update_upload_url | | | | | | | | | | | | | ✅ |
+| codepush_get_metrics | | | | | | | | | | ✅ | | | ✅ |
