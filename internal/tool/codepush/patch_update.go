@@ -27,7 +27,7 @@ var PatchUpdate = bitrise.Tool{
 			mcp.Description("Percentage (0-100) of users who will receive this update. Omit to leave unchanged."),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
