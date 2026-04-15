@@ -10,7 +10,7 @@ import (
 )
 
 var GetUpdate = bitrise.Tool{
-	APIGroups: []string{"code-push", "read-only"},
+	APIGroups: []string{"release-management-code-push", "release-management", "read-only"},
 	Definition: mcp.NewTool("codepush_get_update",
 		mcp.WithDescription("Get a specific CodePush update by its ID."),
 		mcp.WithString("id",

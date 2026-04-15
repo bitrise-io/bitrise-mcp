@@ -10,7 +10,7 @@ import (
 )
 
 var PatchUpdate = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_patch_update",
 		mcp.WithDescription("Patch a CodePush update to change its disabled state, mandatory flag, or rollout percentage. Only include fields you want to change — omitted fields are left unchanged."),
 		mcp.WithString("id",

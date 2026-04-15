@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteDeployment = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_delete_deployment",
 		mcp.WithDescription("Delete a CodePush deployment. This action is irreversible."),
 		mcp.WithString("id",

@@ -10,7 +10,7 @@ import (
 )
 
 var PromoteDeployment = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_promote_deployment",
 		mcp.WithDescription("Promote a package from a source deployment to a target deployment. The most recent package in the source deployment is promoted unless package_id is specified."),
 		mcp.WithString("id",

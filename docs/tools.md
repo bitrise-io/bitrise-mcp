@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, code-push`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -598,8 +598,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | code-push |
-|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|-----------|
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|
 | list_apps | ✅ | | | | | | | | | ✅ | | | |
 | register_app | ✅ | | | | | | | | | | | | |
 | finish_bitrise_app | ✅ | | | | | | | | | | | | |
@@ -667,17 +667,17 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | step_search | | | | | | | | | | ✅ | | ✅ | |
 | step_inputs | | | | | | | | | | ✅ | | ✅ | |
 | list_available_stacks | | | | | | | | | | ✅ | | ✅ | |
-| codepush_list_deployments | | | | | | | | | | ✅ | | | ✅ |
-| codepush_get_deployment | | | | | | | | | | ✅ | | | ✅ |
-| codepush_create_deployment | | | | | | | | | | | | | ✅ |
-| codepush_update_deployment | | | | | | | | | | | | | ✅ |
-| codepush_delete_deployment | | | | | | | | | | | | | ✅ |
-| codepush_promote_deployment | | | | | | | | | | | | | ✅ |
-| codepush_rollback_deployment | | | | | | | | | | | | | ✅ |
-| codepush_list_updates | | | | | | | | | | ✅ | | | ✅ |
-| codepush_get_update | | | | | | | | | | ✅ | | | ✅ |
-| codepush_patch_update | | | | | | | | | | | | | ✅ |
-| codepush_delete_update | | | | | | | | | | | | | ✅ |
-| codepush_get_update_status | | | | | | | | | | ✅ | | | ✅ |
-| codepush_generate_update_upload_url | | | | | | | | | | | | | ✅ |
-| codepush_get_metrics | | | | | | | | | | ✅ | | | ✅ |
+| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | ✅ |
+| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | ✅ |
+| codepush_create_deployment | | | | | | | | | | | ✅ | | ✅ |
+| codepush_update_deployment | | | | | | | | | | | ✅ | | ✅ |
+| codepush_delete_deployment | | | | | | | | | | | ✅ | | ✅ |
+| codepush_promote_deployment | | | | | | | | | | | ✅ | | ✅ |
+| codepush_rollback_deployment | | | | | | | | | | | ✅ | | ✅ |
+| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | ✅ |
+| codepush_get_update | | | | | | | | | | ✅ | ✅ | | ✅ |
+| codepush_patch_update | | | | | | | | | | | ✅ | | ✅ |
+| codepush_delete_update | | | | | | | | | | | ✅ | | ✅ |
+| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ |
+| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ |
+| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ |

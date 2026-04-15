@@ -10,7 +10,7 @@ import (
 )
 
 var RollbackDeployment = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_rollback_deployment",
 		mcp.WithDescription("Rollback a CodePush deployment to its previous version, or to a specific package if package_id is provided."),
 		mcp.WithString("id",

@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteUpdate = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_delete_update",
 		mcp.WithDescription("Delete a CodePush update. This action is irreversible."),
 		mcp.WithString("id",

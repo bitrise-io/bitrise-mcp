@@ -10,7 +10,7 @@ import (
 )
 
 var ListDeployments = bitrise.Tool{
-	APIGroups: []string{"code-push", "read-only"},
+	APIGroups: []string{"release-management-code-push", "release-management", "read-only"},
 	Definition: mcp.NewTool("codepush_list_deployments",
 		mcp.WithDescription("List CodePush deployments for a Bitrise app."),
 		mcp.WithString("app_id",

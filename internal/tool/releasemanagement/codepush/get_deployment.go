@@ -10,7 +10,7 @@ import (
 )
 
 var GetDeployment = bitrise.Tool{
-	APIGroups: []string{"code-push", "read-only"},
+	APIGroups: []string{"release-management-code-push", "release-management", "read-only"},
 	Definition: mcp.NewTool("codepush_get_deployment",
 		mcp.WithDescription("Get a specific CodePush deployment by its ID."),
 		mcp.WithString("id",

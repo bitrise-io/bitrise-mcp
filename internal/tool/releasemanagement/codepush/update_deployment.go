@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateDeployment = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_update_deployment",
 		mcp.WithDescription("Update the name of an existing CodePush deployment."),
 		mcp.WithString("id",

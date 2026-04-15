@@ -9,7 +9,7 @@ import (
 )
 
 var GetMetrics = bitrise.Tool{
-	APIGroups: []string{"code-push", "read-only"},
+	APIGroups: []string{"release-management-code-push", "release-management", "read-only"},
 	Definition: mcp.NewTool("codepush_get_metrics",
 		mcp.WithDescription("Get workspace-level CodePush usage metrics including data transfer, storage, and monthly active users, along with their limits and billing cycle information."),
 		mcp.WithString("workspace_slug",

@@ -10,7 +10,7 @@ import (
 )
 
 var GetUpdateStatus = bitrise.Tool{
-	APIGroups: []string{"code-push", "read-only"},
+	APIGroups: []string{"release-management-code-push", "release-management", "read-only"},
 	Definition: mcp.NewTool("codepush_get_update_status",
 		mcp.WithDescription("Get the processing status of a CodePush update (e.g. pending, ready, failed)."),
 		mcp.WithString("id",

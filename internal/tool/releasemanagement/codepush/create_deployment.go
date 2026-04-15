@@ -9,7 +9,7 @@ import (
 )
 
 var CreateDeployment = bitrise.Tool{
-	APIGroups: []string{"code-push"},
+	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_create_deployment",
 		mcp.WithDescription("Create a new CodePush deployment for a Bitrise app."),
 		mcp.WithString("name",
