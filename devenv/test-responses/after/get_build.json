@@ -1,0 +1,26 @@
+{
+  "data": {
+    "abort_reason": null,
+    "branch": "ER-2664-ai-agent-activity-history",
+    "build_number": 324524,
+    "commit_hash": "792bc8fceb86bb8390ecc420fb4e6759959792b1",
+    "commit_message": "[ER-2664] AI agent activity history",
+    "finished_at": "2026-04-03T17:29:13Z",
+    "is_on_hold": false,
+    "machine_type_id": "g2.linux.medium",
+    "pipeline_workflow_id": "51a11b57-2091-4416-9e05-d36381438868",
+    "pull_request_id": 19170,
+    "pull_request_target_branch": "master",
+    "pull_request_view_url": null,
+    "rebuildable": true,
+    "slug": "7feee0a4-61f4-4eb6-a019-368cf9ac0d82",
+    "stack_identifier": "linux-docker-android-22.04",
+    "started_on_worker_at": "2026-04-03T17:28:26Z",
+    "status": 1,
+    "status_text": "success",
+    "tag": null,
+    "triggered_at": "2026-04-03T17:28:24Z",
+    "triggered_by": "webhook-github/balazsczap",
+    "triggered_workflow": "ci-lint-be-zeitwerk"
+  }
+}
