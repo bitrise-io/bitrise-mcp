@@ -1,0 +1,7 @@
+# Dev Containers
+.devcontainer/devcontainer-lock.json
+
+# Go build output
+*.exe
+*.test
+*.out
