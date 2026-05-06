@@ -12,15 +12,17 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Registration
 
+> **Note:** The `registration` group is **not enabled by default**. It is intended for onboarding flows where the user does not yet have a Bitrise account or PAT. Enable it explicitly with `ENABLED_API_GROUPS=registration` (stdio) or `x-bitrise-enabled-api-groups: registration` (HTTP).
+
 1. `register`
    - Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address.
-   - API group: `registration`
+   - API group: `registration` (opt-in)
    - Arguments:
      - `email` (required): Email address of the user to register
 
 2. `verify_registration`
    - Verify a pending Bitrise registration using the OTP sent to the user's email. Returns an API token and workspace slug for use with authenticated tools.
-   - API group: `registration`
+   - API group: `registration` (opt-in)
    - Arguments:
      - `email` (required): Email address used during registration
      - `otp` (required): One-time password sent to the email address
