@@ -6,23 +6,21 @@ Tools are grouped by their "API group", and you can pass the groups you want to 
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
-By default the following API groups are enabled: `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management`. You can override this using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
+By default the following API groups are enabled: `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,registration`. You can override this using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
 
 ## Tools
 
 ### Registration
 
-> **Note:** The `registration` group is **not enabled by default**. It is intended for onboarding flows where the user does not yet have a Bitrise account or PAT. Enable it explicitly with `ENABLED_API_GROUPS=registration` (stdio) or `x-bitrise-enabled-api-groups: registration` (HTTP).
-
 1. `register`
    - Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address.
-   - API group: `registration` (opt-in)
+   - API group: `registration`
    - Arguments:
      - `email` (required): Email address of the user to register
 
 2. `verify_registration`
    - Verify a pending Bitrise registration using the OTP sent to the user's email. Returns an API token and workspace slug for use with authenticated tools.
-   - API group: `registration` (opt-in)
+   - API group: `registration`
    - Arguments:
      - `email` (required): Email address used during registration
      - `otp` (required): One-time password sent to the email address

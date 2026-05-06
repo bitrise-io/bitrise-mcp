@@ -37,7 +37,7 @@ type config struct {
 	// ignored.
 	BitriseToken string `env:"BITRISE_TOKEN"`
 	// EnabledAPIGroups is a comma-separated list of API groups that are enabled.
-	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management"`
+	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,registration"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
 	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
