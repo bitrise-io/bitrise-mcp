@@ -22,17 +22,22 @@ const (
 )
 
 type CallAPIParams struct {
-	Method  string
-	BaseURL string
-	Path    string
-	Params  map[string]any
-	Body    any
+	Method   string
+	BaseURL  string
+	Path     string
+	Params   map[string]any
+	Body     any
+	SkipAuth bool
 }
 
 func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
-	apiKey, err := patFromCtx(ctx)
-	if err != nil {
-		return "", errors.New("set authorization header to your bitrise pat")
+	var apiKey string
+	if !p.SkipAuth {
+		key, err := patFromCtx(ctx)
+		if err != nil || strings.TrimSpace(key) == "" {
+			return "", errors.New("missing Bitrise authentication: set BITRISE_TOKEN in stdio mode or send Authorization: Bearer <bitrise_pat> in HTTP mode")
+		}
+		apiKey = key
 	}
 
 	var reqBody io.Reader
@@ -74,7 +79,9 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", apiKey)
+	if apiKey != "" {
+		req.Header.Set("Authorization", apiKey)
+	}
 
 	httpClient := http.Client{Timeout: 30 * time.Second}
 	client := httptrace.WrapClient(&httpClient)
