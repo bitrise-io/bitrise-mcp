@@ -61,7 +61,7 @@ var VerifyRegistration = bitrise.Tool{
 			return mcp.NewToolResultErrorFromErr("parse response", err), nil
 		}
 
-		parsed.NextSteps = "Registration verified successfully. Ask the user if they would like to update their MCP configuration to use the new credentials (set BITRISE_TOKEN to the returned api_token). If yes, guide them through updating the config, then ask them to restart the MCP agent for the changes to take effect."
+		parsed.NextSteps = "Registration verified successfully. Ask the user if they would like to update their MCP configuration to use the new credentials. For stdio transport set the BITRISE_TOKEN environment variable to the returned api_token; for HTTP transport pass it as the Authorization: Bearer <api_token> header. Once updated, ask the user to restart the MCP agent for the changes to take effect."
 
 		out, err := json.Marshal(parsed)
 		if err != nil {

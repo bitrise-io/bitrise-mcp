@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	APIBaseURL             = "https://api.bitrise.io/v0.1"
-	APIRMBaseURL           = "https://api.bitrise.io/release-management/v1"
+	APIBaseURL         = "https://api.bitrise.io/v0.1"
+	APIRMBaseURL       = "https://api.bitrise.io/release-management/v1"
 	APICodePushBaseURL = "https://api.bitrise.io/release-management/v2/code-push/v1"
 	userAgent          = "bitrise-mcp/1.0"
 )
