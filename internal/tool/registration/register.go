@@ -29,8 +29,8 @@ var Register = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:   http.MethodPost,
-			BaseURL:  bitrise.APIRegistrationBaseURL,
-			Path:     "/register", // TODO: confirm actual endpoint path
+			BaseURL:  bitrise.APIBaseURL,
+			Path:     "/agent-signup/start",
 			Body:     map[string]any{"email": email},
 			SkipAuth: true,
 		})

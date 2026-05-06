@@ -47,8 +47,8 @@ var VerifyRegistration = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:   http.MethodPost,
-			BaseURL:  bitrise.APIRegistrationBaseURL,
-			Path:     "/verify", // TODO: confirm actual endpoint path
+			BaseURL:  bitrise.APIBaseURL,
+			Path:     "/agent-signup/confirm",
 			Body:     map[string]any{"email": email, "otp": otp},
 			SkipAuth: true,
 		})
