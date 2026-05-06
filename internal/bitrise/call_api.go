@@ -30,6 +30,15 @@ type CallAPIParams struct {
 	SkipAuth bool
 }
 
+type APIError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("unexpected status code %d; response body: %s", e.StatusCode, e.Body)
+}
+
 func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	var apiKey string
 	if !p.SkipAuth {
@@ -92,10 +101,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	defer res.Body.Close()
 	if res.StatusCode >= 400 {
 		resBody, _ := io.ReadAll(res.Body)
-		return "", fmt.Errorf(
-			"unexpected status code %d; response body: %s",
-			res.StatusCode, resBody,
-		)
+		return "", &APIError{StatusCode: res.StatusCode, Body: string(resBody)}
 	}
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {

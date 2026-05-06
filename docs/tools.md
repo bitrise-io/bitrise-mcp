@@ -13,16 +13,16 @@ By default the following API groups are enabled: `apps,builds,workspaces,outgoin
 ### Registration
 
 1. `register`
-   - Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address.
+   - Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address. Returns a `pending_signup_id`. After a successful response, the agent should ask the user for the OTP they received via email, then call `verify_registration` with that OTP and the returned `pending_signup_id`.
    - API group: `registration`
    - Arguments:
      - `email` (required): Email address of the user to register
 
 2. `verify_registration`
-   - Verify a pending Bitrise registration using the OTP sent to the user's email. Returns an API token and workspace slug for use with authenticated tools.
+   - Verify a pending Bitrise registration using the OTP sent to the user's email. Returns an API token and (when a workspace was auto-created) a workspace slug for use with authenticated tools.
    - API group: `registration`
    - Arguments:
-     - `email` (required): Email address used during registration
+     - `pending_signup_id` (required): The `pending_signup_id` returned by the `register` tool
      - `otp` (required): One-time password sent to the email address
 
 ### Apps
