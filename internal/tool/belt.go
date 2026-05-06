@@ -12,6 +12,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/configuration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/registration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/user"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/webhooks"
@@ -107,6 +108,10 @@ func NewBelt() *Belt {
 		releasemanagement.GetTesterGroup,
 		releasemanagement.GetPotentialTesters,
 		releasemanagement.GetTesters,
+
+		// Registration
+		registration.Register,
+		registration.VerifyRegistration,
 
 		// Configuration
 		configuration.ValidateBitriseYML,

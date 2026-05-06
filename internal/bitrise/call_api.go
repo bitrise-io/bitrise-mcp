@@ -15,24 +15,31 @@ import (
 )
 
 const (
-	APIBaseURL         = "https://api.bitrise.io/v0.1"
-	APIRMBaseURL       = "https://api.bitrise.io/release-management/v1"
-	APICodePushBaseURL = "https://api.bitrise.io/release-management/v2/code-push/v1"
-	userAgent          = "bitrise-mcp/1.0"
+	APIBaseURL             = "https://api.bitrise.io/v0.1"
+	APIRMBaseURL           = "https://api.bitrise.io/release-management/v1"
+	APICodePushBaseURL     = "https://api.bitrise.io/release-management/v2/code-push/v1"
+	// TODO: replace with real registration API base URL before merging
+	APIRegistrationBaseURL = "https://api.bitrise.io/placeholder/registration"
+	userAgent              = "bitrise-mcp/1.0"
 )
 
 type CallAPIParams struct {
-	Method  string
-	BaseURL string
-	Path    string
-	Params  map[string]any
-	Body    any
+	Method   string
+	BaseURL  string
+	Path     string
+	Params   map[string]any
+	Body     any
+	SkipAuth bool
 }
 
 func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
-	apiKey, err := patFromCtx(ctx)
-	if err != nil {
-		return "", errors.New("set authorization header to your bitrise pat")
+	var apiKey string
+	if !p.SkipAuth {
+		key, err := patFromCtx(ctx)
+		if err != nil {
+			return "", errors.New("set authorization header to your bitrise pat")
+		}
+		apiKey = key
 	}
 
 	var reqBody io.Reader
@@ -74,7 +81,9 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", apiKey)
+	if apiKey != "" {
+		req.Header.Set("Authorization", apiKey)
+	}
 
 	httpClient := http.Client{Timeout: 30 * time.Second}
 	client := httptrace.WrapClient(&httpClient)
