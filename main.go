@@ -137,10 +137,6 @@ func run() error {
 }
 
 func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
-	if cfg.BitriseToken == "" {
-		return fmt.Errorf("BITRISE_TOKEN must be provided in stdio transport mode")
-	}
-
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			return fn(bitrise.ContextWithPAT(ctx, cfg.BitriseToken), request)
