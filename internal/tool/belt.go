@@ -27,6 +27,8 @@ func NewBelt() *Belt {
 	var toolList = []bitrise.Tool{
 		// User
 		user.Me,
+		user.GetProviderConnectURL,
+		user.ListConnectedAccounts,
 
 		// Apps
 		apps.List,
