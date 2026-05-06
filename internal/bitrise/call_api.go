@@ -34,8 +34,8 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	var apiKey string
 	if !p.SkipAuth {
 		key, err := patFromCtx(ctx)
-		if err != nil {
-			return "", errors.New("set authorization header to your bitrise pat")
+		if err != nil || strings.TrimSpace(key) == "" {
+			return "", errors.New("missing Bitrise authentication: set BITRISE_TOKEN in stdio mode or send Authorization: Bearer <bitrise_pat> in HTTP mode")
 		}
 		apiKey = key
 	}
