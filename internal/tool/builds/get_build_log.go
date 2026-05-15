@@ -86,11 +86,7 @@ var GetBuildLog = bitrise.Tool{
 			return mcp.NewToolResultErrorFromErr("get log", err), nil
 		}
 		logWindow := logWindow{Log: log, Offset: offset, Limit: limit}
-		a, err := json.Marshal(logWindow.Peek())
-		if err != nil {
-			return mcp.NewToolResultErrorFromErr("marshal log window", err), nil
-		}
-		return mcp.NewToolResultText(string(a)), nil
+		return mcp.NewToolResultStructuredOnly(logWindow.Peek()), nil
 	},
 }
 
@@ -135,6 +131,9 @@ func getStepLog(resBitriseRaw string) (string, error) {
 	}
 	if err := json.Unmarshal([]byte(resBitriseRaw), &resBitrise); err != nil {
 		return "", fmt.Errorf("unmarshal bitrise response: %w", err)
+	}
+	if resBitrise.URL == "" {
+		return "[incomplete log: processing is still ongoing]", nil
 	}
 
 	rawLog, err := httpGet(resBitrise.URL)
