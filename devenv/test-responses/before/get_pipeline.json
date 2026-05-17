@@ -1,0 +1,366 @@
+{
+  "abort_reason": "",
+  "app": {
+    "slug": "46b6b9a78a418ee8"
+  },
+  "attempts": [
+    {
+      "id": "928d6966-be44-4ab2-921a-d46f9887389d",
+      "number_in_pipeline_build_scope": 1,
+      "status": "failed",
+      "triggered_at": "2026-04-03T17:27:33.012071Z"
+    }
+  ],
+  "credit_cost": 195,
+  "current_attempt_id": "928d6966-be44-4ab2-921a-d46f9887389d",
+  "finished_at": "2026-04-03T17:31:07.424333Z",
+  "id": "6ce998c6-cd89-4972-b278-09277ee7e402",
+  "name": "ci-pipeline",
+  "number_in_app_scope": 324524,
+  "put_on_hold_at": null,
+  "rebuildable": true,
+  "started_at": "2026-04-03T17:27:33.906013Z",
+  "status": "failed",
+  "triggered_at": "2026-04-03T17:27:33.012071Z",
+  "trigger_params": {
+    "commit_hash": "792bc8fceb86bb8390ecc420fb4e6759959792b1",
+    "commit_message": "[ER-2664] AI agent activity history",
+    "commit_messages": null,
+    "commit_paths": [],
+    "tag": "",
+    "branch": "ER-2664-ai-agent-activity-history",
+    "branch_repo_owner": "bitrise-io",
+    "branch_dest": "master",
+    "branch_dest_repo_owner": "bitrise-io",
+    "pull_request_id": "19170",
+    "pull_request_repository_url": "git@github.com:bitrise-io/bitrise-website.git",
+    "pull_request_author": "balazsczap",
+    "pull_request_merge_branch": "",
+    "pull_request_unverified_merge_branch": "pull/19170/merge",
+    "pull_request_head_branch": "pull/19170/head",
+    "environments": null
+  },
+  "triggered_by": "webhook-github/balazsczap",
+  "type": "dag",
+  "workflows": [
+    {
+      "credit_cost": 1,
+      "external_id": "8dc1c827-ff0b-4adf-b21a-5540479149bf",
+      "finished_at": "2026-04-03T17:27:59Z",
+      "id": "9d179ff8-7a8a-4e2c-a3ea-b167254f7434",
+      "name": "check-change-type",
+      "started_at": "2026-04-03T17:27:34Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": null,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "",
+      "finished_at": null,
+      "id": "ec39b79e-657d-4195-9eb6-b19d7fee23a1",
+      "name": "check-permission-diffs",
+      "started_at": null,
+      "status": "skipped",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 1,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "d1ac98b7-a374-4b96-a251-27254f21cf4f",
+      "finished_at": "2026-04-03T17:29:13Z",
+      "id": "23a857c9-14ab-4d9c-a855-78fa9c7f200e",
+      "name": "ci-build-assets-sprockets",
+      "started_at": "2026-04-03T17:28:25Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "dbcfa6e4-44e8-4b8e-b054-d634a5315c79",
+      "finished_at": "2026-04-03T17:29:59Z",
+      "id": "d8bc1bf8-59bc-4302-91a2-1bce87be6459",
+      "name": "ci-build-assets-webpacker",
+      "started_at": "2026-04-03T17:28:01Z",
+      "status": "failed",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 1,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "4960330e-a267-4f0e-9fb5-2f1b8dda33da",
+      "finished_at": "2026-04-03T17:28:24Z",
+      "id": "0ef32ce1-b470-4893-9a8c-7405de536a1a",
+      "name": "ci-build-test-image",
+      "started_at": "2026-04-03T17:28:01Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 1,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "41d9c2b1-05bc-4772-902e-ddbee00cc092",
+      "finished_at": "2026-04-03T17:28:22Z",
+      "id": "2c71267f-f427-494c-ab38-f93e61f4a5d2",
+      "name": "ci-check-env-vars",
+      "started_at": "2026-04-03T17:28:00Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 5,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "a9e3e828-fd86-4d57-8f5c-eba27b9a2ec1",
+      "finished_at": "2026-04-03T17:29:14Z",
+      "id": "e51fb98e-bc1a-4ad7-954c-d611d56f59a6",
+      "name": "ci-check-schema",
+      "started_at": "2026-04-03T17:28:28Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "246a98f0-0065-4b80-bc4c-b84321c87189",
+      "finished_at": "2026-04-03T17:30:18Z",
+      "id": "9e3e8532-7f45-4a04-b470-f7af508e4be6",
+      "name": "ci-check-swagger",
+      "started_at": "2026-04-03T17:28:25Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 15,
+      "external_id": "648f4075-1d0e-4442-8c56-fd1328c38b54",
+      "finished_at": "2026-04-03T17:30:20Z",
+      "id": "19fc352f-e632-42ae-bd79-f4d114769c5b",
+      "name": "ci-deploy-like-build-backend",
+      "started_at": "2026-04-03T17:27:38Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "6b1ffe22-7a1c-4da6-8d25-5d6c1c6e57c9",
+      "finished_at": "2026-04-03T17:29:02Z",
+      "id": "d9de926b-d76e-44cb-82dc-9f66a4d96f89",
+      "name": "ci-frontend-lint",
+      "started_at": "2026-04-03T17:28:01Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 20,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "704358cb-4cd7-41b1-9060-6ff6819c13f1",
+      "finished_at": "2026-04-03T17:31:07Z",
+      "id": "1260a504-81d9-4674-a6bf-d54f5125e979",
+      "name": "ci-frontend-shard_0",
+      "started_at": "2026-04-03T17:28:02Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 15,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "29d21fd8-eeeb-4804-90cb-0a314b9c6b55",
+      "finished_at": "2026-04-03T17:30:51Z",
+      "id": "aebe824d-b192-4346-9806-3919adeb0327",
+      "name": "ci-frontend-shard_1",
+      "started_at": "2026-04-03T17:28:02Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 15,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "97a07b6a-c12c-4a07-a86d-0b3bf5d35302",
+      "finished_at": "2026-04-03T17:30:57Z",
+      "id": "a367d79d-60cc-47bd-9a0f-ff97d0735c0c",
+      "name": "ci-frontend-shard_2",
+      "started_at": "2026-04-03T17:28:00Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 15,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "6478b62a-a29d-4507-857a-9fc65092605a",
+      "finished_at": "2026-04-03T17:30:59Z",
+      "id": "7c6f0ce1-82b5-4032-a225-f776bc4d95e8",
+      "name": "ci-frontend-shard_3",
+      "started_at": "2026-04-03T17:28:01Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 1,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "48d469ed-51c9-41f3-983e-310f0620fb43",
+      "finished_at": "2026-04-03T17:29:22Z",
+      "id": "3e480ad4-99c1-4470-91e7-d8e9d3436c50",
+      "name": "ci-lint-be-brakeman",
+      "started_at": "2026-04-03T17:28:25Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 1,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "c4c71f62-1d81-4afb-aeee-442f41027177",
+      "finished_at": "2026-04-03T17:29:14Z",
+      "id": "775479a4-f12a-4a7e-b35c-64c21fee0e19",
+      "name": "ci-lint-be-packwerk",
+      "started_at": "2026-04-03T17:28:24Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 5,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "3c69e895-c4f3-4dad-ab9e-876f6c5ba077",
+      "finished_at": "2026-04-03T17:29:25Z",
+      "id": "2cdff1b0-94d4-49c2-a182-d5dbb003d060",
+      "name": "ci-lint-be-rubocop",
+      "started_at": "2026-04-03T17:28:25Z",
+      "status": "failed",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 1,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "7feee0a4-61f4-4eb6-a019-368cf9ac0d82",
+      "finished_at": "2026-04-03T17:29:13Z",
+      "id": "51a11b57-2091-4416-9e05-d36381438868",
+      "name": "ci-lint-be-zeitwerk",
+      "started_at": "2026-04-03T17:28:26Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 15,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "bda8b370-a8bc-44b9-bc59-340c5a306518",
+      "finished_at": "2026-04-03T17:30:35Z",
+      "id": "56efa629-1ee0-4edd-bdab-74b9a4189e63",
+      "name": "ci-rspec-rm-engine",
+      "started_at": "2026-04-03T17:28:26Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "43e95c1d-b5c3-4764-831e-b1b8f38a59f7",
+      "finished_at": "2026-04-03T17:30:15Z",
+      "id": "ecadf850-7076-4466-afc7-118ce6d525c7",
+      "name": "ci-rspec-shard_0",
+      "started_at": "2026-04-03T17:28:27Z",
+      "status": "failed",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "a9b17fba-0aae-4a89-bd77-d97d08637dcf",
+      "finished_at": "2026-04-03T17:30:18Z",
+      "id": "f79d02ac-e47f-4bda-b2be-d5ba044ed948",
+      "name": "ci-rspec-shard_1",
+      "started_at": "2026-04-03T17:28:28Z",
+      "status": "failed",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "1bba9983-b1c3-436d-8178-cb6af625e56e",
+      "finished_at": "2026-04-03T17:30:23Z",
+      "id": "501074f9-8e55-421f-b713-c322d0ce03fb",
+      "name": "ci-rspec-shard_2",
+      "started_at": "2026-04-03T17:28:28Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "cd0aa447-4adb-49b5-9290-ab1d830c658b",
+      "finished_at": "2026-04-03T17:30:28Z",
+      "id": "9eb4f4e1-5364-4efe-9243-22a836b6bb4d",
+      "name": "ci-rspec-shard_3",
+      "started_at": "2026-04-03T17:28:28Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 10,
+      "depends_on": [
+        "ci-build-test-image"
+      ],
+      "external_id": "434ae4ef-16e7-4b74-a787-6246bf50f9fe",
+      "finished_at": "2026-04-03T17:29:56Z",
+      "id": "98857e58-8ba4-44d5-a4b0-4ec90da8a40a",
+      "name": "ci-rspec-task-engine",
+      "started_at": "2026-04-03T17:28:25Z",
+      "status": "succeeded",
+      "startFailureReason": ""
+    },
+    {
+      "credit_cost": 3,
+      "depends_on": [
+        "check-change-type"
+      ],
+      "external_id": "34239bc4-984c-41ef-8e36-2b63b031ae92",
+      "finished_at": "2026-04-03T17:30:37Z",
+      "id": "be368ee6-37b0-4426-a52c-4dfb335da9d9",
+      "name": "deploy-storybook",
+      "started_at": "2026-04-03T17:28:00Z",
+      "status": "failed",
+      "startFailureReason": ""
+    }
+  ]
+}

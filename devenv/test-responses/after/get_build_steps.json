@@ -1,0 +1,78 @@
+{
+  "execution": {
+    "build_environment_setup": {
+      "finished_at": "2026-04-03T17:28:32.808Z",
+      "started_at": "2026-04-03T17:28:26.553Z",
+      "status": "success"
+    },
+    "step_bundles": null,
+    "with_groups": null,
+    "workflows": [
+      {
+        "steps": [
+          {
+            "finished_at": "2026-04-03T17:28:39.138Z",
+            "latest_version": "8.4.2",
+            "source_code_url": "https://github.com/bitrise-steplib/steps-git-clone",
+            "started_at": "2026-04-03T17:28:32Z",
+            "status": "success",
+            "step_id": "git-clone",
+            "title": "Git clone",
+            "uuid": "06b8e851-f3bb-4475-ac64-ffd49783e64e",
+            "version": "8.2.1"
+          }
+        ],
+        "uuid": "e46af88f-ec69-4d99-9c4c-f559e1f027cd",
+        "workflow_id": "_setup"
+      },
+      {
+        "steps": [
+          {
+            "finished_at": "2026-04-03T17:28:40.618Z",
+            "source_code_url": "https://github.com/bitrise-io/steps-script",
+            "started_at": "2026-04-03T17:28:39Z",
+            "status": "success",
+            "step_id": "script",
+            "title": "Docker login",
+            "uuid": "0831e152-dc56-480c-9eca-f689c6e2b833",
+            "version": "1.2.1"
+          }
+        ],
+        "uuid": "2e808bcd-04c3-4214-9899-4ddf5c97b226",
+        "workflow_id": "_docker_login"
+      },
+      {
+        "steps": [
+          {
+            "finished_at": "2026-04-03T17:28:57.301Z",
+            "source_code_url": "https://github.com/bitrise-io/steps-script",
+            "started_at": "2026-04-03T17:28:40Z",
+            "status": "success",
+            "step_id": "script",
+            "title": "Pull pre-built CI test image",
+            "uuid": "e8d70e76-50b7-44a9-9566-17e32bc5ebd2",
+            "version": "1.2.1"
+          }
+        ],
+        "uuid": "53940dd2-238d-4715-88a5-7c2bc11daab0",
+        "workflow_id": "_build_docker_img_with_cache"
+      },
+      {
+        "steps": [
+          {
+            "finished_at": "2026-04-03T17:29:13.503Z",
+            "source_code_url": "https://github.com/bitrise-io/steps-script",
+            "started_at": "2026-04-03T17:28:57Z",
+            "status": "success",
+            "step_id": "script",
+            "title": "zeitwerk",
+            "uuid": "54a64a62-1838-44f0-99a1-2a1b34b2ff0f",
+            "version": "1.2.1"
+          }
+        ],
+        "uuid": "45050928-2f7b-4283-962f-104444a3f13b",
+        "workflow_id": "ci-lint-be-zeitwerk"
+      }
+    ]
+  }
+}

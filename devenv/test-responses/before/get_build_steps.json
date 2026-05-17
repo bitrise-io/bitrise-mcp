@@ -1,0 +1,111 @@
+{
+  "agent_info": {
+    "bitrise_cli_command": "$ docker \"run\" \"-v\" \"/var/run/docker.sock:/var/run/docker.sock\" \"-v\" \"/bitrise:/bitrise\" \"-v\" \"/tmp/bitrise-agent3121576872:/.bitrise-config\" \"-v\" \"/opt/bitrise/bitrise-den-agent.task-startup-script.sh:/.task-startup-script.sh\" \"-v\" \"/tmp/build-config-409395545/.env.var:/.env.var\" \"-v\" \"/tmp/build-config-409395545/.env_all.yaml:/.env_all.yaml\" \"-v\" \"/opt/bitrise/releases:/opt/bitrise/releases\" \"-v\" \"/root/.bitrise/toolkits/go:/root/.bitrise/toolkits/go\" \"-v\" \"/root/.bitrise/tools:/root/.bitrise/tools\" \"-v\" \"/tmp:/tmp\" \"--privileged\" \"--network=host\" \"--name=bitrise-main-container\" \"bitriseio/ubuntu-22-android:pinned\" \"/bin/bash\" \"-lc\" \"echo \\\"run task-startup-script\\\" 1>&2 && sh /.task-startup-script.sh 1>&2;[ \\\"$(/usr/local/bin/bitrise version)\\\" != \\\"2.39.2\\\" ] && { mkdir -p /opt/bitrise/bin; rm /usr/local/bin/bitrise; cp /opt/bitrise/releases/bitrise-cli-linux-amd64-v2.39.2 /opt/bitrise/bin/bitrise; chmod +x /opt/bitrise/bin/bitrise; ln -s /opt/bitrise/bin/bitrise /usr/local/bin;} 1>&2 && echo \\\"run bitrise setup\\\" 1>&2 && bitrise setup 1>&2 ; echo \\\"run bitrise run\\\" 1>&2 && source /.env.var && bitrise run --config /.bitrise-config/bitrise.yml --inventory /.bitrise-config/bitrise.secrets.yml --json-params-base64 eyJ3b3JrZmxvdyI6ImNpLWxpbnQtYmUtemVpdHdlcmsifQ== --output-format json\"",
+    "den_agent_version": "2.63.2",
+    "host_name": "vm-linux-c4-m16-2dc157af-96de-4afe-87c9-6f1115b44353",
+    "machine_resource_class": "g2.linux.medium",
+    "machine_type": "g2.linux.amd-zen4.4c-16g",
+    "node_name": "US-CENTRAL-ORD-1A-LC01-0007",
+    "region": "US",
+    "stack_image_version": "1-11-9"
+  },
+  "app_id": "46b6b9a78a418ee8",
+  "build_id": "7feee0a4-61f4-4eb6-a019-368cf9ac0d82",
+  "cli_info": {
+    "bitrise_cli_version": "2.39.2",
+    "ci_mode": true,
+    "log_format_version": "2",
+    "secret_envs_filtering_mode": true,
+    "secret_filtering_mode": true,
+    "pr_mode": true,
+    "debug_mode": false,
+    "no_output_timeout_mode": false
+  },
+  "has_build_environment_setup_logs": true,
+  "execution": {
+    "build_environment_setup": {
+      "started_at": "2026-04-03T17:28:26.553Z",
+      "finished_at": "2026-04-03T17:28:32.808Z",
+      "status": "success"
+    },
+    "workflows": [
+      {
+        "steps": [
+          {
+            "collection": "https://github.com/bitrise-io/bitrise-steplib.git",
+            "finished_at": "2026-04-03T17:28:39.138Z",
+            "latest_version": "8.4.2",
+            "release_notes": "https://github.com/bitrise-steplib/steps-git-clone/releases",
+            "source_code_url": "https://github.com/bitrise-steplib/steps-git-clone",
+            "started_at": "2026-04-03T17:28:32Z",
+            "status": "success",
+            "step_id": "git-clone",
+            "support_url": "https://github.com/bitrise-steplib/steps-git-clone/issues",
+            "title": "Git clone",
+            "uuid": "06b8e851-f3bb-4475-ac64-ffd49783e64e",
+            "version": "8.2.1"
+          }
+        ],
+        "uuid": "e46af88f-ec69-4d99-9c4c-f559e1f027cd",
+        "workflow_id": "_setup"
+      },
+      {
+        "steps": [
+          {
+            "collection": "https://github.com/bitrise-io/bitrise-steplib.git",
+            "finished_at": "2026-04-03T17:28:40.618Z",
+            "source_code_url": "https://github.com/bitrise-io/steps-script",
+            "started_at": "2026-04-03T17:28:39Z",
+            "status": "success",
+            "step_id": "script",
+            "support_url": "https://github.com/bitrise-io/steps-script/issues",
+            "title": "Docker login",
+            "uuid": "0831e152-dc56-480c-9eca-f689c6e2b833",
+            "version": "1.2.1"
+          }
+        ],
+        "uuid": "2e808bcd-04c3-4214-9899-4ddf5c97b226",
+        "workflow_id": "_docker_login"
+      },
+      {
+        "steps": [
+          {
+            "collection": "https://github.com/bitrise-io/bitrise-steplib.git",
+            "finished_at": "2026-04-03T17:28:57.301Z",
+            "source_code_url": "https://github.com/bitrise-io/steps-script",
+            "started_at": "2026-04-03T17:28:40Z",
+            "status": "success",
+            "step_id": "script",
+            "support_url": "https://github.com/bitrise-io/steps-script/issues",
+            "title": "Pull pre-built CI test image",
+            "uuid": "e8d70e76-50b7-44a9-9566-17e32bc5ebd2",
+            "version": "1.2.1"
+          }
+        ],
+        "uuid": "53940dd2-238d-4715-88a5-7c2bc11daab0",
+        "workflow_id": "_build_docker_img_with_cache"
+      },
+      {
+        "steps": [
+          {
+            "collection": "https://github.com/bitrise-io/bitrise-steplib.git",
+            "finished_at": "2026-04-03T17:29:13.503Z",
+            "source_code_url": "https://github.com/bitrise-io/steps-script",
+            "started_at": "2026-04-03T17:28:57Z",
+            "status": "success",
+            "step_id": "script",
+            "support_url": "https://github.com/bitrise-io/steps-script/issues",
+            "title": "zeitwerk",
+            "uuid": "54a64a62-1838-44f0-99a1-2a1b34b2ff0f",
+            "version": "1.2.1"
+          }
+        ],
+        "uuid": "45050928-2f7b-4283-962f-104444a3f13b",
+        "workflow_id": "ci-lint-be-zeitwerk"
+      }
+    ],
+    "with_groups": null,
+    "step_bundles": null
+  },
+  "is_log_archived": true
+}

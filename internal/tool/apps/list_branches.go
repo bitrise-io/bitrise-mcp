@@ -2,6 +2,7 @@ package apps
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -17,6 +18,9 @@ var ListBranches = bitrise.Tool{
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
 		),
+		mcp.WithNumber("limit",
+			mcp.Description("Max number of branches to return (default: 50). The API returns all branches sorted by last build date, so lower limits return the most recently active branches first."),
+		),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),
@@ -28,6 +32,8 @@ var ListBranches = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		limit := request.GetInt("limit", 50)
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIBaseURL,
@@ -36,6 +42,29 @@ var ListBranches = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
 		}
-		return mcp.NewToolResultText(res), nil
+
+		// The API returns all branches in one shot with no server-side
+		// pagination. Active repos can have thousands, so we truncate
+		// client-side. Branches are already sorted by most-recently-built
+		// first, so this naturally returns the most relevant ones.
+		var response map[string]any
+		if err := json.Unmarshal([]byte(res), &response); err != nil {
+			return mcp.NewToolResultText(res), nil
+		}
+
+		if branches, ok := response["data"].([]any); ok {
+			total := len(branches)
+			if limit > 0 && len(branches) > limit {
+				branches = branches[:limit]
+			}
+			response["data"] = branches
+			response["meta"] = map[string]any{
+				"returned": len(branches),
+				"total":    total,
+			}
+		}
+
+		return mcp.NewToolResultStructuredOnly(response), nil
 	},
 }
+
