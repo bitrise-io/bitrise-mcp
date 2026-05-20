@@ -2,13 +2,28 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,configuration,release-management-code-push,registration`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
-By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
+By default the following API groups are enabled: `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,registration`. You can override this using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
 
 ## Tools
+
+### Registration
+
+1. `register`
+   - Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address. Returns a `pending_signup_id`. After a successful response, the agent should ask the user for the OTP they received via email, then call `verify_registration` with that OTP and the returned `pending_signup_id`.
+   - API group: `registration`
+   - Arguments:
+     - `email` (required): Email address of the user to register
+
+2. `verify_registration`
+   - Verify a pending Bitrise registration using the OTP sent to the user's email. Returns an API token and (when a workspace was auto-created) a workspace slug for use with authenticated tools.
+   - API group: `registration`
+   - Arguments:
+     - `pending_signup_id` (required): The `pending_signup_id` returned by the `register` tool
+     - `otp` (required): One-time password sent to the email address
 
 ### Apps
 
@@ -315,10 +330,16 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 45. `me`
     - Get info from the currently authenticated user account
+46. `get_provider_connect_url`
+    - Returns a URL the user can open in a browser to connect a Git provider (GitHub, Bitbucket, or GitLab) via OAuth. The URL points at a page that auto-submits the OmniAuth form using the user's existing Bitrise session, so a single click takes them straight to the provider's authorize page. The OAuth handshake itself runs in the user's browser and cannot be performed via PAT.
+    - Arguments:
+      - `provider`: Git provider identifier. One of `github`, `bitbucket`, `gitlab`.
+47. `list_connected_accounts`
+    - List the authenticated user's connected Git provider identities. For each provider returns whether it is connected, the linked account name and URL, and whether the stored OAuth credentials are in an error state. Use this after `get_provider_connect_url` to detect when the OAuth flow completes.
 
 ### Release Management
 
-46. `create_connected_app`
+48. `create_connected_app`
    - Add a new Release Management connected app to Bitrise.
    - Arguments:
      - `platform`: The mobile platform for the connected app (ios/android).
@@ -330,7 +351,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `store_app_name`: (Optional) App name for manual connections.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
 
-47. `list_connected_apps`
+49. `list_connected_apps`
    - List Release Management connected apps available for the authenticated account within a workspace.
    - Arguments:
      - `workspace_slug`: Identifier of the Bitrise workspace.
@@ -340,12 +361,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `project_id`: (Optional) Filter for a specific Bitrise Project.
      - `search`: (Optional) Search by bundle ID, package name, or app title.
 
-48. `get_connected_app`
+50. `get_connected_app`
    - Gives back a Release Management connected app for the authenticated account.
    - Arguments:
      - `id`: Identifier of the Release Management connected app.
 
-49. `update_connected_app`
+51. `update_connected_app`
    - Updates a connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier for your connected app.
@@ -353,7 +374,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `connect_to_store`: (Optional) Check validity against the App Store or Google Play.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
 
-50. `list_installable_artifacts`
+52. `list_installable_artifacts`
    - List Release Management installable artifacts of a connected app.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -371,7 +392,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `version`: (Optional) Filter for a specific version.
      - `workflow`: (Optional) Filter for a specific Bitrise CI workflow.
 
-51. `generate_installable_artifact_upload_url`
+53. `generate_installable_artifact_upload_url`
    - Generates a signed upload URL for an installable artifact to be uploaded to Bitrise.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -382,27 +403,27 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `with_public_page`: (Optional) Enable public install page.
      - `workflow`: (Optional) Name of the CI workflow.
 
-52. `get_installable_artifact_upload_and_processing_status`
+54. `get_installable_artifact_upload_and_processing_status`
    - Gets the processing and upload status of an installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: The uuidv4 identifier for the installable artifact.
 
-53. `set_installable_artifact_public_install_page`
+55. `set_installable_artifact_public_install_page`
    - Changes whether public install page should be available for the installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: The uuidv4 identifier for the installable artifact.
      - `with_public_page`: Boolean flag for enabling/disabling public install page.
 
-54. `list_build_distribution_versions`
+56. `list_build_distribution_versions`
    - Lists Build Distribution versions available for testers.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of versions per page.
      - `page`: (Optional) Page number to return.
 
-55. `list_build_distribution_version_test_builds`
+57. `list_build_distribution_version_test_builds`
    - Gives back a list of test builds for the given build distribution version.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -410,28 +431,28 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `items_per_page`: (Optional) Maximum number of test builds per page.
      - `page`: (Optional) Page number to return.
 
-56. `create_tester_group`
+58. `create_tester_group`
    - Creates a tester group for a Release Management connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `name`: The name for the new tester group.
      - `auto_notify`: (Optional) Indicates automatic notifications for the group.
 
-57. `notify_tester_group`
+59. `notify_tester_group`
    - Notifies a tester group about a new test build.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
      - `test_build_id`: The unique identifier of the test build.
 
-58. `add_testers_to_tester_group`
+60. `add_testers_to_tester_group`
    - Adds testers to a tester group of a connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
      - `user_slugs`: The list of users identified by slugs to be added.
 
-59. `update_tester_group`
+61. `update_tester_group`
    - Updates the given tester group settings.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -439,20 +460,20 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `auto_notify`: (Optional) Setting for automatic email notifications.
      - `name`: (Optional) The new name for the tester group.
 
-60. `list_tester_groups`
+62. `list_tester_groups`
    - Gives back a list of tester groups related to a specific connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of tester groups per page.
      - `page`: (Optional) Page number to return.
 
-61. `get_tester_group`
+63. `get_tester_group`
    - Gives back the details of the selected tester group.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
 
-62. `get_potential_testers`
+64. `get_potential_testers`
    - Gets a list of potential testers who can be added to a specific tester group.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -461,7 +482,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `page`: (Optional) Page number to return.
      - `search`: (Optional) Search for testers by email or username.
 
-63. `get_testers`
+65. `get_testers`
    - Gets a list of testers that have been associated with a tester group related to a specific connected app.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -471,32 +492,32 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 ### Configuration
 
-64. `validate_bitrise_yml`
+66. `validate_bitrise_yml`
     - Validate a Bitrise YML config file. This endpoint checks if the provided bitrise.yml is valid.
     - Arguments:
       - `bitrise_yml`: The Bitrise YML config file content to be validated. It must be a string.
       - `app_slug` (optional): Slug of a Bitrise app. Specifying this value allows for validating the YML against workspace-specific settings like available stacks, machine types, license pools etc.
 
-65. `step_search`
+67. `step_search`
     - Find steps for building workflows or step bundles in a Bitrise YML config file. Finds steps based on name, description, tags or maintainers.
     - Arguments:
       - `query`: The phrase to search steps for like `clone`, `npm`, `deploy` etc.
       - `categories` (optional): Categories to filter steps. Available values: `build`, `code-sign`, `test`, `deploy`, `notification`, `access-control`, `artifact-info`, `installer`, `dependency`, `utility`
       - `maintainers` (optional): Filter steps by maintainers. Available values: `bitrise`, `verified`, `community`
 
-66. `step_inputs`
+68. `step_inputs`
     - List inputs of a step with their defaults, allowed values etc.
     - Arguments:
       - `step_ref`: Step reference formatted as `step_lib_source::step_id@version`. `step_id` and an exact `version` are required, `step_lib_source` is only necessary for custom step sources.
 
-67. `list_available_stacks`
+69. `list_available_stacks`
     - List available stacks with their machine configurations and version information. When a workspace_slug is provided, returns stacks available for that workspace including any custom stacks. When omitted, returns globally available stacks.
     - Arguments:
       - `workspace_slug` (optional): Slug of the Bitrise workspace. When provided, lists stacks available for that workspace (including custom stacks). When omitted, lists globally available stacks.
 
 ### CodePush
 
-68. `codepush_list_deployments`
+70. `codepush_list_deployments`
    - List CodePush deployments for a Bitrise app.
    - Arguments:
      - `app_id`: Identifier of the Bitrise app.
@@ -504,30 +525,30 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `items_per_page`: (Optional) Maximum number of deployments per page (default: 10).
      - `page`: (Optional) Page number to return (default: 1).
 
-69. `codepush_get_deployment`
+71. `codepush_get_deployment`
    - Get a specific CodePush deployment by its ID.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush deployment.
 
-70. `codepush_create_deployment`
+72. `codepush_create_deployment`
    - Create a new CodePush deployment for a Bitrise app.
    - Arguments:
      - `name`: Name for the new deployment.
      - `app_id`: Identifier of the Bitrise app.
      - `key`: (Optional) Deployment key. Auto-generated if not provided.
 
-71. `codepush_update_deployment`
+73. `codepush_update_deployment`
    - Update the name of an existing CodePush deployment.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush deployment.
      - `name`: New name for the deployment.
 
-72. `codepush_delete_deployment`
+74. `codepush_delete_deployment`
    - Delete a CodePush deployment. This action is irreversible.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush deployment to delete.
 
-73. `codepush_promote_deployment`
+75. `codepush_promote_deployment`
    - Promote a package from a source deployment to a target deployment. The most recent package in the source deployment is promoted unless package_id is specified.
    - Arguments:
      - `id`: Identifier (UUID) of the source deployment.
@@ -539,13 +560,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `mandatory`: (Optional) If true, clients must install immediately.
      - `rollout`: (Optional) Percentage (0-100) of users who receive this update.
 
-74. `codepush_rollback_deployment`
+76. `codepush_rollback_deployment`
    - Rollback a CodePush deployment to its previous version.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush deployment to rollback.
      - `package_id`: (Optional) UUID of a specific package to rollback to. Defaults to the previous package.
 
-75. `codepush_list_updates`
+77. `codepush_list_updates`
    - List CodePush updates for a specific deployment.
    - Arguments:
      - `deployment_id`: Identifier (UUID) of the CodePush deployment.
@@ -553,12 +574,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `items_per_page`: (Optional) Maximum number of updates per page (default: 10).
      - `page`: (Optional) Page number to return (default: 1).
 
-76. `codepush_get_update`
+78. `codepush_get_update`
    - Get a specific CodePush update by its ID.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush update.
 
-77. `codepush_patch_update`
+79. `codepush_patch_update`
    - Patch a CodePush update to change its disabled state, mandatory flag, or rollout percentage. Only include fields you want to change — omitted fields are left unchanged.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush update.
@@ -566,17 +587,17 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `mandatory`: (Optional) Set to 'true' to make mandatory or 'false' to make optional.
      - `rollout`: (Optional) Percentage (0-100) of users who receive this update.
 
-78. `codepush_delete_update`
+80. `codepush_delete_update`
    - Delete a CodePush update. This action is irreversible.
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush update to delete.
 
-79. `codepush_get_update_status`
+81. `codepush_get_update_status`
    - Get the processing status of a CodePush update (e.g. pending, ready, failed).
    - Arguments:
      - `id`: Identifier (UUID) of the CodePush update.
 
-80. `codepush_generate_update_upload_url`
+82. `codepush_generate_update_upload_url`
    - Generate a signed upload URL (valid 1 hour) for uploading a CodePush update bundle. The response contains the URL, HTTP method, and headers needed for a direct upload. After uploading, check status with `codepush_get_update_status`.
    - Arguments:
      - `id`: Client-generated UUID for the new update.
@@ -589,7 +610,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `mandatory`: (Optional) If true, clients must install this update immediately.
      - `rollout`: (Optional) Percentage (0-100) of users who receive this update. Defaults to 100.
 
-81. `codepush_get_metrics`
+83. `codepush_get_metrics`
    - Get workspace-level CodePush usage metrics including data transfer, storage, and monthly active users, along with their limits and billing cycle information.
    - Arguments:
      - `workspace_slug`: Slug of the Bitrise workspace.
