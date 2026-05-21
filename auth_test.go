@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
@@ -89,7 +88,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 	t.Run("successful exchange returns PAT", func(t *testing.T) {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "application/x-www-form-urlencoded", r.Header.Get("Content-Type"))
-			require.NoError(t, r.ParseForm())
+			assert.NoError(t, r.ParseForm())
 			assert.Equal(t, "urn:ietf:params:oauth:grant-type:token-exchange", r.FormValue("grant_type"))
 			body, _ := json.Marshal(map[string]string{"access_token": "my-bitrise-pat"})
 			w.Header().Set("Content-Type", "application/json")
@@ -100,7 +99,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 		pat, err := exchanger.exchange(t.Context(), jwt)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "my-bitrise-pat", pat)
 	})
 
@@ -118,9 +117,9 @@ func TestJwtExchangerExchange(t *testing.T) {
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 
 		pat1, err := exchanger.exchange(t.Context(), jwt)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		pat2, err := exchanger.exchange(t.Context(), jwt)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		assert.Equal(t, pat1, pat2, "second call should return cached value")
 		assert.Equal(t, 1, calls, "endpoint should only be called once")
@@ -136,7 +135,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 		_, err := exchanger.exchange(t.Context(), jwt)
-		require.Error(t, err)
+		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "401")
 	})
 
@@ -151,7 +150,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 		_, err := exchanger.exchange(t.Context(), jwt)
-		require.Error(t, err)
+		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "access_token")
 	})
 }
@@ -170,11 +169,13 @@ func TestOauthProtectedResourceHandler(t *testing.T) {
 		assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
 		var body map[string]any
-		require.NoError(t, json.NewDecoder(w.Body).Decode(&body))
-		assert.Equal(t, "https://mcp.example.com", body["resource"])
-		authServers, ok := body["authorization_servers"].([]any)
-		require.True(t, ok)
-		assert.Equal(t, "https://auth.example.com", authServers[0], "trailing slash on issuer should be stripped")
+		if assert.NoError(t, json.NewDecoder(w.Body).Decode(&body)) {
+			assert.Equal(t, "https://mcp.example.com", body["resource"])
+			authServers, ok := body["authorization_servers"].([]any)
+			if assert.True(t, ok) {
+				assert.Equal(t, "https://auth.example.com", authServers[0], "trailing slash on issuer should be stripped")
+			}
+		}
 	})
 
 	t.Run("uses http when no TLS and no forwarded proto", func(t *testing.T) {
@@ -184,7 +185,8 @@ func TestOauthProtectedResourceHandler(t *testing.T) {
 		handler(w, req)
 
 		var body map[string]any
-		require.NoError(t, json.NewDecoder(w.Body).Decode(&body))
-		assert.Equal(t, "http://localhost:8080", body["resource"])
+		if assert.NoError(t, json.NewDecoder(w.Body).Decode(&body)) {
+			assert.Equal(t, "http://localhost:8080", body["resource"])
+		}
 	})
 }
