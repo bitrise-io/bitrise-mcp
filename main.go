@@ -43,6 +43,19 @@ type config struct {
 	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
 	// Requires a DataDog agent to be running and reachable (DD_AGENT_HOST).
 	DatadogTracingEnabled bool `env:"DATADOG_TRACING_ENABLED" default:"false"`
+	// ExternalOAuthIssuer is the issuer URL of an external OAuth authorization
+	// server. When set, the server advertises
+	// /.well-known/oauth-protected-resource so OAuth clients can discover the
+	// correct authorization server. Requires OIDCTokenEndpoint to be set as well.
+	ExternalOAuthIssuer string `env:"EXTERNAL_OAUTH_ISSUER"`
+	// OIDCTokenEndpoint is the full URL of the OIDC token exchange endpoint
+	// (RFC 8693) used to trade an external JWT for a Bitrise PAT. When set,
+	// Bearer tokens that look like JWTs are exchanged before being passed to tools.
+	OIDCTokenEndpoint string `env:"OIDC_TOKEN_ENDPOINT"`
+	// BitriseAPIBaseURL overrides the Bitrise v0.1 API base URL
+	// (default: https://api.bitrise.io/v0.1). Useful for pointing at a
+	// test or local API instance.
+	BitriseAPIBaseURL string `env:"BITRISE_API_BASE_URL"`
 }
 
 func main() {
@@ -55,6 +68,10 @@ func run() error {
 	var cfg config
 	if err := configor.Load(&cfg); err != nil {
 		return fmt.Errorf("load configuration: %w", err)
+	}
+
+	if cfg.BitriseAPIBaseURL != "" {
+		bitrise.APIBaseURL = cfg.BitriseAPIBaseURL
 	}
 
 	logger, err := newStructuredLogger(cfg.LogLevel)
@@ -157,13 +174,26 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		return fmt.Errorf("BITRISE_TOKEN cannot be provided in http transport mode")
 	}
 
+	var exchanger *jwtExchanger
+	if cfg.OIDCTokenEndpoint != "" {
+		exchanger = &jwtExchanger{tokenEndpoint: cfg.OIDCTokenEndpoint, logger: logger}
+	}
+
 	mcpHandler := server.NewStreamableHTTPServer(
 		mcpServer,
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			// The tools can use it to auth to the Bitrise API.
-			pat := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-			if pat != "" {
+			token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+			if token != "" {
+				pat := token
+				if exchanger != nil && isJWT(token) {
+					var err error
+					pat, err = exchanger.exchange(r.Context(), token)
+					if err != nil {
+						logger.Warnw("JWT→PAT exchange failed", "error", err)
+						return ctx
+					}
+				}
 				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
 			// server.WithToolFilter can use it to limit the tools listed.
@@ -191,6 +221,9 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	}
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
+	if cfg.ExternalOAuthIssuer != "" {
+		mux.HandleFunc("/.well-known/oauth-protected-resource", oauthProtectedResourceHandler(cfg.ExternalOAuthIssuer))
+	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// If the request looks like it's from a browser (Sec-Fetch-Mode: navigate),
 		// redirect to the documentation instead of handling as MCP request.
