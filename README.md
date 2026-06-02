@@ -7,7 +7,7 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 ## Features
 
 - **Comprehensive API Access**: Access to Bitrise APIs including apps, builds, artifacts, and more.
-- **Authentication Support**: Secure API token-based access to Bitrise resources.
+- **OAuth-based Authentication**: Sign in once with your Bitrise account — no need to copy a Personal Access Token. (PAT-based auth still supported for clients that don't speak MCP OAuth.)
 - **Detailed Documentation**: [Well-documented tools with parameter descriptions](/docs/tools.md).
 
 ## Installation
