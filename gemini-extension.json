@@ -4,10 +4,7 @@
 	"mcpServers": {
 		"bitrise": {
 			"description": "Connect AI assistants to Bitrise - manage apps, builds, artifacts, and more through natural language",
-			"httpUrl": "https://mcp.bitrise.io",
-			"headers": {
-				"Authorization": "Bearer $BITRISE_PAT"
-			}
+			"httpUrl": "https://mcp.bitrise.io"
 		}
 	}
 }

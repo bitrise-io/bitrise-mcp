@@ -11,8 +11,8 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bitrise Personal Access Token (format: 'Bearer YOUR_TOKEN'). Get your token from https://app.bitrise.io/me/account/security",
-          "isRequired": true,
+          "description": "Optional. Bitrise Personal Access Token (format: 'Bearer YOUR_TOKEN') for MCP clients that don't yet support OAuth. Get your token from https://app.bitrise.io/me/account/security. Modern MCP clients (Claude, Cursor, VS Code, etc.) can leave this unset and the server will trigger the OAuth flow automatically on first tool use.",
+          "isRequired": false,
           "isSecret": true
         },
         {

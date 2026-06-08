@@ -2,10 +2,12 @@
 
 ## Prerequisites
 - AWS Kiro IDE installed
-- [Create a Bitrise API Token](https://devcenter.bitrise.io/api/authentication):
-  - Go to your [Bitrise Account Settings/Security](https://app.bitrise.io/me/account/security)
-  - Navigate to the "Personal access tokens" section
-  - Copy the generated token
+
+## Authentication
+
+Kiro currently uses environment-variable-based authentication for MCP servers, so the standard Power installation uses a Bitrise Personal Access Token (PAT). [Create a Bitrise API Token](https://devcenter.bitrise.io/api/authentication) under [Account Settings → Security](https://app.bitrise.io/me/account/security).
+
+If you're running a Kiro build that supports MCP OAuth and prefer to use it, see the [OAuth-based Kiro configuration](#oauth-based-configuration-experimental) section below.
 
 ## Installation via Kiro Power
 
@@ -20,7 +22,6 @@ AWS Kiro supports installing the Bitrise MCP server as a Power, which provides a
    - Click on "Add power from GitHub"
 
 3. **Enter the Repository URL**
-   - Enter the following URL:
    ```
    https://github.com/bitrise-io/bitrise-mcp/tree/main/kiro-powers/bitrise-ci
    ```
@@ -50,6 +51,23 @@ Once installed, the Bitrise Power will automatically activate when relevant. You
 - Set up release management
 
 The power provides access to all 63 Bitrise tools. For a complete list of available tools and their parameters, refer to the [tools documentation](/docs/tools.md).
+
+## OAuth-based Configuration (experimental)
+
+For Kiro builds that support MCP OAuth, you can drop the `BITRISE_TOKEN` requirement entirely. Edit `~/.kiro/settings/mcp.json` (user level) or `.kiro/settings/mcp.json` (workspace level) and remove the `headers` block:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "type": "http",
+      "url": "https://mcp.bitrise.io"
+    }
+  }
+}
+```
+
+On first tool use, Kiro will open your browser for the Bitrise sign-in flow.
 
 ## Advanced Configuration
 
@@ -92,6 +110,9 @@ If the environment variable approach doesn't work, you can hardcode the token:
 2. Find the Bitrise server entry
 3. Replace `${BITRISE_TOKEN}` with your actual token value
 4. Save the file and restart Kiro
+
+**Option 3: Use OAuth**
+If your Kiro build supports MCP OAuth, see the [OAuth-based Configuration](#oauth-based-configuration-experimental) section above.
 
 **Note on Environment Variable Syntax**
 The syntax for environment variables differs between Kiro CLI and IDE:
