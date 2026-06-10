@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"mcpServers": {
 		"bitrise": {
-			"description": "Connect AI assistants to Bitrise - manage apps, builds, artifacts, and more through natural language",
+			"description": "Set up & manage mobile CI/CD on Bitrise: build, test, distribute iOS, Android, Flutter, RN apps.",
 			"httpUrl": "https://mcp.bitrise.io"
 		}
 	}
