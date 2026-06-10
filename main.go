@@ -37,7 +37,7 @@ type config struct {
 	// ignored.
 	BitriseToken string `env:"BITRISE_TOKEN"`
 	// EnabledAPIGroups is a comma-separated list of API groups that are enabled.
-	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management"`
+	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,registration"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
 	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
@@ -154,10 +154,6 @@ func run() error {
 }
 
 func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
-	if cfg.BitriseToken == "" {
-		return fmt.Errorf("BITRISE_TOKEN must be provided in stdio transport mode")
-	}
-
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			return fn(bitrise.ContextWithPAT(ctx, cfg.BitriseToken), request)

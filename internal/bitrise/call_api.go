@@ -25,17 +25,31 @@ var (
 const userAgent = "bitrise-mcp/1.0"
 
 type CallAPIParams struct {
-	Method  string
-	BaseURL string
-	Path    string
-	Params  map[string]any
-	Body    any
+	Method   string
+	BaseURL  string
+	Path     string
+	Params   map[string]any
+	Body     any
+	SkipAuth bool
+}
+
+type APIError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("unexpected status code %d; response body: %s", e.StatusCode, e.Body)
 }
 
 func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
-	apiKey, err := patFromCtx(ctx)
-	if err != nil {
-		return "", errors.New("set authorization header to your bitrise pat")
+	var apiKey string
+	if !p.SkipAuth {
+		key, err := patFromCtx(ctx)
+		if err != nil || strings.TrimSpace(key) == "" {
+			return "", errors.New("missing Bitrise authentication: set BITRISE_TOKEN in stdio mode or send Authorization: Bearer <bitrise_pat> in HTTP mode")
+		}
+		apiKey = key
 	}
 
 	var reqBody io.Reader
@@ -77,7 +91,9 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", apiKey)
+	if apiKey != "" {
+		req.Header.Set("Authorization", apiKey)
+	}
 
 	httpClient := http.Client{Timeout: 30 * time.Second}
 	client := httptrace.WrapClient(&httpClient)
@@ -88,10 +104,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	defer res.Body.Close()
 	if res.StatusCode >= 400 {
 		resBody, _ := io.ReadAll(res.Body)
-		return "", fmt.Errorf(
-			"unexpected status code %d; response body: %s",
-			res.StatusCode, resBody,
-		)
+		return "", &APIError{StatusCode: res.StatusCode, Body: string(resBody)}
 	}
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
