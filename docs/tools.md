@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, registration`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -594,12 +594,27 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Arguments:
      - `workspace_slug`: Slug of the Bitrise workspace.
 
+### Registration
+
+These tools are unauthenticated (no Bitrise token required) and let an agent onboard a brand-new user. They are most useful with the remote (HTTP) MCP server, since the local (stdio) server requires `BITRISE_TOKEN` to start.
+
+82. `register`
+    - Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address and returns a `pending_signup_id`. Ask the user for the OTP they received, then call `verify_registration`.
+    - Arguments:
+      - `email`: Email address of the user to register.
+
+83. `verify_registration`
+    - Verify a pending registration using the OTP. Returns an `api_token` (a Bitrise personal access token) and, when a workspace was auto-created, a `workspace_slug`. Use the returned token to authenticate subsequent tool calls.
+    - Arguments:
+      - `pending_signup_id`: The `pending_signup_id` returned by `register`.
+      - `otp`: One-time password sent to the email address.
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push |
-|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | registration |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|--------------|
 | list_apps | ✅ | | | | | | | | | ✅ | | | |
 | register_app | ✅ | | | | | | | | | | | | |
 | finish_bitrise_app | ✅ | | | | | | | | | | | | |
@@ -681,3 +696,5 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ |
 | codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ |
 | codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ |
+| register | | | | | | | | | | | | | | ✅ |
+| verify_registration | | | | | | | | | | | | | | ✅ |

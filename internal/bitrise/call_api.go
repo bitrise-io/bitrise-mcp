@@ -17,8 +17,8 @@ import (
 // APIBaseURL, APIRMBaseURL, and APICodePushBaseURL are vars so main can override
 // them via environment variables to point at non-production API instances.
 var (
-	APIBaseURL         = "https://api.bitrise.io/v0.1"                          //nolint:gochecknoglobals
-	APIRMBaseURL       = "https://api.bitrise.io/release-management/v1"         //nolint:gochecknoglobals
+	APIBaseURL         = "https://api.bitrise.io/v0.1"                               //nolint:gochecknoglobals
+	APIRMBaseURL       = "https://api.bitrise.io/release-management/v1"              //nolint:gochecknoglobals
 	APICodePushBaseURL = "https://api.bitrise.io/release-management/v2/code-push/v1" //nolint:gochecknoglobals
 )
 
@@ -30,12 +30,32 @@ type CallAPIParams struct {
 	Path    string
 	Params  map[string]any
 	Body    any
+	// SkipAuth omits the Authorization header and the PAT requirement. Used by
+	// unauthenticated endpoints such as agent signup, which the caller reaches
+	// before they have a Bitrise token.
+	SkipAuth bool
+}
+
+// APIError is returned when the Bitrise API responds with a >= 400 status. It
+// carries the status code and raw response body so callers can branch on them
+// (e.g. via errors.As) instead of parsing the error string.
+type APIError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("unexpected status code %d; response body: %s", e.StatusCode, e.Body)
 }
 
 func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
-	apiKey, err := patFromCtx(ctx)
-	if err != nil {
-		return "", errors.New("set authorization header to your bitrise pat")
+	var apiKey string
+	if !p.SkipAuth {
+		key, err := patFromCtx(ctx)
+		if err != nil || strings.TrimSpace(key) == "" {
+			return "", errors.New("set authorization header to your bitrise pat")
+		}
+		apiKey = key
 	}
 
 	var reqBody io.Reader
@@ -77,7 +97,9 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", apiKey)
+	if apiKey != "" {
+		req.Header.Set("Authorization", apiKey)
+	}
 
 	httpClient := http.Client{Timeout: 30 * time.Second}
 	client := httptrace.WrapClient(&httpClient)
@@ -88,10 +110,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	defer res.Body.Close()
 	if res.StatusCode >= 400 {
 		resBody, _ := io.ReadAll(res.Body)
-		return "", fmt.Errorf(
-			"unexpected status code %d; response body: %s",
-			res.StatusCode, resBody,
-		)
+		return "", &APIError{StatusCode: res.StatusCode, Body: string(resBody)}
 	}
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
