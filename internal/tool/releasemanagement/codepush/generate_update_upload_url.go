@@ -48,6 +48,7 @@ var GenerateUpdateUploadURL = bitrise.Tool{
 		mcp.WithNumber("rollout",
 			mcp.Description("Percentage (0-100) of users who will receive this update. Defaults to 100."),
 		),
+		mcp.WithTitleAnnotation("Generate CodePush Update Upload URL"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

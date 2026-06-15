@@ -12,6 +12,7 @@ var Me = bitrise.Tool{
 	APIGroups: []string{"user", "read-only"},
 	Definition: mcp.NewTool("me",
 		mcp.WithDescription("Get user info for the currently authenticated user account"),
+		mcp.WithTitleAnnotation("Get Current User"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

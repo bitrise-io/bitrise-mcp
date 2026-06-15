@@ -25,6 +25,7 @@ var SetInstallableArtifactPublicInstallPage = bitrise.Tool{
 			mcp.Description("Boolean flag for enabling/disabling public install page for the installable artifact. This field is mandatory."),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Set Installable Artifact Public Install Page"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -54,6 +54,7 @@ var Trigger = bitrise.Tool{
 				"required": []string{"mapped_to", "value"},
 			}),
 		),
+		mcp.WithTitleAnnotation("Trigger Build"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -26,6 +26,7 @@ var StepSearch = bitrise.Tool{
 			mcp.WithStringEnumItems([]string{"bitrise", "verified", "community"}),
 			mcp.Description("Filter steps by maintainers. Use `bitrise` to only look for official steps."),
 		),
+		mcp.WithTitleAnnotation("Search Steps"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

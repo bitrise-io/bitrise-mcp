@@ -31,6 +31,7 @@ var List = bitrise.Tool{
 		mcp.WithString("project_type",
 			mcp.Description("Filter apps by project type (e.g., 'ios', 'android')"),
 		),
+		mcp.WithTitleAnnotation("List Apps"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

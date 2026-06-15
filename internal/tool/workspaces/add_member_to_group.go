@@ -21,6 +21,7 @@ var AddMemberToGroup = bitrise.Tool{
 			mcp.Description("Slug of the user"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Add Member to Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

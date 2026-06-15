@@ -28,6 +28,7 @@ var ListUpdates = bitrise.Tool{
 			mcp.Description("Page number to return from the paginated result set. Default value is 1."),
 			mcp.DefaultNumber(1),
 		),
+		mcp.WithTitleAnnotation("List CodePush Updates"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

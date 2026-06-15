@@ -21,6 +21,7 @@ var CreateWorkspaceGroup = bitrise.Tool{
 			mcp.Description("Name of the group"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Create Workspace Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

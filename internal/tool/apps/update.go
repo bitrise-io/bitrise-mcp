@@ -26,6 +26,7 @@ var Update = bitrise.Tool{
 		mcp.WithString("repository_url",
 			mcp.Description("The new repository URL for the application"),
 		),
+		mcp.WithTitleAnnotation("Update App"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

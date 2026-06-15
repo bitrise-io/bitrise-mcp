@@ -21,6 +21,7 @@ var GetBuildBitriseYML = bitrise.Tool{
 			mcp.Description("Identifier of the build"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Build bitrise.yml"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

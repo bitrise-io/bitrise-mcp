@@ -21,6 +21,7 @@ var List = bitrise.Tool{
 			mcp.Description("Name of the role"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("List Group Roles"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

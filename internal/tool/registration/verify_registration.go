@@ -19,6 +19,7 @@ var VerifyRegistration = bitrise.Tool{
 	APIGroups: []string{"registration"},
 	Definition: mcp.NewTool("verify_registration",
 		mcp.WithDescription("Verify a pending Bitrise registration using the OTP sent to the user's email. Pass the `pending_signup_id` returned by `register`. Returns an `api_token` (a Bitrise personal access token) and, when a workspace was auto-created, a `workspace_slug`. After a successful call, save the token into the user's MCP client config so the Bitrise MCP server is authenticated: find the Bitrise server entry and set its `Authorization` header to `Bearer <api_token>` (for clients that connect through `mcp-remote`, such as Claude Desktop, add `--header \"Authorization: Bearer <api_token>\"` to its `args` instead). Common config files: Claude Desktop — `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows); Cursor — `~/.cursor/mcp.json`; VS Code — `.vscode/mcp.json` or user `settings.json`. If you can't edit the file, output the exact JSON snippet for the user to paste; if you don't know which client they use, ask first. Then have them restart or reconnect their MCP client. The token expires in 24 hours, after which they'll need to register again."),
+		mcp.WithTitleAnnotation("Verify Registration"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -16,6 +16,7 @@ var GetMetrics = bitrise.Tool{
 			mcp.Description("Slug of the Bitrise workspace"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get CodePush Metrics"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

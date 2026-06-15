@@ -40,6 +40,7 @@ var Register = bitrise.Tool{
 			mcp.Enum("bitbucket", "bitbucket-server", "custom", "github", "github-app", "github-self-hosted", "gitlab", "gitlab-self-hosted"),
 			mcp.DefaultString("github"),
 		),
+		mcp.WithTitleAnnotation("Register App"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

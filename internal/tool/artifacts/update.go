@@ -29,6 +29,7 @@ var Update = bitrise.Tool{
 			mcp.Description("Enable public page for the artifact"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Update Artifact"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

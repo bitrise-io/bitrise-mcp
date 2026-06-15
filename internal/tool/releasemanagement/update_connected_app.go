@@ -27,6 +27,7 @@ var UpdateConnectedApp = bitrise.Tool{
 		mcp.WithString("store_credential_id",
 			mcp.Description("If you have credentials added on Bitrise, you can decide to select one for your app. In case of ios platform it will be an Apple API credential id. In case of android platform it will be a Google Service credential id."),
 		),
+		mcp.WithTitleAnnotation("Update Connected App"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

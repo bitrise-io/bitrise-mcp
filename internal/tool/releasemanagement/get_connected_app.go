@@ -17,6 +17,7 @@ var GetConnectedApp = bitrise.Tool{
 			mcp.Description("Identifier of the Release Management connected app"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Connected App"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

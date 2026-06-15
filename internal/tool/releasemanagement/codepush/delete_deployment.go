@@ -17,6 +17,7 @@ var DeleteDeployment = bitrise.Tool{
 			mcp.Description("Identifier (UUID) of the CodePush deployment to delete"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Delete CodePush Deployment"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

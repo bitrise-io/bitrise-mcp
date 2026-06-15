@@ -20,6 +20,7 @@ var RollbackDeployment = bitrise.Tool{
 		mcp.WithString("package_id",
 			mcp.Description("Optional UUID of a specific package to rollback to. Defaults to the previous package."),
 		),
+		mcp.WithTitleAnnotation("Rollback CodePush Deployment"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -28,6 +28,7 @@ var Rebuild = bitrise.Tool{
 		mcp.WithString("triggered_by",
 			mcp.Description("Who triggered the rebuild"),
 		),
+		mcp.WithTitleAnnotation("Rebuild Pipeline"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

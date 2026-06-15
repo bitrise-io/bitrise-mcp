@@ -17,6 +17,7 @@ var RegisterWebhook = bitrise.Tool{
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Register Webhook"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

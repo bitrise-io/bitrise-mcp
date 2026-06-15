@@ -32,6 +32,7 @@ var CreateOutgoing = bitrise.Tool{
 		mcp.WithObject("headers",
 			mcp.Description("Headers to be sent with the webhook"),
 		),
+		mcp.WithTitleAnnotation("Create Outgoing Webhook"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

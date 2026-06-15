@@ -32,6 +32,7 @@ var Abort = bitrise.Tool{
 			mcp.Description("If set to true, skip sending notifications"),
 			mcp.DefaultBool(false),
 		),
+		mcp.WithTitleAnnotation("Abort Pipeline"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

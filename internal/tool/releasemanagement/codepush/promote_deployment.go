@@ -41,6 +41,7 @@ var PromoteDeployment = bitrise.Tool{
 		mcp.WithNumber("rollout",
 			mcp.Description("Percentage (0-100) of users who will receive this update. Defaults to 100."),
 		),
+		mcp.WithTitleAnnotation("Promote CodePush Deployment"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

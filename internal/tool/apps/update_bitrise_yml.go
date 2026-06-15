@@ -21,6 +21,7 @@ var UpdateBitriseYML = bitrise.Tool{
 			mcp.Description("The new Bitrise YML config file content to be updated. It must be a string. Important: these configs are large files, so get these by running: cat <filepath> via the Bash tool."),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Update bitrise.yml"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

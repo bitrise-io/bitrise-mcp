@@ -33,6 +33,7 @@ var GetPotentialTesters = bitrise.Tool{
 		mcp.WithString("search",
 			mcp.Description("Searches for potential testers based on email or username using a case-insensitive approach."),
 		),
+		mcp.WithTitleAnnotation("Get Potential Testers"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

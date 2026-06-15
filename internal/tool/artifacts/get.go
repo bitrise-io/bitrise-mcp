@@ -25,6 +25,7 @@ var Get = bitrise.Tool{
 			mcp.Description("Identifier of the artifact"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Artifact"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

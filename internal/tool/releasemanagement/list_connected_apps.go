@@ -35,6 +35,7 @@ var ListConnectedApps = bitrise.Tool{
 			mcp.Description("Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1."),
 			mcp.DefaultNumber(1),
 		),
+		mcp.WithTitleAnnotation("List Connected Apps"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

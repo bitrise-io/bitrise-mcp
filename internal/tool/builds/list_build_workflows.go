@@ -17,6 +17,7 @@ var ListBuildWorkflows = bitrise.Tool{
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("List Build Workflows"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -24,6 +24,7 @@ var ListOutgoing = bitrise.Tool{
 		mcp.WithNumber("limit",
 			mcp.Description("Max number of elements per page (default: 50)"),
 		),
+		mcp.WithTitleAnnotation("List Outgoing Webhooks"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

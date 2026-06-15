@@ -25,6 +25,7 @@ var Delete = bitrise.Tool{
 			mcp.Description("Identifier of the artifact"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Delete Artifact"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

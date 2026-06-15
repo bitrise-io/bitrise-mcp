@@ -26,6 +26,7 @@ var Replace = bitrise.Tool{
 			mcp.Required(),
 			mcp.WithStringItems(),
 		),
+		mcp.WithTitleAnnotation("Replace Group Roles"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

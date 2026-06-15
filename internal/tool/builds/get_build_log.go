@@ -43,6 +43,7 @@ var GetBuildLog = bitrise.Tool{
 			mcp.DefaultNumber(2000),
 		),
 		mcp.WithOutputSchema[GetBuildLogResponse](),
+		mcp.WithTitleAnnotation("Get Build Log"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

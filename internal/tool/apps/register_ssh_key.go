@@ -28,6 +28,7 @@ var RegisterSSHKey = bitrise.Tool{
 		mcp.WithBoolean("is_register_key_into_provider_service",
 			mcp.Description("Register the key in the provider service"),
 		),
+		mcp.WithTitleAnnotation("Register SSH Key"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

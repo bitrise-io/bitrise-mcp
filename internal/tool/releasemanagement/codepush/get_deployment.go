@@ -17,6 +17,7 @@ var GetDeployment = bitrise.Tool{
 			mcp.Description("Identifier (UUID) of the CodePush deployment"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get CodePush Deployment"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

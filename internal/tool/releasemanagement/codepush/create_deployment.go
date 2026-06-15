@@ -23,6 +23,7 @@ var CreateDeployment = bitrise.Tool{
 		mcp.WithString("key",
 			mcp.Description("Optional deployment key. If not provided, one will be auto-generated."),
 		),
+		mcp.WithTitleAnnotation("Create CodePush Deployment"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),
