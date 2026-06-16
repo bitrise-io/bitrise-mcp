@@ -18,7 +18,7 @@ type RegisterResponse struct {
 var Register = bitrise.Tool{
 	APIGroups: []string{"registration"},
 	Definition: mcp.NewTool("register",
-		mcp.WithDescription("Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address and returns a `pending_signup_id`. After this returns successfully, ask the user for the OTP that was sent to their email, then call `verify_registration` with that OTP and the `pending_signup_id` from this response."),
+		mcp.WithDescription("Start registration for a new Bitrise user. Sends a one-time password (OTP) to the provided email address and returns a `pending_signup_id`. After this returns successfully, ask the user for the OTP that was sent to their email, then call `verify_registration` with that OTP and the `pending_signup_id` from this response. If this fails because the email is already registered, the user already has a Bitrise account — don't retry; authenticate that existing account (OAuth or a PAT) instead."),
 		mcp.WithTitleAnnotation("Register Bitrise Account"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
