@@ -16,18 +16,35 @@ import (
 	"go.uber.org/zap"
 )
 
+// protectedResourceMetadataPath is the well-known location (RFC 9728) where the
+// server advertises which authorization server issues tokens for this resource.
+const protectedResourceMetadataPath = "/.well-known/oauth-protected-resource"
+
+// serverBaseURL reconstructs this server's externally visible base URL from the
+// incoming request, honouring the X-Forwarded-Proto header set by TLS-terminating
+// proxies.
+func serverBaseURL(r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
+		scheme = "https"
+	}
+	return scheme + "://" + r.Host
+}
+
+// resourceMetadataURL returns the absolute URL of this server's RFC 9728
+// protected resource metadata document, derived from the incoming request so it
+// stays correct regardless of the host the server is reached on.
+func resourceMetadataURL(r *http.Request) string {
+	return serverBaseURL(r) + protectedResourceMetadataPath
+}
+
 // oauthProtectedResourceHandler serves RFC 9728 Protected Resource Metadata,
 // telling OAuth clients which authorization server issues tokens for this resource.
 func oauthProtectedResourceHandler(issuer string) http.HandlerFunc {
 	issuer = strings.TrimRight(issuer, "/")
 	return func(w http.ResponseWriter, r *http.Request) {
-		scheme := "http"
-		if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
-			scheme = "https"
-		}
-		serverBase := scheme + "://" + r.Host
 		metadata := map[string]any{
-			"resource":                 serverBase,
+			"resource":                 serverBaseURL(r),
 			"authorization_servers":    []string{issuer},
 			"bearer_methods_supported": []string{"header"},
 		}
@@ -36,6 +53,21 @@ func oauthProtectedResourceHandler(issuer string) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(body)
 	}
+}
+
+// extractPAT resolves the Authorization bearer token on r into a Bitrise PAT,
+// exchanging it via the OIDC token endpoint (RFC 8693) when it looks like a JWT
+// and an exchanger is configured. It returns an empty PAT and a nil error when
+// no bearer token is present.
+func extractPAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if token == "" {
+		return "", nil
+	}
+	if exchanger != nil && isJWT(token) {
+		return exchanger.exchange(r.Context(), token)
+	}
+	return token, nil
 }
 
 type cacheEntry struct {

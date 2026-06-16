@@ -179,22 +179,24 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		exchanger = &jwtExchanger{tokenEndpoint: cfg.OIDCTokenEndpoint, logger: logger}
 	}
 
+	// When an external OAuth issuer is configured the auth middleware enforces
+	// authentication for tool calls (returning a 401 + WWW-Authenticate) and
+	// resolves the bearer token to a PAT before the request reaches the MCP
+	// handler. Otherwise the context func resolves it here, preserving the
+	// previous behaviour where missing auth surfaces as an in-band tool error.
+	authActive := cfg.ExternalOAuthIssuer != ""
+
 	mcpHandler := server.NewStreamableHTTPServer(
 		mcpServer,
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-			if token != "" {
-				pat := token
-				if exchanger != nil && isJWT(token) {
-					var err error
-					pat, err = exchanger.exchange(r.Context(), token)
-					if err != nil {
-						logger.Warnw("JWT→PAT exchange failed", "error", err)
-						return ctx
-					}
+			if !authActive {
+				pat, err := extractPAT(r, exchanger)
+				if err != nil {
+					logger.Warnw("JWT→PAT exchange failed", "error", err)
+				} else if pat != "" {
+					ctx = bitrise.ContextWithPAT(ctx, pat)
 				}
-				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
 			// server.WithToolFilter can use it to limit the tools listed.
 			enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
@@ -221,8 +223,13 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	}
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
-	if cfg.ExternalOAuthIssuer != "" {
-		mux.HandleFunc("/.well-known/oauth-protected-resource", oauthProtectedResourceHandler(cfg.ExternalOAuthIssuer))
+	if authActive {
+		mux.HandleFunc(protectedResourceMetadataPath, oauthProtectedResourceHandler(cfg.ExternalOAuthIssuer))
+	}
+
+	var mcpEntry http.Handler = mcpHandler
+	if authActive {
+		mcpEntry = requireAuthMiddleware(mcpHandler, exchanger, logger)
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// If the request looks like it's from a browser (Sec-Fetch-Mode: navigate),
@@ -232,7 +239,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			return
 		}
 		// Otherwise, handle as MCP request
-		mcpHandler.ServeHTTP(w, r)
+		mcpEntry.ServeHTTP(w, r)
 	})
 
 	httpServer := &http.Server{
