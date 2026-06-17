@@ -25,6 +25,7 @@ var CreateTesterGroup = bitrise.Tool{
 			mcp.Description("If set to true it indicates that the tester group will receive notifications automatically."),
 			mcp.DefaultBool(false),
 		),
+		mcp.WithTitleAnnotation("Create Tester Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

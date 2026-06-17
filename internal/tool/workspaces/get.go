@@ -17,6 +17,7 @@ var Get = bitrise.Tool{
 			mcp.Description("Slug of the Bitrise workspace"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Workspace"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -26,6 +26,7 @@ var AddTestersToTesterGroup = bitrise.Tool{
 			mcp.Required(),
 			mcp.WithStringItems(),
 		),
+		mcp.WithTitleAnnotation("Add Testers to Tester Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

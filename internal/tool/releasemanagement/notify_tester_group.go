@@ -25,6 +25,7 @@ var NotifyTesterGroup = bitrise.Tool{
 			mcp.Description("The unique identifier of the test build what will be sent in the notification of the tester group."),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Notify Tester Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

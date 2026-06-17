@@ -21,6 +21,7 @@ var GetInstallableArtifactUploadAndProcessingStatus = bitrise.Tool{
 			mcp.Description("The uuidv4 identifier for the installable artifact. This field is mandatory."),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Installable Artifact Upload and Processing Status"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

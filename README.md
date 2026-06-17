@@ -19,3 +19,19 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 - **[Windsurf](/docs/install-windsurf.md)** - Installation guide for Windsurf IDE
 - **[Gemini CLI](/docs/install-gemini-cli.md)** - Installation guide for Gemini CLI
 - **[AWS Kiro](/docs/install-kiro.md)** - Installation guide for AWS Kiro IDE
+
+## Example prompts
+
+Once connected, you can ask your AI assistant things like:
+
+- "Show me my last failed iOS build and explain why it failed."
+- "What's the success rate of my main branch builds over the last week?"
+- "Add a new team member to my workspace as an admin."
+
+## Support
+
+For help, questions, or to report an issue, visit the [Bitrise support portal](https://support.bitrise.io/en/).
+
+## Privacy
+
+Use of the Bitrise MCP Server is governed by the [Bitrise Privacy Policy](https://bitrise.io/legal/privacy-policy).

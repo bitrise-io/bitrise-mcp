@@ -16,6 +16,7 @@ var ListAvailableStacks = bitrise.Tool{
 		mcp.WithString("workspace_slug",
 			mcp.Description("Slug of the Bitrise workspace. When provided, lists stacks available for that workspace (including custom stacks). When omitted, lists globally available stacks."),
 		),
+		mcp.WithTitleAnnotation("List Available Stacks"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

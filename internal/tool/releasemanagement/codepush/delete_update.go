@@ -17,6 +17,7 @@ var DeleteUpdate = bitrise.Tool{
 			mcp.Description("Identifier (UUID) of the CodePush update to delete"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Delete CodePush Update"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

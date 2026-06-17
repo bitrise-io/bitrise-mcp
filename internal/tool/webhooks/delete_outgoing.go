@@ -21,6 +21,7 @@ var DeleteOutgoing = bitrise.Tool{
 			mcp.Description("Identifier of the webhook"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Delete Outgoing Webhook"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

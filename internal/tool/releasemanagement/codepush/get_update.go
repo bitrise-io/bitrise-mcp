@@ -17,6 +17,7 @@ var GetUpdate = bitrise.Tool{
 			mcp.Description("Identifier (UUID) of the CodePush update"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get CodePush Update"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

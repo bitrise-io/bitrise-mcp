@@ -21,6 +21,7 @@ var GetItemDownloadURL = bitrise.Tool{
 			mcp.Description("Key of the cache item"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Cache Item Download URL"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

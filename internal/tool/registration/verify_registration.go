@@ -19,6 +19,7 @@ var VerifyRegistration = bitrise.Tool{
 	APIGroups: []string{"registration"},
 	Definition: mcp.NewTool("verify_registration",
 		mcp.WithDescription("Verify a pending Bitrise registration using the OTP sent to the user's email. Pass the `pending_signup_id` returned by `register`. Returns an `api_token` (a Bitrise personal access token) and, when a workspace was auto-created, a `workspace_slug`. If the code is rejected as invalid, retry with the same `pending_signup_id`; if it has expired or hit the attempt limit, call `register` again for a fresh code. After success, authenticate the MCP connection so the other tools work: set `Authorization: Bearer <api_token>` on the user's Bitrise server entry. Give the user BOTH a CLI command and a copy-pastable JSON snippet — e.g. Claude Code: `claude mcp add --transport http bitrise https://mcp.bitrise.io -H \"Authorization: Bearer <api_token>\"` — and let them use whichever fits (ask which client they use if unsure). Then have them reconnect for it to take effect, and explain how for their client (don't just say \"reconnect\"). The token expires in 24 hours, after which they'll need to register again."),
+		mcp.WithTitleAnnotation("Verify Registration"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

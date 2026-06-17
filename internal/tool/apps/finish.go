@@ -55,6 +55,7 @@ var Finish = bitrise.Tool{
 			),
 			mcp.DefaultString("other-config"),
 		),
+		mcp.WithTitleAnnotation("Finish App Registration"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

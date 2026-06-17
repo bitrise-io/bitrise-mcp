@@ -21,6 +21,7 @@ var InviteMemberToWorkspace = bitrise.Tool{
 			mcp.Description("Email address of the user"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Invite Member to Workspace"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

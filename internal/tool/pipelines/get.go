@@ -25,6 +25,7 @@ var Get = bitrise.Tool{
 		mcp.WithBoolean("verbose",
 			mcp.Description("Include all pipeline details. Default: false"),
 		),
+		mcp.WithTitleAnnotation("Get Pipeline"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

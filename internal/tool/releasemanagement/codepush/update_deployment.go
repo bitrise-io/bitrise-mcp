@@ -21,6 +21,7 @@ var UpdateDeployment = bitrise.Tool{
 			mcp.Description("New name for the deployment"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Update CodePush Deployment"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

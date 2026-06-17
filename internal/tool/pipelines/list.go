@@ -54,6 +54,7 @@ var List = bitrise.Tool{
 		mcp.WithBoolean("verbose",
 			mcp.Description("Include all pipeline details. Default: false"),
 		),
+		mcp.WithTitleAnnotation("List Pipelines"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

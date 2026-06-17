@@ -21,6 +21,7 @@ var DeleteItem = bitrise.Tool{
 			mcp.Description("Key of the cache item"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Delete Cache Item"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

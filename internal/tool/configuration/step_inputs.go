@@ -17,6 +17,7 @@ var StepInputs = bitrise.Tool{
 			mcp.Description("Step reference formatted as `step_lib_source::step_id@version`. `step_id` and an exact `version` are required, `step_lib_source` is only necessary for custom step sources."),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Step Inputs"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

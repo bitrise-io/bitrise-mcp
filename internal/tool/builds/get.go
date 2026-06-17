@@ -25,6 +25,7 @@ var Get = bitrise.Tool{
 		mcp.WithBoolean("verbose",
 			mcp.Description("Include all build details. Default: false"),
 		),
+		mcp.WithTitleAnnotation("Get Build"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

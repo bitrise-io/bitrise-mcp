@@ -28,6 +28,7 @@ var List = bitrise.Tool{
 		mcp.WithNumber("limit",
 			mcp.Description("Max number of elements per page (default: 50)"),
 		),
+		mcp.WithTitleAnnotation("List Artifacts"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

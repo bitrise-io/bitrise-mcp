@@ -28,6 +28,7 @@ var UpdateTesterGroup = bitrise.Tool{
 			mcp.Description("If set to true it indicates the tester group will receive email notifications automatically from now on about new installable builds."),
 			mcp.DefaultBool(false),
 		),
+		mcp.WithTitleAnnotation("Update Tester Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

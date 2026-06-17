@@ -26,6 +26,7 @@ var PatchUpdate = bitrise.Tool{
 		mcp.WithNumber("rollout",
 			mcp.Description("Percentage (0-100) of users who will receive this update. Omit to leave unchanged."),
 		),
+		mcp.WithTitleAnnotation("Patch CodePush Update"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

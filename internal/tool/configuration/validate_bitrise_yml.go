@@ -19,6 +19,7 @@ var ValidateBitriseYML = bitrise.Tool{
 		mcp.WithString("app_slug",
 			mcp.Description("Slug of a Bitrise app (as returned by the list_apps tool). Specifying this value allows for validating the YML against workspace-specific settings like available stacks, machine types, license pools etc."),
 		),
+		mcp.WithTitleAnnotation("Validate bitrise.yml"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

@@ -21,6 +21,7 @@ var GetTesterGroup = bitrise.Tool{
 			mcp.Description("The uuidV4 identifier of the tester group. This field is mandatory."),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Get Tester Group"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

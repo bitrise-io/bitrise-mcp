@@ -17,6 +17,7 @@ var DeleteAllItems = bitrise.Tool{
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
 		),
+		mcp.WithTitleAnnotation("Delete All Cache Items"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),

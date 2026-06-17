@@ -25,6 +25,7 @@ var ListItems = bitrise.Tool{
 			mcp.Description("Max number of elements per page (default: 100)"),
 			mcp.DefaultNumber(100),
 		),
+		mcp.WithTitleAnnotation("List Cache Items"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),
