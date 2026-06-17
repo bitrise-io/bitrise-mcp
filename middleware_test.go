@@ -245,4 +245,36 @@ func TestRequireAuthMiddleware(t *testing.T) {
 		assert.True(t, s.called)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
+
+	t.Run("unauthenticated batch request returns 401", func(t *testing.T) {
+		s := &spy{}
+		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
+
+		body := `[{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"me","arguments":{}}}]`
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Host = "mcp.example.com"
+		w := httptest.NewRecorder()
+		mw.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+		assert.NotEmpty(t, w.Header().Get("WWW-Authenticate"))
+		assert.False(t, s.called, "batch requests without auth must not reach the handler")
+	})
+
+	t.Run("authenticated batch request reaches the handler", func(t *testing.T) {
+		s := &spy{}
+		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
+
+		body := `[{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"me","arguments":{}}}]`
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer valid-pat")
+		req.Host = "mcp.example.com"
+		w := httptest.NewRecorder()
+		mw.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.True(t, s.called)
+	})
 }

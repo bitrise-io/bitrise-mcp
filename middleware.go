@@ -12,21 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
-// requireAuthMiddleware gates tool-executing MCP requests behind a valid bearer
-// token. When a tools/call arrives without usable credentials it responds with
-// an RFC 6750 401 whose WWW-Authenticate header points at this server's RFC 9728
-// protected resource metadata. That 401 is the signal a spec-compliant reactive
-// OAuth client waits for before starting its authorization flow; without it such
-// clients connect and list tools fine but can never authenticate to run them.
-//
-// initialize and tools/list are intentionally left open so clients can connect
-// and enumerate tools before authorizing. The middleware is only installed when
-// an external OAuth issuer is configured; otherwise the server keeps its prior
-// behaviour of surfacing missing auth as an in-band tool error.
+// requireAuthMiddleware returns RFC 6750 401 + WWW-Authenticate on unauthenticated
+// tools/call so reactive OAuth clients can start their authorization flow without
+// pre-probing the metadata endpoint. initialize and tools/list stay open.
 func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, logger *zap.SugaredLogger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Only POST carries JSON-RPC requests; GET/DELETE manage the SSE stream
-		// and session and never execute tools.
 		if r.Method != http.MethodPost {
 			next.ServeHTTP(w, r)
 			return
@@ -41,8 +31,6 @@ func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, logger *z
 
 		pat, err := extractPAT(r, exchanger)
 		if err != nil {
-			// A bearer token was supplied but the JWT→PAT exchange rejected it
-			// (e.g. expired or invalid token): treat it as unauthenticated.
 			logger.Warnw("JWT→PAT exchange failed", "error", err)
 			writeUnauthorized(w, r)
 			return
@@ -56,31 +44,30 @@ func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, logger *z
 	})
 }
 
-// peekMCPMethod reads the JSON-RPC method from the request body without
-// consuming it, returning the method and a fresh body for downstream handlers.
-// A body that is missing, unreadable, or not a single JSON-RPC object yields an
-// empty method, which is treated as not requiring auth so the streamable HTTP
-// server can produce its own parse error.
+// peekMCPMethod restores the body after reading so downstream handlers still see it.
+// Unparseable bodies yield "" (no auth required); the MCP server handles the error.
+// JSON arrays are treated as tools/call so a batch can't sneak past the auth check.
 func peekMCPMethod(r *http.Request) (mcp.MCPMethod, io.ReadCloser) {
 	raw, err := io.ReadAll(r.Body)
 	if err != nil {
 		return "", io.NopCloser(bytes.NewReader(nil))
 	}
+	body := io.NopCloser(bytes.NewReader(raw))
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) > 0 && trimmed[0] == '[' {
+		return mcp.MethodToolsCall, body
+	}
 	var msg struct {
 		Method mcp.MCPMethod `json:"method"`
 	}
 	_ = json.Unmarshal(raw, &msg)
-	return msg.Method, io.NopCloser(bytes.NewReader(raw))
+	return msg.Method, body
 }
 
-// methodRequiresAuth reports whether an MCP method executes a tool and therefore
-// needs Bitrise credentials. Only tools/call does.
 func methodRequiresAuth(method mcp.MCPMethod) bool {
 	return method == mcp.MethodToolsCall
 }
 
-// writeUnauthorized emits an RFC 6750 401 whose WWW-Authenticate header points
-// OAuth clients at this server's RFC 9728 protected resource metadata.
 func writeUnauthorized(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("WWW-Authenticate", fmt.Sprintf("Bearer resource_metadata=%q", resourceMetadataURL(r)))
 	w.Header().Set("Content-Type", "application/json")

@@ -16,13 +16,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// protectedResourceMetadataPath is the well-known location (RFC 9728) where the
-// server advertises which authorization server issues tokens for this resource.
 const protectedResourceMetadataPath = "/.well-known/oauth-protected-resource"
 
-// serverBaseURL reconstructs this server's externally visible base URL from the
-// incoming request, honouring the X-Forwarded-Proto header set by TLS-terminating
-// proxies.
+// serverBaseURL honours X-Forwarded-Proto so the URL is correct behind TLS-terminating proxies.
 func serverBaseURL(r *http.Request) string {
 	scheme := "http"
 	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
@@ -31,15 +27,10 @@ func serverBaseURL(r *http.Request) string {
 	return scheme + "://" + r.Host
 }
 
-// resourceMetadataURL returns the absolute URL of this server's RFC 9728
-// protected resource metadata document, derived from the incoming request so it
-// stays correct regardless of the host the server is reached on.
 func resourceMetadataURL(r *http.Request) string {
 	return serverBaseURL(r) + protectedResourceMetadataPath
 }
 
-// oauthProtectedResourceHandler serves RFC 9728 Protected Resource Metadata,
-// telling OAuth clients which authorization server issues tokens for this resource.
 func oauthProtectedResourceHandler(issuer string) http.HandlerFunc {
 	issuer = strings.TrimRight(issuer, "/")
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -55,10 +46,8 @@ func oauthProtectedResourceHandler(issuer string) http.HandlerFunc {
 	}
 }
 
-// extractPAT resolves the Authorization bearer token on r into a Bitrise PAT,
-// exchanging it via the OIDC token endpoint (RFC 8693) when it looks like a JWT
-// and an exchanger is configured. It returns an empty PAT and a nil error when
-// no bearer token is present.
+// extractPAT exchanges via OIDC (RFC 8693) when the token looks like a JWT;
+// otherwise passes it through as a raw PAT. Returns ("", nil) with no auth header.
 func extractPAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 	if token == "" {
@@ -75,8 +64,7 @@ type cacheEntry struct {
 	expiresAt time.Time
 }
 
-// jwtExchanger calls an OIDC token exchange endpoint (RFC 8693) to trade an
-// external JWT for a Bitrise PAT, caching results until the JWT expires.
+// jwtExchanger trades an external JWT for a Bitrise PAT via RFC 8693, caching by JWT hash.
 type jwtExchanger struct {
 	tokenEndpoint string
 	logger        *zap.SugaredLogger
@@ -145,14 +133,12 @@ func (e *jwtExchanger) callExchangeEndpoint(ctx context.Context, jwt string) (st
 	return result.AccessToken, nil
 }
 
-// isJWT returns true when the token looks like a JWT (three base64url parts
-// with an "eyJ" header prefix).
+// isJWT is a heuristic: "eyJ" header prefix + two dots, no signature verification.
 func isJWT(token string) bool {
 	return strings.HasPrefix(token, "eyJ") && strings.Count(token, ".") == 2
 }
 
-// jwtTTL decodes the exp claim from a JWT (without verification) and returns
-// the remaining lifetime, capped at 1 hour. Falls back to 5 minutes on any error.
+// jwtTTL reads exp without signature verification; capped at 1h, falls back to 5m.
 func jwtTTL(jwt string) time.Duration {
 	parts := strings.Split(jwt, ".")
 	if len(parts) != 3 {
@@ -182,8 +168,7 @@ func jwtTTL(jwt string) time.Duration {
 	return ttl
 }
 
-// cacheKey returns a short stable identifier for a JWT without storing the
-// full token value.
+// cacheKey hashes the JWT so the full token is not kept in memory.
 func cacheKey(jwt string) string {
 	h := sha256.Sum256([]byte(jwt))
 	return fmt.Sprintf("%x", h[:8])
