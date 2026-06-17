@@ -188,7 +188,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	// resolves the bearer token to a PAT before the request reaches the MCP
 	// handler. Otherwise the context func resolves it here, preserving the
 	// previous behaviour where missing auth surfaces as an in-band tool error.
-	authActive := cfg.ExternalOAuthIssuer != ""
+	externalOAuthConfigured := cfg.ExternalOAuthIssuer != ""
 
 	var metadataURL string
 	httpServerOpts := []server.StreamableHTTPOption{
@@ -210,7 +210,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		}),
 		server.WithDisableStreaming(true),
 	}
-	if authActive {
+	if externalOAuthConfigured {
 		protectedResourceCfg := server.ProtectedResourceMetadataConfig{
 			Resource:               cfg.ServerBaseURL,
 			AuthorizationServers:   []string{cfg.ExternalOAuthIssuer},
@@ -235,12 +235,12 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
 
-	if authActive {
+	if externalOAuthConfigured {
 		server.WithToolHandlerMiddleware(requireAuthToolHandler)(mcpServer)
 	}
 
 	var mcpEntry http.Handler = mcpHandler
-	if authActive {
+	if externalOAuthConfigured {
 		mcpEntry = withAuthContext(mcpHandler, metadataURL)
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
