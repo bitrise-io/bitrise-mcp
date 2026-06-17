@@ -1,75 +1,75 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
+	"errors"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/mark3labs/mcp-go/mcp"
-	"go.uber.org/zap"
+	"github.com/mark3labs/mcp-go/server"
 )
 
-// requireAuthMiddleware returns RFC 6750 401 + WWW-Authenticate on unauthenticated
-// tools/call so reactive OAuth clients can start their authorization flow without
-// pre-probing the metadata endpoint. initialize and tools/list stay open.
-func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, logger *zap.SugaredLogger) http.Handler {
+type ctxWriterKey struct{}
+type ctxMetadataURLKey struct{}
+
+// hijackableWriter lets requireAuthToolHandler write a 401 and then suppress
+// mcp-go's own error write that follows — mcp-go has no hook to return an HTTP
+// error status from a tool handler, so we intercept at the transport layer.
+type hijackableWriter struct {
+	http.ResponseWriter
+	done bool
+}
+
+func (h *hijackableWriter) Write(b []byte) (int, error) {
+	if h.done {
+		return len(b), nil
+	}
+	return h.ResponseWriter.Write(b)
+}
+
+func (h *hijackableWriter) WriteHeader(code int) {
+	if h.done {
+		return
+	}
+	h.ResponseWriter.WriteHeader(code)
+}
+
+// withAuthContext wraps the response writer in a hijackableWriter and stores it
+// alongside the metadata URL in the context. requireAuthToolHandler reads both to
+// write a 401 directly to the wire and discard mcp-go's subsequent error write.
+// PAT extraction happens in WithHTTPContextFunc so it applies to all transports.
+func withAuthContext(next http.Handler, metadataURL string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		method, body := peekMCPMethod(r)
-		r.Body = body
-		if !methodRequiresAuth(method) {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		pat, err := extractPAT(r, exchanger)
-		if err != nil {
-			logger.Warnw("JWT→PAT exchange failed", "error", err)
-			writeUnauthorized(w, r)
-			return
-		}
-		if pat == "" {
-			writeUnauthorized(w, r)
-			return
-		}
-
-		next.ServeHTTP(w, r.WithContext(bitrise.ContextWithPAT(r.Context(), pat)))
+		hw := &hijackableWriter{ResponseWriter: w}
+		ctx := context.WithValue(r.Context(), ctxWriterKey{}, hw)
+		ctx = context.WithValue(ctx, ctxMetadataURLKey{}, metadataURL)
+		next.ServeHTTP(hw, r.WithContext(ctx))
 	})
 }
 
-// peekMCPMethod restores the body after reading so downstream handlers still see it.
-// Unparseable bodies yield "" (no auth required); the MCP server handles the error.
-// JSON arrays are treated as tools/call so a batch can't sneak past the auth check.
-func peekMCPMethod(r *http.Request) (mcp.MCPMethod, io.ReadCloser) {
-	raw, err := io.ReadAll(r.Body)
-	if err != nil {
-		return "", io.NopCloser(bytes.NewReader(nil))
+// requireAuthToolHandler is a WithToolHandlerMiddleware that returns RFC 6750
+// 401 + WWW-Authenticate for unauthenticated tool calls. It writes the 401
+// directly to the response writer stored in context by withAuthContext, then
+// hijacks that writer so mcp-go's subsequent error response is silently discarded.
+func requireAuthToolHandler(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		pat, err := bitrise.PATFromCtx(ctx)
+		if pat == "" || err != nil {
+			if hw, ok := ctx.Value(ctxWriterKey{}).(*hijackableWriter); ok {
+				metadataURL, _ := ctx.Value(ctxMetadataURLKey{}).(string)
+				writeUnauthorized(hw, metadataURL)
+				hw.done = true
+			}
+			return nil, errors.New("unauthorized")
+		}
+		return fn(ctx, request)
 	}
-	body := io.NopCloser(bytes.NewReader(raw))
-	trimmed := bytes.TrimSpace(raw)
-	if len(trimmed) > 0 && trimmed[0] == '[' {
-		return mcp.MethodToolsCall, body
-	}
-	var msg struct {
-		Method mcp.MCPMethod `json:"method"`
-	}
-	_ = json.Unmarshal(raw, &msg)
-	return msg.Method, body
 }
 
-func methodRequiresAuth(method mcp.MCPMethod) bool {
-	return method == mcp.MethodToolsCall
-}
-
-func writeUnauthorized(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("WWW-Authenticate", fmt.Sprintf("Bearer resource_metadata=%q", resourceMetadataURL(r)))
+func writeUnauthorized(w http.ResponseWriter, metadataURL string) {
+	w.Header().Set("WWW-Authenticate", fmt.Sprintf("Bearer resource_metadata=%q", metadataURL))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
 	_, _ = w.Write([]byte(`{"error":"unauthorized","error_description":"authentication required to call tools"}`))

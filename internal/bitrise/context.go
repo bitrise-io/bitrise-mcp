@@ -21,6 +21,10 @@ func patFromCtx(ctx context.Context) (string, error) {
 	return u, nil
 }
 
+func PATFromCtx(ctx context.Context) (string, error) {
+	return patFromCtx(ctx)
+}
+
 func ContextWithPAT(ctx context.Context, s string) context.Context {
 	return context.WithValue(ctx, keyPAT, s)
 }

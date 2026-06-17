@@ -12,39 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"go.uber.org/zap"
 )
-
-const protectedResourceMetadataPath = "/.well-known/oauth-protected-resource"
-
-// serverBaseURL honours X-Forwarded-Proto so the URL is correct behind TLS-terminating proxies.
-func serverBaseURL(r *http.Request) string {
-	scheme := "http"
-	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
-		scheme = "https"
-	}
-	return scheme + "://" + r.Host
-}
-
-func resourceMetadataURL(r *http.Request) string {
-	return serverBaseURL(r) + protectedResourceMetadataPath
-}
-
-func oauthProtectedResourceHandler(issuer string) http.HandlerFunc {
-	issuer = strings.TrimRight(issuer, "/")
-	return func(w http.ResponseWriter, r *http.Request) {
-		metadata := map[string]any{
-			"resource":                 serverBaseURL(r),
-			"authorization_servers":    []string{issuer},
-			"bearer_methods_supported": []string{"header"},
-		}
-		body, _ := json.Marshal(metadata)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(body)
-	}
-}
 
 // extractPAT exchanges via OIDC (RFC 8693) when the token looks like a JWT;
 // otherwise passes it through as a raw PAT. Returns ("", nil) with no auth header.
@@ -67,7 +35,6 @@ type cacheEntry struct {
 // jwtExchanger trades an external JWT for a Bitrise PAT via RFC 8693, caching by JWT hash.
 type jwtExchanger struct {
 	tokenEndpoint string
-	logger        *zap.SugaredLogger
 	cache         sync.Map
 }
 

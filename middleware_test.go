@@ -1,42 +1,20 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
-func TestMethodRequiresAuth(t *testing.T) {
-	cases := map[string]struct {
-		method mcp.MCPMethod
-		want   bool
-	}{
-		"tools/call requires auth":      {method: mcp.MethodToolsCall, want: true},
-		"initialize is open":            {method: mcp.MethodInitialize, want: false},
-		"tools/list is open":            {method: mcp.MethodToolsList, want: false},
-		"ping is open":                  {method: mcp.MethodPing, want: false},
-		"empty/unparseable method open": {method: "", want: false},
-	}
-
-	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.want, methodRequiresAuth(tc.method))
-		})
-	}
-}
-
 func TestExtractPAT(t *testing.T) {
-	nopLogger := zap.NewNop().Sugar()
-
 	t.Run("no Authorization header returns empty PAT and no error", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/", nil)
 		pat, err := extractPAT(req, nil)
@@ -60,7 +38,7 @@ func TestExtractPAT(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
 		req := httptest.NewRequest(http.MethodPost, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+makeTestJWT(time.Now().Add(10*time.Minute).Unix()))
 		pat, err := extractPAT(req, exchanger)
@@ -74,7 +52,7 @@ func TestExtractPAT(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
 		req := httptest.NewRequest(http.MethodPost, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+makeTestJWT(time.Now().Add(10*time.Minute).Unix()))
 		_, err := extractPAT(req, exchanger)
@@ -91,190 +69,108 @@ func TestExtractPAT(t *testing.T) {
 	})
 }
 
-// jsonRPCBody builds a minimal JSON-RPC request body for the given method.
-func jsonRPCBody(method mcp.MCPMethod) string {
-	return fmt.Sprintf(`{"jsonrpc":"2.0","id":1,"method":%q,"params":{}}`, string(method))
-}
+func TestWithAuthContext(t *testing.T) {
+	const metadataURL = "https://mcp.bitrise.io/.well-known/oauth-protected-resource"
 
-// newMCPRequest builds an MCP POST request for the given method with an optional
-// bearer token.
-func newMCPRequest(method mcp.MCPMethod, bearer string) *http.Request {
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(jsonRPCBody(method)))
-	req.Header.Set("Content-Type", "application/json")
-	req.Host = "mcp.example.com"
-	if bearer != "" {
-		req.Header.Set("Authorization", "Bearer "+bearer)
-	}
-	return req
-}
-
-func TestRequireAuthMiddleware(t *testing.T) {
-	nopLogger := zap.NewNop().Sugar()
-
-	// spyHandler records whether it was reached and what body it observed.
-	type spy struct {
-		called bool
-		body   string
-	}
-	newSpy := func(s *spy) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			s.called = true
-			b, _ := io.ReadAll(r.Body)
-			s.body = string(b)
+	captureCtx := func() (http.Handler, *context.Context) {
+		var captured context.Context
+		h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			captured = r.Context()
 			w.WriteHeader(http.StatusOK)
 		})
+		return h, &captured
 	}
 
-	t.Run("unauthenticated tools/call returns 401 with WWW-Authenticate", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
+	t.Run("wraps writer as hijackable", func(t *testing.T) {
+		next, ctx := captureCtx()
+		mw := withAuthContext(next, metadataURL)
 
-		req := newMCPRequest(mcp.MethodToolsCall, "")
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
+		mw.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPost, "/", nil))
 
-		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.Equal(t,
-			`Bearer resource_metadata="http://mcp.example.com/.well-known/oauth-protected-resource"`,
-			w.Header().Get("WWW-Authenticate"),
-		)
-		assert.False(t, s.called, "downstream handler must not run for unauthenticated tool calls")
+		hw, ok := (*ctx).Value(ctxWriterKey{}).(*hijackableWriter)
+		assert.True(t, ok)
+		assert.NotNil(t, hw)
 	})
 
-	t.Run("WWW-Authenticate uses https behind a TLS-terminating proxy", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
+	t.Run("stores metadata URL in context verbatim", func(t *testing.T) {
+		next, ctx := captureCtx()
+		mw := withAuthContext(next, metadataURL)
 
-		req := newMCPRequest(mcp.MethodToolsCall, "")
-		req.Header.Set("X-Forwarded-Proto", "https")
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
+		mw.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPost, "/", nil))
 
-		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.Equal(t,
-			`Bearer resource_metadata="https://mcp.example.com/.well-known/oauth-protected-resource"`,
-			w.Header().Get("WWW-Authenticate"),
-		)
+		stored, _ := (*ctx).Value(ctxMetadataURLKey{}).(string)
+		assert.Equal(t, metadataURL, stored)
 	})
 
-	t.Run("tools/call with a valid PAT reaches the handler", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
+	t.Run("passes all requests through to next handler", func(t *testing.T) {
+		called := false
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			called = true
+			w.WriteHeader(http.StatusOK)
+		})
+		mw := withAuthContext(next, metadataURL)
 
-		req := newMCPRequest(mcp.MethodToolsCall, "valid-pat")
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.True(t, s.called, "downstream handler should run for authenticated tool calls")
-		assert.Equal(t, jsonRPCBody(mcp.MethodToolsCall), s.body, "request body must be preserved for the handler")
-	})
-
-	t.Run("tools/call with a valid JWT is exchanged then reaches the handler", func(t *testing.T) {
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-			body, _ := json.Marshal(map[string]string{"access_token": "exchanged-pat"})
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write(body)
-		}))
-		defer srv.Close()
-
-		s := &spy{}
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
-		mw := requireAuthMiddleware(newSpy(s), exchanger, nopLogger)
-
-		req := newMCPRequest(mcp.MethodToolsCall, makeTestJWT(time.Now().Add(10*time.Minute).Unix()))
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.True(t, s.called)
-	})
-
-	t.Run("tools/call with an invalid JWT returns 401", func(t *testing.T) {
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-			w.WriteHeader(http.StatusUnauthorized)
-		}))
-		defer srv.Close()
-
-		s := &spy{}
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
-		mw := requireAuthMiddleware(newSpy(s), exchanger, nopLogger)
-
-		req := newMCPRequest(mcp.MethodToolsCall, makeTestJWT(time.Now().Add(10*time.Minute).Unix()))
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.NotEmpty(t, w.Header().Get("WWW-Authenticate"))
-		assert.False(t, s.called)
-	})
-
-	t.Run("initialize is allowed without auth", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
-
-		req := newMCPRequest(mcp.MethodInitialize, "")
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.True(t, s.called)
-		assert.Empty(t, w.Header().Get("WWW-Authenticate"))
-	})
-
-	t.Run("tools/list is allowed without auth", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
-
-		req := newMCPRequest(mcp.MethodToolsList, "")
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.True(t, s.called)
-	})
-
-	t.Run("non-POST requests pass through untouched", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
-
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.True(t, s.called)
-		assert.Equal(t, http.StatusOK, w.Code)
-	})
-
-	t.Run("unauthenticated batch request returns 401", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
-
-		body := `[{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"me","arguments":{}}}]`
-		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Host = "mcp.example.com"
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.NotEmpty(t, w.Header().Get("WWW-Authenticate"))
-		assert.False(t, s.called, "batch requests without auth must not reach the handler")
-	})
-
-	t.Run("authenticated batch request reaches the handler", func(t *testing.T) {
-		s := &spy{}
-		mw := requireAuthMiddleware(newSpy(s), nil, nopLogger)
-
-		body := `[{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"me","arguments":{}}}]`
-		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer valid-pat")
-		req.Host = "mcp.example.com"
-		w := httptest.NewRecorder()
-		mw.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.True(t, s.called)
+		mw.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/", nil))
+		assert.True(t, called)
 	})
 }
+
+func TestRequireAuthToolHandler(t *testing.T) {
+	makeCtx := func(pat string) (context.Context, *httptest.ResponseRecorder) {
+		rec := httptest.NewRecorder()
+		hw := &hijackableWriter{ResponseWriter: rec}
+		ctx := context.WithValue(context.Background(), ctxWriterKey{}, hw)
+		ctx = context.WithValue(ctx, ctxMetadataURLKey{}, "http://mcp.example.com/.well-known/oauth-protected-resource")
+		if pat != "" {
+			ctx = bitrise.ContextWithPAT(ctx, pat)
+		}
+		return ctx, rec
+	}
+
+	passThroughFn := server.ToolHandlerFunc(func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return &mcp.CallToolResult{}, nil
+	})
+
+	t.Run("unauthenticated call writes 401 and does not invoke fn", func(t *testing.T) {
+		ctx, rec := makeCtx("")
+		fnCalled := false
+		fn := server.ToolHandlerFunc(func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			fnCalled = true
+			return &mcp.CallToolResult{}, nil
+		})
+
+		result, err := requireAuthToolHandler(fn)(ctx, mcp.CallToolRequest{})
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+		assert.False(t, fnCalled)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Equal(t,
+			`Bearer resource_metadata="http://mcp.example.com/.well-known/oauth-protected-resource"`,
+			rec.Header().Get("WWW-Authenticate"),
+		)
+		hw := ctx.Value(ctxWriterKey{}).(*hijackableWriter)
+		assert.True(t, hw.done, "writer must be hijacked so mcp-go's error write is discarded")
+	})
+
+	t.Run("authenticated call passes through to fn", func(t *testing.T) {
+		ctx, _ := makeCtx("valid-pat")
+
+		result, err := requireAuthToolHandler(passThroughFn)(ctx, mcp.CallToolRequest{})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		hw := ctx.Value(ctxWriterKey{}).(*hijackableWriter)
+		assert.False(t, hw.done)
+	})
+
+	t.Run("JWT exchange to valid PAT passes through", func(t *testing.T) {
+		ctx, _ := makeCtx("exchanged-pat")
+
+		result, err := requireAuthToolHandler(passThroughFn)(ctx, mcp.CallToolRequest{})
+
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+	})
+}
+
