@@ -183,11 +183,12 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		exchanger = &jwtExchanger{tokenEndpoint: cfg.OIDCTokenEndpoint}
 	}
 
-	// When an external OAuth issuer is configured the auth middleware enforces
-	// authentication for tool calls (returning a 401 + WWW-Authenticate) and
-	// resolves the bearer token to a PAT before the request reaches the MCP
-	// handler. Otherwise the context func resolves it here, preserving the
-	// previous behaviour where missing auth surfaces as an in-band tool error.
+	// When an external OAuth issuer is configured the auth middleware challenges
+	// credential-less requests at the connection layer (returning a 401 +
+	// WWW-Authenticate). The WithHTTPContextFunc still resolves the bearer token
+	// to a PAT for authenticated requests. Otherwise (no issuer) the context func
+	// is the only auth step, preserving the previous behaviour where missing auth
+	// surfaces as an in-band tool error.
 	externalOAuthConfigured := cfg.ExternalOAuthIssuer != ""
 
 	var metadataURL string
@@ -235,13 +236,9 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
 
-	if externalOAuthConfigured {
-		server.WithToolHandlerMiddleware(requireAuthToolHandler)(mcpServer)
-	}
-
 	var mcpEntry http.Handler = mcpHandler
 	if externalOAuthConfigured {
-		mcpEntry = withAuthContext(mcpHandler, metadataURL)
+		mcpEntry = requireAuthMiddleware(mcpHandler, exchanger, metadataURL, logger)
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// If the request looks like it's from a browser (Sec-Fetch-Mode: navigate),

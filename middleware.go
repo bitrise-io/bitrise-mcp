@@ -1,76 +1,61 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"go.uber.org/zap"
 )
 
-type ctxWriterKey struct{}
-type ctxMetadataURLKey struct{}
-
-// hijackableWriter lets requireAuthToolHandler write a 401 and then suppress
-// mcp-go's own error write that follows — mcp-go has no hook to return an HTTP
-// error status from a tool handler, so we intercept at the transport layer.
-type hijackableWriter struct {
-	http.ResponseWriter
-	done bool
-}
-
-func (h *hijackableWriter) Write(b []byte) (int, error) {
-	if h.done {
-		return len(b), nil
-	}
-	return h.ResponseWriter.Write(b)
-}
-
-func (h *hijackableWriter) WriteHeader(code int) {
-	if h.done {
-		return
-	}
-	h.ResponseWriter.WriteHeader(code)
-}
-
-// withAuthContext wraps the response writer in a hijackableWriter and stores it
-// alongside the metadata URL in the context. requireAuthToolHandler reads both to
-// write a 401 directly to the wire and discard mcp-go's subsequent error write.
-// PAT extraction happens in WithHTTPContextFunc so it applies to all transports.
-func withAuthContext(next http.Handler, metadataURL string) http.Handler {
+// requireAuthMiddleware gates credential-less JSON-RPC requests at the HTTP layer
+// with an RFC 6750 401 whose WWW-Authenticate header points at this server's RFC
+// 9728 protected resource metadata. That 401 is the signal a spec-compliant
+// reactive OAuth client waits for before starting its authorization flow.
+//
+// Unlike gating only tools/call, this challenges the initialize handshake too.
+// Claude Code (and other clients) only surface the interactive, URL-showing auth
+// flow once they have flagged a server as needing auth; that flag is set from a
+// connection-level 401. If initialize succeeds anonymously, the client connects,
+// lists tools, and only discovers the 401 reactively on the first tool call —
+// where it refuses to surface the authorization URL. Challenging the connection
+// itself flags the server as needing auth up front, so the very first tool
+// invocation drives the auth flow instead of failing silently.
+//
+// The trade-off is that unauthenticated clients can no longer connect and
+// enumerate tools; for an OAuth-gated resource that does nothing useful without
+// credentials this is acceptable. PAT resolution for authenticated requests
+// still happens in the WithHTTPContextFunc so it applies across transports.
+//
+// Only installed when an external OAuth issuer is configured; otherwise the
+// server keeps its prior behaviour of surfacing missing auth as an in-band tool
+// error.
+func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, metadataURL string, logger *zap.SugaredLogger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		hw := &hijackableWriter{ResponseWriter: w}
-		ctx := context.WithValue(r.Context(), ctxWriterKey{}, hw)
-		ctx = context.WithValue(ctx, ctxMetadataURLKey{}, metadataURL)
-		next.ServeHTTP(hw, r.WithContext(ctx))
-	})
-}
-
-// requireAuthToolHandler is a WithToolHandlerMiddleware that returns RFC 6750
-// 401 + WWW-Authenticate for unauthenticated tool calls. It writes the 401
-// directly to the response writer stored in context by withAuthContext, then
-// hijacks that writer so mcp-go's subsequent error response is silently discarded.
-func requireAuthToolHandler(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		pat, err := bitrise.PATFromCtx(ctx)
-		if pat == "" || err != nil {
-			if hw, ok := ctx.Value(ctxWriterKey{}).(*hijackableWriter); ok {
-				metadataURL, _ := ctx.Value(ctxMetadataURLKey{}).(string)
-				writeUnauthorized(hw, metadataURL)
-				hw.done = true
-			}
-			return nil, errors.New("unauthorized")
+		// Only POST carries JSON-RPC requests (initialize, tools/*). GET/DELETE
+		// manage the SSE stream and session and never need credentials here.
+		if r.Method != http.MethodPost {
+			next.ServeHTTP(w, r)
+			return
 		}
-		return fn(ctx, request)
-	}
+
+		pat, err := extractPAT(r, exchanger)
+		if err != nil {
+			// A bearer token was supplied but the JWT→PAT exchange rejected it
+			// (e.g. expired or invalid token): treat it as unauthenticated.
+			logger.Warnw("JWT→PAT exchange failed", "error", err)
+		}
+		if pat == "" {
+			writeUnauthorized(w, metadataURL)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func writeUnauthorized(w http.ResponseWriter, metadataURL string) {
 	w.Header().Set("WWW-Authenticate", fmt.Sprintf("Bearer resource_metadata=%q", metadataURL))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
-	_, _ = w.Write([]byte(`{"error":"unauthorized","error_description":"authentication required to call tools"}`))
+	_, _ = w.Write([]byte(`{"error":"unauthorized","error_description":"authentication required"}`))
 }
