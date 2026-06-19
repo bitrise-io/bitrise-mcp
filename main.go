@@ -52,6 +52,10 @@ type config struct {
 	// (RFC 8693) used to trade an external JWT for a Bitrise PAT. When set,
 	// Bearer tokens that look like JWTs are exchanged before being passed to tools.
 	OIDCTokenEndpoint string `env:"OIDC_TOKEN_ENDPOINT"`
+	// ServerBaseURL is the public base URL of this MCP server (e.g. https://mcp.bitrise.io).
+	// Required when EXTERNAL_OAUTH_ISSUER is set — used in WWW-Authenticate headers and
+	// the OAuth protected resource metadata document.
+	ServerBaseURL string `env:"SERVER_BASE_URL"`
 	// BitriseAPIBaseURL overrides the Bitrise v0.1 API base URL
 	// (default: https://api.bitrise.io/v0.1). Useful for pointing at a
 	// test or local API instance.
@@ -176,24 +180,25 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 
 	var exchanger *jwtExchanger
 	if cfg.OIDCTokenEndpoint != "" {
-		exchanger = &jwtExchanger{tokenEndpoint: cfg.OIDCTokenEndpoint, logger: logger}
+		exchanger = &jwtExchanger{tokenEndpoint: cfg.OIDCTokenEndpoint}
 	}
 
-	mcpHandler := server.NewStreamableHTTPServer(
-		mcpServer,
+	// When an external OAuth issuer is configured the auth middleware challenges
+	// credential-less requests at the connection layer (returning a 401 +
+	// WWW-Authenticate). The WithHTTPContextFunc still resolves the bearer token
+	// to a PAT for authenticated requests. Otherwise (no issuer) the context func
+	// is the only auth step, preserving the previous behaviour where missing auth
+	// surfaces as an in-band tool error.
+	externalOAuthConfigured := cfg.ExternalOAuthIssuer != ""
+
+	var metadataURL string
+	httpServerOpts := []server.StreamableHTTPOption{
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-			if token != "" {
-				pat := token
-				if exchanger != nil && isJWT(token) {
-					var err error
-					pat, err = exchanger.exchange(r.Context(), token)
-					if err != nil {
-						logger.Warnw("JWT→PAT exchange failed", "error", err)
-						return ctx
-					}
-				}
+			pat, err := extractPAT(r, exchanger)
+			if err != nil {
+				logger.Warnw("JWT→PAT exchange failed", "error", err)
+			} else if pat != "" {
 				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
 			// server.WithToolFilter can use it to limit the tools listed.
@@ -204,9 +209,18 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			}
 			return ctx
 		}),
-		server.WithLogger(logger),
 		server.WithDisableStreaming(true),
-	)
+	}
+	if externalOAuthConfigured {
+		protectedResourceCfg := server.ProtectedResourceMetadataConfig{
+			Resource:               cfg.ServerBaseURL,
+			AuthorizationServers:   []string{cfg.ExternalOAuthIssuer},
+			BearerMethodsSupported: []string{"header"},
+		}
+		httpServerOpts = append(httpServerOpts, server.WithProtectedResourceMetadata(protectedResourceCfg))
+		metadataURL = cfg.ServerBaseURL + server.WellKnownProtectedResourcePath
+	}
+	mcpHandler := server.NewStreamableHTTPServer(mcpServer, httpServerOpts...)
 
 	type router interface {
 		http.Handler
@@ -221,8 +235,10 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	}
 	mux.HandleFunc("/readyz", readyzHandler)
 	mux.HandleFunc("/livez", livezHandler)
-	if cfg.ExternalOAuthIssuer != "" {
-		mux.HandleFunc("/.well-known/oauth-protected-resource", oauthProtectedResourceHandler(cfg.ExternalOAuthIssuer))
+
+	var mcpEntry http.Handler = mcpHandler
+	if externalOAuthConfigured {
+		mcpEntry = requireAuthMiddleware(mcpHandler, exchanger, metadataURL, logger)
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// If the request looks like it's from a browser (Sec-Fetch-Mode: navigate),
@@ -232,7 +248,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			return
 		}
 		// Otherwise, handle as MCP request
-		mcpHandler.ServeHTTP(w, r)
+		mcpEntry.ServeHTTP(w, r)
 	})
 
 	httpServer := &http.Server{

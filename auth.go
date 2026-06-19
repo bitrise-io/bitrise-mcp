@@ -12,30 +12,19 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"go.uber.org/zap"
 )
 
-// oauthProtectedResourceHandler serves RFC 9728 Protected Resource Metadata,
-// telling OAuth clients which authorization server issues tokens for this resource.
-func oauthProtectedResourceHandler(issuer string) http.HandlerFunc {
-	issuer = strings.TrimRight(issuer, "/")
-	return func(w http.ResponseWriter, r *http.Request) {
-		scheme := "http"
-		if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
-			scheme = "https"
-		}
-		serverBase := scheme + "://" + r.Host
-		metadata := map[string]any{
-			"resource":                 serverBase,
-			"authorization_servers":    []string{issuer},
-			"bearer_methods_supported": []string{"header"},
-		}
-		body, _ := json.Marshal(metadata)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(body)
+// extractPAT exchanges via OIDC (RFC 8693) when the token looks like a JWT;
+// otherwise passes it through as a raw PAT. Returns ("", nil) with no auth header.
+func extractPAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if token == "" {
+		return "", nil
 	}
+	if exchanger != nil && isJWT(token) {
+		return exchanger.exchange(r.Context(), token)
+	}
+	return token, nil
 }
 
 type cacheEntry struct {
@@ -43,11 +32,9 @@ type cacheEntry struct {
 	expiresAt time.Time
 }
 
-// jwtExchanger calls an OIDC token exchange endpoint (RFC 8693) to trade an
-// external JWT for a Bitrise PAT, caching results until the JWT expires.
+// jwtExchanger trades an external JWT for a Bitrise PAT via RFC 8693, caching by JWT hash.
 type jwtExchanger struct {
 	tokenEndpoint string
-	logger        *zap.SugaredLogger
 	cache         sync.Map
 }
 
@@ -113,14 +100,12 @@ func (e *jwtExchanger) callExchangeEndpoint(ctx context.Context, jwt string) (st
 	return result.AccessToken, nil
 }
 
-// isJWT returns true when the token looks like a JWT (three base64url parts
-// with an "eyJ" header prefix).
+// isJWT is a heuristic: "eyJ" header prefix + two dots, no signature verification.
 func isJWT(token string) bool {
 	return strings.HasPrefix(token, "eyJ") && strings.Count(token, ".") == 2
 }
 
-// jwtTTL decodes the exp claim from a JWT (without verification) and returns
-// the remaining lifetime, capped at 1 hour. Falls back to 5 minutes on any error.
+// jwtTTL reads exp without signature verification; capped at 1h, falls back to 5m.
 func jwtTTL(jwt string) time.Duration {
 	parts := strings.Split(jwt, ".")
 	if len(parts) != 3 {
@@ -150,8 +135,7 @@ func jwtTTL(jwt string) time.Duration {
 	return ttl
 }
 
-// cacheKey returns a short stable identifier for a JWT without storing the
-// full token value.
+// cacheKey hashes the JWT so the full token is not kept in memory.
 func cacheKey(jwt string) string {
 	h := sha256.Sum256([]byte(jwt))
 	return fmt.Sprintf("%x", h[:8])

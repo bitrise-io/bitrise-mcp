@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 // makeTestJWT builds a minimal unsigned JWT with the given exp claim.
@@ -83,8 +82,6 @@ func TestCacheKey(t *testing.T) {
 }
 
 func TestJwtExchangerExchange(t *testing.T) {
-	nopLogger := zap.NewNop().Sugar()
-
 	t.Run("successful exchange returns PAT", func(t *testing.T) {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "application/x-www-form-urlencoded", r.Header.Get("Content-Type"))
@@ -96,7 +93,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 		pat, err := exchanger.exchange(t.Context(), jwt)
 		assert.NoError(t, err)
@@ -113,7 +110,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 
 		pat1, err := exchanger.exchange(t.Context(), jwt)
@@ -132,7 +129,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 		_, err := exchanger.exchange(t.Context(), jwt)
 		assert.Error(t, err)
@@ -147,7 +144,7 @@ func TestJwtExchangerExchange(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL, logger: nopLogger}
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
 		jwt := makeTestJWT(time.Now().Add(10 * time.Minute).Unix())
 		_, err := exchanger.exchange(t.Context(), jwt)
 		assert.Error(t, err)
@@ -155,38 +152,3 @@ func TestJwtExchangerExchange(t *testing.T) {
 	})
 }
 
-func TestOauthProtectedResourceHandler(t *testing.T) {
-	handler := oauthProtectedResourceHandler("https://auth.example.com/")
-
-	t.Run("returns correct metadata with https forwarded proto", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/.well-known/oauth-protected-resource", nil)
-		req.Host = "mcp.example.com"
-		req.Header.Set("X-Forwarded-Proto", "https")
-		w := httptest.NewRecorder()
-		handler(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
-
-		var body map[string]any
-		if assert.NoError(t, json.NewDecoder(w.Body).Decode(&body)) {
-			assert.Equal(t, "https://mcp.example.com", body["resource"])
-			authServers, ok := body["authorization_servers"].([]any)
-			if assert.True(t, ok) {
-				assert.Equal(t, "https://auth.example.com", authServers[0], "trailing slash on issuer should be stripped")
-			}
-		}
-	})
-
-	t.Run("uses http when no TLS and no forwarded proto", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/.well-known/oauth-protected-resource", nil)
-		req.Host = "localhost:8080"
-		w := httptest.NewRecorder()
-		handler(w, req)
-
-		var body map[string]any
-		if assert.NoError(t, json.NewDecoder(w.Body).Decode(&body)) {
-			assert.Equal(t, "http://localhost:8080", body["resource"])
-		}
-	})
-}

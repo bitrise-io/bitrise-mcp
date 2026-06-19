@@ -53,7 +53,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 	if !p.SkipAuth {
 		key, err := patFromCtx(ctx)
 		if err != nil || strings.TrimSpace(key) == "" {
-			return "", errors.New("set authorization header to your bitrise pat")
+			return "", errors.New("authentication required: complete the OAuth flow, or set the Authorization header to a Bitrise personal access token")
 		}
 		apiKey = key
 	}
