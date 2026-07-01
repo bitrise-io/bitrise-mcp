@@ -11,7 +11,6 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/configuration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
-	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/registration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/codepush"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/user"
@@ -114,10 +113,6 @@ func NewBelt() *Belt {
 		configuration.StepSearch,
 		configuration.StepInputs,
 		configuration.ListAvailableStacks,
-
-		// Registration
-		registration.Register,
-		registration.VerifyRegistration,
 
 		// CodePush
 		codepush.ListDeployments,
