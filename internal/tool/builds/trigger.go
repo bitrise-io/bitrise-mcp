@@ -33,6 +33,9 @@ var Trigger = bitrise.Tool{
 		mcp.WithString("commit_hash",
 			mcp.Description("The commit hash for the build"),
 		),
+		mcp.WithString("stack",
+			mcp.Description("Stack to run the build on, overriding the workflow's meta.bitrise.io.stack for this build only (e.g. \"osx-xcode-16.0.x\"). Undocumented by the Bitrise API reference but honored by the trigger endpoint."),
+		),
 		mcp.WithArray("environments",
 			mcp.Description(`Custom environment variables for the build.`),
 			mcp.Items(map[string]any{
@@ -80,6 +83,9 @@ var Trigger = bitrise.Tool{
 		}
 		if v := request.GetString("commit_hash", ""); v != "" {
 			buildParams["commit_hash"] = v
+		}
+		if v := request.GetString("stack", ""); v != "" {
+			buildParams["stack"] = v
 		}
 		if v, ok := request.GetArguments()["environments"]; ok {
 			buildParams["environments"] = v
