@@ -51,10 +51,10 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Update an app
    - Arguments:
      - `app_slug`: Identifier of the Bitrise app
+     - `title`: The new title of the application
+     - `default_branch`: The new default branch for the application
+     - `repository_url`: The new repository URL for the application
      - `is_public`: Whether the app's builds visibility is "public"
-     - `project_type`: Type of project
-     - `provider`: Repository provider
-     - `repo_url`: Repository URL
 
 7. `get_bitrise_yml`
    - Get the current Bitrise YML config file of a specified Bitrise app
