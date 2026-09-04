@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, user, read-only, release-management, configuration, release-management-code-push`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -18,6 +18,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `sort_by` (optional): Order of the apps: last_build_at (default) or created_at
      - `next` (optional): Slug of the first app in the response
      - `limit` (optional): Max number of elements per page (default: 50)
+     - `title` (optional): Filter apps by title
+     - `project_type` (optional): Filter apps by project type (e.g., "ios", "android")
 
 2. `register_app`
    - Add a new app to Bitrise
@@ -25,8 +27,10 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `repo_url`: Repository URL
      - `is_public`: Whether the app's builds visibility is "public"
      - `organization_slug`: The organization (aka workspace) the app to add to
-     - `project_type` (optional): Type of project (ios, android, etc.)
-     - `provider` (optional): github
+     - `title` (optional): The title of the application (if not specified, will use the git repository's name)
+     - `default_branch_name` (optional): The default branch of the repository (default: master)
+     - `manual_approval_enabled` (optional): Toggles whether manual approval should be enabled for the app's builds (default: true)
+     - `provider` (optional): The git provider of the repository (default: github)
 
 3. `finish_bitrise_app`
    - Finish the setup of a Bitrise app
@@ -34,7 +38,6 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `app_slug`: The slug of the Bitrise app to finish setup for
      - `project_type` (optional): The type of project (e.g., android, ios, flutter, etc.)
      - `stack_id` (optional): The stack ID to use for the app
-     - `mode` (optional): The mode of setup
      - `config` (optional): The configuration to use for the app
 
 4. `get_app`
@@ -97,13 +100,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `status` (optional): Filter builds by status (0: not finished, 1: successful, 2: failed, 3: aborted, 4: in-progress)
       - `next` (optional): Slug of the first build in the response
       - `limit` (optional): Max number of elements per page (default: 50)
+      - `verbose` (optional): Include all build details. Default: false
 
 13. `trigger_bitrise_build`
     - Trigger a new build/pipeline for a specified Bitrise app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `branch` (optional): The branch to build (default: main)
-      - `pipeline_id` (optional): The pipeline to build
       - `workflow_id` (optional): The workflow to build
       - `pipeline_id` (optional): The pipeline to build
       - `commit_message` (optional): The commit message for the build
@@ -116,19 +119,26 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
+      - `verbose` (optional): Include all build details. Default: false
 
 15. `abort_build`
     - Abort a specific build
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
-      - `reason` (optional): Reason for aborting the build
+      - `abort_reason` (optional): Reason for aborting the build
+      - `abort_with_success` (optional): If set to true, the aborted build will be marked as successful (default: false)
+      - `skip_git_status_report` (optional): If set to true, skip sending git status report (default: false)
+      - `skip_notifications` (optional): If set to true, skip sending notifications (default: false)
 
 16. `get_build_log`
     - Get the build log of a specified build of a Bitrise app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the Bitrise build
+      - `step_uuid` (optional): UUID of the step to get the log for. If not provided, the full build log is returned.
+      - `offset` (optional): The line number to start reading from. Defaults to 0. Set -1 to read from the end of the log.
+      - `limit` (optional): The number of lines to read. Defaults to 2000.
 
 17. `get_build_bitrise_yml`
     - Get the bitrise.yml of a build
@@ -146,6 +156,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
+      - `verbose` (optional): Include all build details. Default: false
 
 ### Artifacts
 
@@ -185,6 +196,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - List the outgoing webhooks of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
+      - `next` (optional): Slug of the first outgoing webhook in the response
+      - `limit` (optional): Max number of elements per page (default: 50)
 
 25. `delete_outgoing_webhook`
     - Delete the outgoing webhook of an app
@@ -207,6 +220,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `app_slug`: Identifier of the Bitrise app
       - `events`: List of events to trigger the webhook
       - `url`: URL of the webhook
+      - `secret` (optional): Secret for webhook signature verification
       - `headers` (optional): Headers to be sent with the webhook
 
 ### Cache Items
@@ -215,6 +229,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - List the key-value cache items belonging to an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
+      - `next` (optional): Getting cache items created before the given parameter (RFC3339 time format)
+      - `limit` (optional): Max number of elements per page (default: 100)
 
 29. `delete_all_cache_items`
     - Delete all key-value cache items belonging to an app
@@ -239,6 +255,17 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - List all pipelines and standalone builds of an app
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
+      - `after` (optional): List pipelines/standalone builds run after a given date (RFC3339 time format)
+      - `before` (optional): List pipelines/standalone builds run before a given date (RFC3339 time format)
+      - `branch` (optional): Filter by the branch which was built
+      - `build_number` (optional): Filter by the pipeline/standalone build number
+      - `commit_message` (optional): Filter by the commit message of the pipeline/standalone build
+      - `limit` (optional): Max number of elements per page (default: 10)
+      - `pipeline` (optional): Filter by the name of the pipeline
+      - `status` (optional): Filter by the status of the pipeline/standalone build (on_hold, running, succeeded, failed, aborted, succeeded_with_abort)
+      - `trigger_event_type` (optional): Filter by the event that triggered the pipeline/standalone build (push, pull-request, tag)
+      - `workflow` (optional): Filter by the name of the workflow used for the pipeline/standalone build
+      - `verbose` (optional): Include all pipeline details. Default: false
 
 33. `get_pipeline`
     - Get a pipeline of a given app
@@ -251,13 +278,17 @@ By default, all API groups are enabled. You can specify which groups to enable u
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `pipeline_id`: Identifier of the pipeline
-      - `reason` (optional): Reason for aborting the pipeline
+      - `abort_reason` (optional): Reason for aborting the pipeline
+      - `abort_with_success` (optional): If set to true, the aborted pipeline will be marked as successful (default: false)
+      - `skip_notifications` (optional): If set to true, skip sending notifications (default: false)
 
 35. `rebuild_pipeline`
     - Rebuild a pipeline
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `pipeline_id`: Identifier of the pipeline
+      - `partial` (optional): Whether to rebuild only unsuccessful workflows and their dependents (default: false)
+      - `triggered_by` (optional): Who triggered the rebuild
 
 ### Group Roles
 
@@ -312,7 +343,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `group_slug`: Slug of the group
       - `user_slug`: Slug of the user
 
-### Account
+### User
 
 45. `me`
     - Get info from the currently authenticated user account
@@ -599,7 +630,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push |
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | user | read-only | release-management | configuration | release-management-code-push |
 |------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|
 | list_apps | ✅ | | | | | | | | | ✅ | | | |
 | register_app | ✅ | | | | | | | | | | | | |
