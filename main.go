@@ -37,7 +37,7 @@ type config struct {
 	// ignored.
 	BitriseToken string `env:"BITRISE_TOKEN"`
 	// EnabledAPIGroups is a comma-separated list of API groups that are enabled.
-	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management"`
+	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,insights"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
 	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
@@ -60,6 +60,9 @@ type config struct {
 	// (default: https://api.bitrise.io/v0.1). Useful for pointing at a
 	// test or local API instance.
 	BitriseAPIBaseURL string `env:"BITRISE_API_BASE_URL"`
+	// BitriseInsightsAPIBaseURL overrides the Bitrise Insights API base URL
+	// (default: https://api.bitrise.io/insights/v1).
+	BitriseInsightsAPIBaseURL string `env:"BITRISE_INSIGHTS_API_BASE_URL"`
 }
 
 func main() {
@@ -76,6 +79,9 @@ func run() error {
 
 	if cfg.BitriseAPIBaseURL != "" {
 		bitrise.APIBaseURL = cfg.BitriseAPIBaseURL
+	}
+	if cfg.BitriseInsightsAPIBaseURL != "" {
+		bitrise.APIInsightsBaseURL = cfg.BitriseInsightsAPIBaseURL
 	}
 
 	logger, err := newStructuredLogger(cfg.LogLevel)

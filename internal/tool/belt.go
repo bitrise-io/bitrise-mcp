@@ -10,6 +10,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/cache"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/configuration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/insights"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/codepush"
@@ -129,6 +130,13 @@ func NewBelt() *Belt {
 		codepush.GetUpdateStatus,
 		codepush.GenerateUpdateUploadURL,
 		codepush.GetMetrics,
+
+		// Insights
+		insights.GetBuildTotals,
+		insights.GetBuildSeries,
+		insights.GetTestTotals,
+		insights.GetTestSeries,
+		insights.ListFlakyTests,
 	}
 	belt := &Belt{tools: make(map[string]bitrise.Tool)}
 	for _, tool := range toolList {

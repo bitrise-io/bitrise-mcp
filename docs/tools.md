@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, insights`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -595,90 +595,145 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Arguments:
      - `workspace_slug`: Slug of the Bitrise workspace.
 
+### Insights
+
+Build and test metrics from Bitrise Insights (the public Insights API, `https://api.bitrise.io/insights/v1`). Requires a paid Insights plan on the workspace; without one every call fails with HTTP 402. Every tool reports on exactly one project, identified by its Insights project ID. Time windows are RFC3339 in UTC, `start` inclusive and `end` exclusive. Durations are seconds, rates are percentages in 0-100. The `branch` filter accepts `*` as a wildcard (`release/*`).
+
+Common arguments of every Insights tool:
+- `workspace_slug`: Slug of the workspace the project belongs to
+- `project`: ID of the Insights project to report on
+- `start`: Start of the time window, inclusive, RFC3339
+- `end`: End of the time window, exclusive, RFC3339
+
+1. `get_insights_build_totals`
+   - Build count, failure rate, p50/p90 duration and total duration over the whole window, without grouping. The window may span at most 2 years.
+   - Arguments:
+     - `branch` (optional): Keep only builds on these branches; `*` is a wildcard
+     - `workflow` (optional): Keep only builds of these workflows
+     - `pipeline` (optional): Keep only builds of these pipelines
+
+2. `get_insights_build_series`
+   - The same build metrics as a time series: one row per time bucket, oldest first. With `group_by`, one row per bucket per group, each row naming its group. Window caps: 7 days hourly, 90 days daily, 1 year weekly, 2 years monthly.
+   - Arguments:
+     - `branch`, `workflow`, `pipeline` (optional): as above
+     - `granularity` (optional): hourly, daily (default), weekly or monthly
+     - `group_by` (optional): workflow, pipeline, stage or step
+     - `limit` (optional): Max number of groups, 1-100 (default: 20); ignored without `group_by`
+
+3. `get_insights_test_totals`
+   - Test run count, failure rate, p50/p90 duration, total duration and flaky run count over the whole window, without grouping. Counts are of test case runs, not distinct test cases. The window may span at most 2 years.
+   - Arguments:
+     - `branch`, `workflow`, `pipeline` (optional): as above, on the builds the tests ran in
+     - `test_suite` (optional): Keep only runs of these test suites
+
+4. `get_insights_test_series`
+   - The same test metrics as a time series, with the same window caps as the build series.
+   - Arguments:
+     - `branch`, `workflow`, `pipeline`, `test_suite` (optional): as above
+     - `granularity` (optional): hourly, daily (default), weekly or monthly
+     - `group_by` (optional): workflow, pipeline, stage, branch or test_suite
+     - `limit` (optional): Max number of groups, 1-100 (default: 20)
+
+5. `list_insights_flaky_tests`
+   - Test cases that were rerun after a flaky result in the window, one page at a time, ranked. The window may span at most 2 years.
+   - Arguments:
+     - `branch`, `workflow`, `test_suite` (optional): as above (no `pipeline` filter on this tool)
+     - `test_case` (optional): Keep only these test cases
+     - `module` (optional): Keep only test cases of these modules
+     - `order_by` (optional): flaky_rerun_count (default) or flaky_rate
+     - `order` (optional): desc (default) or asc
+     - `page` (optional): 1-based page (default: 1)
+     - `per_page` (optional): Test cases per page, 1-100 (default: 20)
+
 ## API Groups
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push |
-|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|
-| list_apps | ✅ | | | | | | | | | ✅ | | | |
-| register_app | ✅ | | | | | | | | | | | | |
-| finish_bitrise_app | ✅ | | | | | | | | | | | | |
-| get_app | ✅ | | | | | | | | | ✅ | | | |
-| delete_app | ✅ | | | | | | | | | | | | |
-| update_app | ✅ | | | | | | | | | | | | |
-| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | |
-| update_bitrise_yml | ✅ | | | | | | | | | | | | |
-| list_branches | ✅ | | | | | | | | | ✅ | | | |
-| register_ssh_key | ✅ | | | | | | | | | | | | |
-| register_webhook | ✅ | | | | | | | | | | | | |
-| list_builds | | ✅ | | | | | | | | ✅ | | | |
-| trigger_bitrise_build | | ✅ | | | | | | | | | | | |
-| get_build | | ✅ | | | | | | | | ✅ | | | |
-| abort_build | | ✅ | | | | | | | | | | | |
-| get_build_log | | ✅ | | | | | | | | ✅ | | | |
-| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | |
-| list_build_workflows | | ✅ | | | | | | | | ✅ | | | |
-| get_build_steps | | ✅ | | | | | | | | ✅ | | | |
-| list_artifacts | | | | | ✅ | | | | | ✅ | | | |
-| get_artifact | | | | | ✅ | | | | | ✅ | | | |
-| delete_artifact | | | | | ✅ | | | | | | | | |
-| update_artifact | | | | | ✅ | | | | | | | | |
-| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | |
-| delete_outgoing_webhook | | | | ✅ | | | | | | | | | |
-| update_outgoing_webhook | | | | ✅ | | | | | | | | | |
-| create_outgoing_webhook | | | | ✅ | | | | | | | | | |
-| list_cache_items | | | | | | | ✅ | | | ✅ | | | |
-| delete_all_cache_items | | | | | | | ✅ | | | | | | |
-| delete_cache_item | | | | | | | ✅ | | | | | | |
-| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | |
-| list_pipelines | | | | | | | | ✅ | | ✅ | | | |
-| get_pipeline | | | | | | | | ✅ | | ✅ | | | |
-| abort_pipeline | | | | | | | | ✅ | | | | | |
-| rebuild_pipeline | | | | | | | | ✅ | | | | | |
-| list_group_roles | | | | | | ✅ | | | | ✅ | | | |
-| replace_group_roles | | | | | | ✅ | | | | | | | |
-| list_workspaces | | | ✅ | | | | | | | ✅ | | | |
-| get_workspace | | | ✅ | | | | | | | ✅ | | | |
-| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | |
-| create_workspace_group | | | ✅ | | | | | | | | | | |
-| get_workspace_members | | | ✅ | | | | | | | ✅ | | | |
-| invite_member_to_workspace | | | ✅ | | | | | | | | | | |
-| add_member_to_group | | | ✅ | | | | | | | | | | |
-| me | | | | | | | | | ✅ | ✅ | | | |
-| create_connected_app | | | | | | | | | | | ✅ | | |
-| list_connected_apps | | | | | | | | | | ✅ | ✅ | | |
-| get_connected_app | | | | | | | | | | ✅ | ✅ | | |
-| update_connected_app | | | | | | | | | | | ✅ | | |
-| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | |
-| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | |
-| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ | | |
-| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | |
-| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | |
-| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | |
-| create_tester_group | | | | | | | | | | | ✅ | | |
-| notify_tester_group | | | | | | | | | | | ✅ | | |
-| add_testers_to_tester_group | | | | | | | | | | | ✅ | | |
-| update_tester_group | | | | | | | | | | | ✅ | | |
-| list_tester_groups | | | | | | | | | | ✅ | ✅ | | |
-| get_tester_group | | | | | | | | | | ✅ | ✅ | | |
-| get_potential_testers | | | | | | | | | | ✅ | ✅ | | |
-| get_testers | | | | | | | | | | ✅ | ✅ | | |
-| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | |
-| step_search | | | | | | | | | | ✅ | | ✅ | |
-| step_inputs | | | | | | | | | | ✅ | | ✅ | |
-| list_available_stacks | | | | | | | | | | ✅ | | ✅ | |
-| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | ✅ |
-| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | ✅ |
-| codepush_create_deployment | | | | | | | | | | | ✅ | | ✅ |
-| codepush_update_deployment | | | | | | | | | | | ✅ | | ✅ |
-| codepush_delete_deployment | | | | | | | | | | | ✅ | | ✅ |
-| codepush_promote_deployment | | | | | | | | | | | ✅ | | ✅ |
-| codepush_rollback_deployment | | | | | | | | | | | ✅ | | ✅ |
-| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | ✅ |
-| codepush_get_update | | | | | | | | | | ✅ | ✅ | | ✅ |
-| codepush_patch_update | | | | | | | | | | | ✅ | | ✅ |
-| codepush_delete_update | | | | | | | | | | | ✅ | | ✅ |
-| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ |
-| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ |
-| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ |
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | insights |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|---|
+| list_apps | ✅ | | | | | | | | | ✅ | | | | |
+| register_app | ✅ | | | | | | | | | | | | | |
+| finish_bitrise_app | ✅ | | | | | | | | | | | | | |
+| get_app | ✅ | | | | | | | | | ✅ | | | | |
+| delete_app | ✅ | | | | | | | | | | | | | |
+| update_app | ✅ | | | | | | | | | | | | | |
+| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | | |
+| update_bitrise_yml | ✅ | | | | | | | | | | | | | |
+| list_branches | ✅ | | | | | | | | | ✅ | | | | |
+| register_ssh_key | ✅ | | | | | | | | | | | | | |
+| register_webhook | ✅ | | | | | | | | | | | | | |
+| list_builds | | ✅ | | | | | | | | ✅ | | | | |
+| trigger_bitrise_build | | ✅ | | | | | | | | | | | | |
+| get_build | | ✅ | | | | | | | | ✅ | | | | |
+| abort_build | | ✅ | | | | | | | | | | | | |
+| get_build_log | | ✅ | | | | | | | | ✅ | | | | |
+| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | | |
+| list_build_workflows | | ✅ | | | | | | | | ✅ | | | | |
+| get_build_steps | | ✅ | | | | | | | | ✅ | | | | |
+| list_artifacts | | | | | ✅ | | | | | ✅ | | | | |
+| get_artifact | | | | | ✅ | | | | | ✅ | | | | |
+| delete_artifact | | | | | ✅ | | | | | | | | | |
+| update_artifact | | | | | ✅ | | | | | | | | | |
+| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | | |
+| delete_outgoing_webhook | | | | ✅ | | | | | | | | | | |
+| update_outgoing_webhook | | | | ✅ | | | | | | | | | | |
+| create_outgoing_webhook | | | | ✅ | | | | | | | | | | |
+| list_cache_items | | | | | | | ✅ | | | ✅ | | | | |
+| delete_all_cache_items | | | | | | | ✅ | | | | | | | |
+| delete_cache_item | | | | | | | ✅ | | | | | | | |
+| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | | |
+| list_pipelines | | | | | | | | ✅ | | ✅ | | | | |
+| get_pipeline | | | | | | | | ✅ | | ✅ | | | | |
+| abort_pipeline | | | | | | | | ✅ | | | | | | |
+| rebuild_pipeline | | | | | | | | ✅ | | | | | | |
+| list_group_roles | | | | | | ✅ | | | | ✅ | | | | |
+| replace_group_roles | | | | | | ✅ | | | | | | | | |
+| list_workspaces | | | ✅ | | | | | | | ✅ | | | | |
+| get_workspace | | | ✅ | | | | | | | ✅ | | | | |
+| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | | |
+| create_workspace_group | | | ✅ | | | | | | | | | | | |
+| get_workspace_members | | | ✅ | | | | | | | ✅ | | | | |
+| invite_member_to_workspace | | | ✅ | | | | | | | | | | | |
+| add_member_to_group | | | ✅ | | | | | | | | | | | |
+| me | | | | | | | | | ✅ | ✅ | | | | |
+| create_connected_app | | | | | | | | | | | ✅ | | | |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ | | | |
+| get_connected_app | | | | | | | | | | ✅ | ✅ | | | |
+| update_connected_app | | | | | | | | | | | ✅ | | | |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | | |
+| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | | |
+| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ | | | |
+| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | | |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | | |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | | |
+| create_tester_group | | | | | | | | | | | ✅ | | | |
+| notify_tester_group | | | | | | | | | | | ✅ | | | |
+| add_testers_to_tester_group | | | | | | | | | | | ✅ | | | |
+| update_tester_group | | | | | | | | | | | ✅ | | | |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ | | | |
+| get_tester_group | | | | | | | | | | ✅ | ✅ | | | |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ | | | |
+| get_testers | | | | | | | | | | ✅ | ✅ | | | |
+| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | | |
+| step_search | | | | | | | | | | ✅ | | ✅ | | |
+| step_inputs | | | | | | | | | | ✅ | | ✅ | | |
+| list_available_stacks | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | ✅ | |
+| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | ✅ | |
+| codepush_create_deployment | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_update_deployment | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_delete_deployment | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_promote_deployment | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_rollback_deployment | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | ✅ | |
+| codepush_get_update | | | | | | | | | | ✅ | ✅ | | ✅ | |
+| codepush_patch_update | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_delete_update | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ | |
+| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ | |
+| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ | |
+| get_insights_build_totals | | | | | | | | | | ✅ | | | | ✅ |
+| get_insights_build_series | | | | | | | | | | ✅ | | | | ✅ |
+| get_insights_test_totals | | | | | | | | | | ✅ | | | | ✅ |
+| get_insights_test_series | | | | | | | | | | ✅ | | | | ✅ |
+| list_insights_flaky_tests | | | | | | | | | | ✅ | | | | ✅ |
