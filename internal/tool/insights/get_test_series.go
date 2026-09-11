@@ -10,7 +10,7 @@ import (
 
 var GetTestSeries = bitrise.Tool{
 	APIGroups: []string{"insights", "read-only"},
-	Definition: mcp.NewTool("get_insights_test_series",
+	Definition: mcp.NewTool("insights_get_test_series",
 		toolOptions(
 			"Get a test metrics time series for a project from Bitrise Insights: one row per time bucket, oldest first, "+
 				"each with test run count, failure rate (0-100 %), p50/p90 duration and total duration in seconds, and flaky run count. "+

@@ -10,7 +10,7 @@ import (
 
 var ListFlakyTests = bitrise.Tool{
 	APIGroups: []string{"insights", "read-only"},
-	Definition: mcp.NewTool("list_insights_flaky_tests",
+	Definition: mcp.NewTool("insights_list_flaky_tests",
 		toolOptions(
 			"List the flaky test cases of a project from Bitrise Insights: test cases that were rerun after a flaky result "+
 				"in the time window, one page at a time, ranked by rerun count or flaky rate. "+

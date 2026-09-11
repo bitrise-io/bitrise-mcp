@@ -10,7 +10,7 @@ import (
 
 var GetBuildSeries = bitrise.Tool{
 	APIGroups: []string{"insights", "read-only"},
-	Definition: mcp.NewTool("get_insights_build_series",
+	Definition: mcp.NewTool("insights_get_build_series",
 		toolOptions(
 			"Get a build metrics time series for a project from Bitrise Insights: one row per time bucket, oldest first, "+
 				"each with build count, failure rate (0-100 %), p50/p90 duration and total duration in seconds. "+

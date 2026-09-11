@@ -10,7 +10,7 @@ import (
 
 var GetBuildTotals = bitrise.Tool{
 	APIGroups: []string{"insights", "read-only"},
-	Definition: mcp.NewTool("get_insights_build_totals",
+	Definition: mcp.NewTool("insights_get_build_totals",
 		toolOptions(
 			"Get build aggregates for a project from Bitrise Insights: build count, failure rate (0-100 %), "+
 				"p50/p90 duration and total duration in seconds over the whole time window, without grouping. "+

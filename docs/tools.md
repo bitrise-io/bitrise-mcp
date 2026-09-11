@@ -605,14 +605,14 @@ Common arguments of every Insights tool:
 - `start`: Start of the time window, inclusive, RFC3339
 - `end`: End of the time window, exclusive, RFC3339
 
-1. `get_insights_build_totals`
+1. `insights_get_build_totals`
    - Build count, failure rate, p50/p90 duration and total duration over the whole window, without grouping. The window may span at most 2 years.
    - Arguments:
      - `branch` (optional): Keep only builds on these branches; `*` is a wildcard
      - `workflow` (optional): Keep only builds of these workflows
      - `pipeline` (optional): Keep only builds of these pipelines
 
-2. `get_insights_build_series`
+2. `insights_get_build_series`
    - The same build metrics as a time series: one row per time bucket, oldest first. With `group_by`, one row per bucket per group, each row naming its group. Window caps: 7 days hourly, 90 days daily, 1 year weekly, 2 years monthly.
    - Arguments:
      - `branch`, `workflow`, `pipeline` (optional): as above
@@ -620,13 +620,13 @@ Common arguments of every Insights tool:
      - `group_by` (optional): workflow, pipeline, stage or step
      - `limit` (optional): Max number of groups, 1-100 (default: 20); ignored without `group_by`
 
-3. `get_insights_test_totals`
+3. `insights_get_test_totals`
    - Test run count, failure rate, p50/p90 duration, total duration and flaky run count over the whole window, without grouping. Counts are of test case runs, not distinct test cases. The window may span at most 2 years.
    - Arguments:
      - `branch`, `workflow`, `pipeline` (optional): as above, on the builds the tests ran in
      - `test_suite` (optional): Keep only runs of these test suites
 
-4. `get_insights_test_series`
+4. `insights_get_test_series`
    - The same test metrics as a time series, with the same window caps as the build series.
    - Arguments:
      - `branch`, `workflow`, `pipeline`, `test_suite` (optional): as above
@@ -634,7 +634,7 @@ Common arguments of every Insights tool:
      - `group_by` (optional): workflow, pipeline, stage, branch or test_suite
      - `limit` (optional): Max number of groups, 1-100 (default: 20)
 
-5. `list_insights_flaky_tests`
+5. `insights_list_flaky_tests`
    - Test cases that were rerun after a flaky result in the window, one page at a time, ranked. The window may span at most 2 years.
    - Arguments:
      - `branch`, `workflow`, `test_suite` (optional): as above (no `pipeline` filter on this tool)
@@ -732,8 +732,8 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ | |
 | codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ | |
 | codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| get_insights_build_totals | | | | | | | | | | ✅ | | | | ✅ |
-| get_insights_build_series | | | | | | | | | | ✅ | | | | ✅ |
-| get_insights_test_totals | | | | | | | | | | ✅ | | | | ✅ |
-| get_insights_test_series | | | | | | | | | | ✅ | | | | ✅ |
-| list_insights_flaky_tests | | | | | | | | | | ✅ | | | | ✅ |
+| insights_get_build_totals | | | | | | | | | | ✅ | | | | ✅ |
+| insights_get_build_series | | | | | | | | | | ✅ | | | | ✅ |
+| insights_get_test_totals | | | | | | | | | | ✅ | | | | ✅ |
+| insights_get_test_series | | | | | | | | | | ✅ | | | | ✅ |
+| insights_list_flaky_tests | | | | | | | | | | ✅ | | | | ✅ |

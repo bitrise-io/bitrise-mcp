@@ -15,7 +15,7 @@ var testSuiteOption = mcp.WithArray("test_suite",
 
 var GetTestTotals = bitrise.Tool{
 	APIGroups: []string{"insights", "read-only"},
-	Definition: mcp.NewTool("get_insights_test_totals",
+	Definition: mcp.NewTool("insights_get_test_totals",
 		toolOptions(
 			"Get test aggregates for a project from Bitrise Insights: test run count, failure rate (0-100 %), "+
 				"p50/p90 duration and total duration in seconds, and flaky run count over the whole time window, without grouping. "+
