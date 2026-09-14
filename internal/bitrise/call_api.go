@@ -20,6 +20,7 @@ var (
 	APIBaseURL         = "https://api.bitrise.io/v0.1"                               //nolint:gochecknoglobals
 	APIRMBaseURL       = "https://api.bitrise.io/release-management/v1"              //nolint:gochecknoglobals
 	APICodePushBaseURL = "https://api.bitrise.io/release-management/v2/code-push/v1" //nolint:gochecknoglobals
+	APIInsightsBaseURL = "https://api.bitrise.io/insights/v1"                        //nolint:gochecknoglobals
 )
 
 const userAgent = "bitrise-mcp/1.0"
