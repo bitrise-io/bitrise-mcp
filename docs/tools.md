@@ -330,6 +330,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `project_id`: (Optional) Specifies which Bitrise Project to associate with.
      - `store_app_name`: (Optional) App name for manual connections.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
+     - `framework`: (Optional) The framework used to build the app (flutter/react_native/kotlin_multiplatform/other/native_ios/native_android), defaults to 'other'.
 
 47. `list_connected_apps`
    - List Release Management connected apps available for the authenticated account within a workspace.
@@ -383,7 +384,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `with_public_page`: (Optional) Enable public install page.
      - `workflow`: (Optional) Name of the CI workflow.
 
-52. `get_installable_artifact_upload_and_processing_status`
+52. `get_installable_artifact_upload_and_proc_status`
    - Gets the processing and upload status of an installable artifact.
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
@@ -417,6 +418,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `name`: The name for the new tester group.
      - `auto_notify`: (Optional) Indicates automatic notifications for the group.
+     - `emails`: (Optional) Email addresses to add as testers for an external tester group.
+     - `type`: (Optional) The type of the tester group, 'internal' or 'external' (default: internal).
 
 57. `notify_tester_group`
    - Notifies a tester group about a new test build.
@@ -430,7 +433,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
-     - `user_slugs`: The list of users identified by slugs to be added.
+     - `user_slugs`: (Optional) User slugs to add as internal testers. Required for internal tester groups; ignored for external tester groups.
+     - `emails`: (Optional) Email addresses to add as external testers. Required for external tester groups (at most 1000 entries); ignored for internal tester groups.
 
 59. `update_tester_group`
    - Updates the given tester group settings.
@@ -446,6 +450,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `items_per_page`: (Optional) Maximum number of tester groups per page.
      - `page`: (Optional) Page number to return.
+     - `type`: (Optional) Filters for a specific tester group type, 'internal' or 'external' (default: internal).
+     - `installable_artifact_id`: (Optional) If given, decorates the response with notification details about that artifact for each tester group.
 
 61. `get_tester_group`
    - Gives back the details of the selected tester group.
@@ -458,8 +464,8 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
-     - `items_per_page`: (Optional) Maximum number of potential testers per page.
-     - `page`: (Optional) Page number to return.
+     - `items_per_page`: (Optional) Maximum number of potential testers per page (default: 30).
+     - `page`: (Optional) Page number to return (default: 1).
      - `search`: (Optional) Search for testers by email or username.
 
 63. `get_testers`
@@ -469,6 +475,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `tester_group_id`: (Optional) The uuidV4 identifier of a tester group. If given, only testers within this specific tester group will be returned.
      - `items_per_page`: (Optional) Maximum number of testers per page (default: 10).
      - `page`: (Optional) Page number to return (default: 1).
+     - `type`: (Optional) Filters for testers belonging to a specific tester group type, 'internal' or 'external' (default: internal).
 
 ### Configuration
 
@@ -702,7 +709,7 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | update_connected_app | | | | | | | | | | | ✅ | | | |
 | list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | | |
 | generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | | |
-| get_installable_artifact_upload_and_processing_status | | | | | | | | | | ✅ | ✅ | | | |
+| get_installable_artifact_upload_and_proc_status | | | | | | | | | | ✅ | ✅ | | | |
 | set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | | |
 | list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | | |
 | list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | | |

@@ -41,6 +41,10 @@ var CreateConnectedApp = bitrise.Tool{
 		mcp.WithString("store_credential_id",
 			mcp.Description("If you have credentials added on Bitrise, you can decide to select one for your app. In case of ios platform it will be an Apple API credential id. In case of android platform it will be a Google Service credential id."),
 		),
+		mcp.WithString("framework",
+			mcp.Description("The framework used to build the app. Defaults to 'other' if not provided."),
+			mcp.Enum("flutter", "react_native", "kotlin_multiplatform", "other", "native_ios", "native_android"),
+		),
 		mcp.WithTitleAnnotation("Create Connected App"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
@@ -80,6 +84,9 @@ var CreateConnectedApp = bitrise.Tool{
 		}
 		if v := request.GetString("store_credential_id", ""); v != "" {
 			body["store_credential_id"] = v
+		}
+		if v := request.GetString("framework", ""); v != "" {
+			body["framework"] = v
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

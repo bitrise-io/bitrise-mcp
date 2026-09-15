@@ -25,6 +25,13 @@ var ListTesterGroups = bitrise.Tool{
 			mcp.Description("Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1."),
 			mcp.DefaultNumber(1),
 		),
+		mcp.WithString("type",
+			mcp.Description("Filters for a specific tester group type. Available values are 'internal' (Bitrise project team members) and 'external' (testers added by email). Defaults to 'internal'."),
+			mcp.Enum("internal", "external"),
+		),
+		mcp.WithString("installable_artifact_id",
+			mcp.Description("The uuidV4 identifier of an installable artifact. If given, the response is decorated with notification details about that artifact for each tester group."),
+		),
 		mcp.WithTitleAnnotation("List Tester Groups"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
@@ -45,6 +52,12 @@ var ListTesterGroups = bitrise.Tool{
 		}
 		if v := request.GetInt("page", 1); v != 1 {
 			params["page"] = strconv.Itoa(v)
+		}
+		if v := request.GetString("type", ""); v != "" {
+			params["type"] = v
+		}
+		if v := request.GetString("installable_artifact_id", ""); v != "" {
+			params["installable_artifact_id"] = v
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

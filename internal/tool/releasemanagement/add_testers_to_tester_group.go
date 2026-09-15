@@ -22,8 +22,11 @@ var AddTestersToTesterGroup = bitrise.Tool{
 			mcp.Required(),
 		),
 		mcp.WithArray("user_slugs",
-			mcp.Description("The list of users identified by slugs that will be added to the tester group."),
-			mcp.Required(),
+			mcp.Description("User slugs to add as internal testers. Required for internal tester groups; ignored for external tester groups."),
+			mcp.WithStringItems(),
+		),
+		mcp.WithArray("emails",
+			mcp.Description("Email addresses to add as external testers. Required for external tester groups (at most 1000 entries); ignored for internal tester groups."),
 			mcp.WithStringItems(),
 		),
 		mcp.WithTitleAnnotation("Add Testers to Tester Group"),
@@ -40,13 +43,12 @@ var AddTestersToTesterGroup = bitrise.Tool{
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
-		userSlugs, err := request.RequireStringSlice("user_slugs")
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
+		body := map[string]any{}
+		if v := request.GetStringSlice("user_slugs", nil); len(v) > 0 {
+			body["user_slugs"] = v
 		}
-
-		body := map[string]any{
-			"user_slugs": userSlugs,
+		if v := request.GetStringSlice("emails", nil); len(v) > 0 {
+			body["emails"] = v
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

@@ -24,6 +24,14 @@ var CreateTesterGroup = bitrise.Tool{
 			mcp.Description("If set to true it indicates that the tester group will receive notifications automatically."),
 			mcp.DefaultBool(false),
 		),
+		mcp.WithArray("emails",
+			mcp.Description("Email addresses to add as external testers. Required for external tester groups (at least one, at most 1000 entries, each at most 255 characters); ignored for internal tester groups."),
+			mcp.WithStringItems(),
+		),
+		mcp.WithString("type",
+			mcp.Description("The type of the tester group. Available values are 'internal' (Bitrise project team members) and 'external' (testers added by email). Defaults to 'internal'."),
+			mcp.Enum("internal", "external"),
+		),
 		mcp.WithTitleAnnotation("Create Tester Group"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),
@@ -47,11 +55,20 @@ var CreateTesterGroup = bitrise.Tool{
 		if v := request.GetBool("auto_notify", false); v {
 			body["auto_notify"] = v
 		}
+		if v := request.GetStringSlice("emails", nil); len(v) > 0 {
+			body["emails"] = v
+		}
+
+		params := map[string]any{}
+		if v := request.GetString("type", ""); v != "" {
+			params["type"] = v
+		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
 			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
 			Path:    "/tester-groups",
+			Params:  params,
 			Body:    body,
 		})
 		if err != nil {
