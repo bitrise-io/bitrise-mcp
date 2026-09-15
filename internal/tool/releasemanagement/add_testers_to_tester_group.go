@@ -22,8 +22,11 @@ var AddTestersToTesterGroup = bitrise.Tool{
 			mcp.Required(),
 		),
 		mcp.WithArray("user_slugs",
-			mcp.Description("The list of users identified by slugs that will be added to the tester group."),
-			mcp.Required(),
+			mcp.Description("User slugs to add as internal testers. Required for internal tester groups; ignored for external tester groups."),
+			mcp.WithStringItems(),
+		),
+		mcp.WithArray("emails",
+			mcp.Description("Email addresses to add as external testers. Required for external tester groups (at most 1000 entries); ignored for internal tester groups."),
 			mcp.WithStringItems(),
 		),
 		mcp.WithTitleAnnotation("Add Testers to Tester Group"),
@@ -33,27 +36,25 @@ var AddTestersToTesterGroup = bitrise.Tool{
 		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		connectedAppID, err := request.RequireString("connected_app_id")
-		if err != nil {
+		if _, err := request.RequireString("connected_app_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 		id, err := request.RequireString("id")
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
-		userSlugs, err := request.RequireStringSlice("user_slugs")
-		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
+		body := map[string]any{}
+		if v := request.GetStringSlice("user_slugs", nil); len(v) > 0 {
+			body["user_slugs"] = v
 		}
-
-		body := map[string]any{
-			"user_slugs": userSlugs,
+		if v := request.GetStringSlice("emails", nil); len(v) > 0 {
+			body["emails"] = v
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/tester-groups/%s/add-testers", connectedAppID, id),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    fmt.Sprintf("/tester-groups/%s/add-testers", id),
 			Body:    body,
 		})
 		if err != nil {

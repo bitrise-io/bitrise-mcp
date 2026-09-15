@@ -2,7 +2,6 @@ package releasemanagement
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -74,7 +73,9 @@ var ListInstallableArtifacts = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]any{}
+		params := map[string]any{
+			"app_id": connectedAppID,
+		}
 		if v := request.GetString("after_date", ""); v != "" {
 			params["after_date"] = v
 		}
@@ -119,8 +120,8 @@ var ListInstallableArtifacts = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/installable-artifacts", connectedAppID),
+			BaseURL: bitrise.APIRMAppsBaseURL,
+			Path:    "/installable-artifacts",
 			Params:  params,
 		})
 		if err != nil {

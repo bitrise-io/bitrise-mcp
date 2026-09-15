@@ -52,8 +52,8 @@ var UpdateConnectedApp = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPatch,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s", connectedAppID),
+			BaseURL: bitrise.APIRMAppsBaseURL,
+			Path:    fmt.Sprintf("/%s", connectedAppID),
 			Body:    body,
 		})
 		if err != nil {

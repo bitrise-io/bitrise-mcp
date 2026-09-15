@@ -28,8 +28,7 @@ var GetTesterGroup = bitrise.Tool{
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		connectedAppID, err := request.RequireString("connected_app_id")
-		if err != nil {
+		if _, err := request.RequireString("connected_app_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 		id, err := request.RequireString("id")
@@ -39,8 +38,8 @@ var GetTesterGroup = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/tester-groups/%s", connectedAppID, id),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    fmt.Sprintf("/tester-groups/%s", id),
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil

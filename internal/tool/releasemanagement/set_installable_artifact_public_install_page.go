@@ -32,8 +32,7 @@ var SetInstallableArtifactPublicInstallPage = bitrise.Tool{
 		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		connectedAppID, err := request.RequireString("connected_app_id")
-		if err != nil {
+		if _, err := request.RequireString("connected_app_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 		installableArtifactID, err := request.RequireString("installable_artifact_id")
@@ -51,8 +50,8 @@ var SetInstallableArtifactPublicInstallPage = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPatch,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/installable-artifacts/%s/public-install-page", connectedAppID, installableArtifactID),
+			BaseURL: bitrise.APIRMAppsBaseURL,
+			Path:    fmt.Sprintf("/installable-artifacts/%s/public-install-page", installableArtifactID),
 			Body:    body,
 		})
 		if err != nil {

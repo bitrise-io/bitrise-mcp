@@ -2,7 +2,6 @@ package releasemanagement
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -29,6 +28,10 @@ var GetTesters = bitrise.Tool{
 			mcp.Description("Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1."),
 			mcp.DefaultNumber(1),
 		),
+		mcp.WithString("type",
+			mcp.Description("Filters for testers belonging to a specific tester group type. Available values are 'internal' (Bitrise project team members) and 'external' (testers added by email). Defaults to 'internal'."),
+			mcp.Enum("internal", "external"),
+		),
 		mcp.WithTitleAnnotation("Get Testers"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
@@ -41,7 +44,9 @@ var GetTesters = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]any{}
+		params := map[string]any{
+			"app_id": connectedAppID,
+		}
 		if v := request.GetString("tester_group_id", ""); v != "" {
 			params["tester_group_id"] = v
 		}
@@ -51,11 +56,14 @@ var GetTesters = bitrise.Tool{
 		if v := request.GetInt("page", 1); v != 1 {
 			params["page"] = strconv.Itoa(v)
 		}
+		if v := request.GetString("type", ""); v != "" {
+			params["type"] = v
+		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/testers", connectedAppID),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    "/testers",
 			Params:  params,
 		})
 		if err != nil {
