@@ -2,7 +2,6 @@ package releasemanagement
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
@@ -42,7 +41,8 @@ var CreateTesterGroup = bitrise.Tool{
 		}
 
 		body := map[string]any{
-			"name": name,
+			"app_id": connectedAppID,
+			"name":   name,
 		}
 		if v := request.GetBool("auto_notify", false); v {
 			body["auto_notify"] = v
@@ -50,8 +50,8 @@ var CreateTesterGroup = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/tester-groups", connectedAppID),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    "/tester-groups",
 			Body:    body,
 		})
 		if err != nil {

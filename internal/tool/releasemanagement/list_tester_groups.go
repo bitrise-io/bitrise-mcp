@@ -2,7 +2,6 @@ package releasemanagement
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -38,7 +37,9 @@ var ListTesterGroups = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		params := map[string]any{}
+		params := map[string]any{
+			"app_id": connectedAppID,
+		}
 		if v := request.GetInt("items_per_page", 10); v != 10 {
 			params["items_per_page"] = strconv.Itoa(v)
 		}
@@ -48,8 +49,8 @@ var ListTesterGroups = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/tester-groups", connectedAppID),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    "/tester-groups",
 			Params:  params,
 		})
 		if err != nil {

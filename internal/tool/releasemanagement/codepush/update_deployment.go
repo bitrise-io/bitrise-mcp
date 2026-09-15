@@ -39,7 +39,7 @@ var UpdateDeployment = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPatch,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    fmt.Sprintf("/deployments/%s", id),
 			Body:    map[string]any{"name": name},
 		})

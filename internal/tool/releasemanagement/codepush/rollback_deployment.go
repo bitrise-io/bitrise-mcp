@@ -39,7 +39,7 @@ var RollbackDeployment = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPost,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    fmt.Sprintf("/deployments/%s/rollback", id),
 			Body:    body,
 		})

@@ -2,7 +2,6 @@ package releasemanagement
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -47,6 +46,7 @@ var ListBuildDistributionVersionTestBuilds = bitrise.Tool{
 		}
 
 		params := map[string]any{
+			"app_id":  connectedAppID,
 			"version": version,
 		}
 		if v := request.GetInt("items_per_page", 10); v != 10 {
@@ -58,8 +58,8 @@ var ListBuildDistributionVersionTestBuilds = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/build-distributions/test-builds", connectedAppID),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    "/test-builds",
 			Params:  params,
 		})
 		if err != nil {

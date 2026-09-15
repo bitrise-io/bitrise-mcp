@@ -30,7 +30,7 @@ var GetMetrics = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    "/metrics",
 			Params:  map[string]any{"workspace_slug": workspaceSlug},
 		})

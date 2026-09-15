@@ -55,7 +55,7 @@ var ListDeployments = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    "/deployments",
 			Params:  params,
 		})

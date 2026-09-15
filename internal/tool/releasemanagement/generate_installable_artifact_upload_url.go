@@ -64,6 +64,7 @@ var GenerateInstallableArtifactUploadURL = bitrise.Tool{
 		}
 
 		params := map[string]any{
+			"app_id":          connectedAppID,
 			"file_name":       fileName,
 			"file_size_bytes": fileSizeBytes,
 		}
@@ -79,8 +80,8 @@ var GenerateInstallableArtifactUploadURL = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/installable-artifacts/%s/upload-url", connectedAppID, installableArtifactID),
+			BaseURL: bitrise.APIRMAppsBaseURL,
+			Path:    fmt.Sprintf("/installable-artifacts/%s/upload-url", installableArtifactID),
 			Params:  params,
 		})
 		if err != nil {

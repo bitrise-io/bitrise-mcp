@@ -23,8 +23,8 @@ var GetPotentialTesters = bitrise.Tool{
 			mcp.Required(),
 		),
 		mcp.WithNumber("items_per_page",
-			mcp.Description("Specifies the maximum number of potential testers to return having access to a specific connected app. Default value is 10."),
-			mcp.DefaultNumber(10),
+			mcp.Description("Specifies the maximum number of potential testers to return having access to a specific connected app. Default value is 30."),
+			mcp.DefaultNumber(30),
 		),
 		mcp.WithNumber("page",
 			mcp.Description("Specifies which page should be returned from the whole result set in a paginated scenario. Default value is 1."),
@@ -40,8 +40,7 @@ var GetPotentialTesters = bitrise.Tool{
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		connectedAppID, err := request.RequireString("connected_app_id")
-		if err != nil {
+		if _, err := request.RequireString("connected_app_id"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 		id, err := request.RequireString("id")
@@ -50,7 +49,7 @@ var GetPotentialTesters = bitrise.Tool{
 		}
 
 		params := map[string]any{}
-		if v := request.GetInt("items_per_page", 10); v != 10 {
+		if v := request.GetInt("items_per_page", 30); v != 30 {
 			params["items_per_page"] = strconv.Itoa(v)
 		}
 		if v := request.GetInt("page", 1); v != 1 {
@@ -62,8 +61,8 @@ var GetPotentialTesters = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s/tester-groups/%s/potential-testers", connectedAppID, id),
+			BaseURL: bitrise.APIRMBuildDistributionsBaseURL,
+			Path:    fmt.Sprintf("/tester-groups/%s/potential-testers", id),
 			Params:  params,
 		})
 		if err != nil {

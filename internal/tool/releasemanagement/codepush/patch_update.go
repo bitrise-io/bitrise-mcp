@@ -54,7 +54,7 @@ var PatchUpdate = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodPatch,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    fmt.Sprintf("/updates/%s", id),
 			Body:    body,
 		})

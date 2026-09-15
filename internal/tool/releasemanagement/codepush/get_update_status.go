@@ -31,7 +31,7 @@ var GetUpdateStatus = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    fmt.Sprintf("/updates/%s/status", id),
 		})
 		if err != nil {

@@ -31,8 +31,8 @@ var GetConnectedApp = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    fmt.Sprintf("/connected-apps/%s", id),
+			BaseURL: bitrise.APIRMAppsBaseURL,
+			Path:    fmt.Sprintf("/%s", id),
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil

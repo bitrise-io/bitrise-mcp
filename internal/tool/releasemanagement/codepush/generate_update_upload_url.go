@@ -98,7 +98,7 @@ var GenerateUpdateUploadURL = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APICodePushBaseURL,
+			BaseURL: bitrise.APIRMCodePushBaseURL,
 			Path:    fmt.Sprintf("/updates/%s/upload-url", id),
 			Params:  params,
 		})

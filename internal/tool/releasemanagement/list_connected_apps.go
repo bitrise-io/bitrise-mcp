@@ -68,8 +68,8 @@ var ListConnectedApps = bitrise.Tool{
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
-			BaseURL: bitrise.APIRMBaseURL,
-			Path:    "/connected-apps",
+			BaseURL: bitrise.APIRMAppsBaseURL,
+			Path:    "/",
 			Params:  params,
 		})
 		if err != nil {
