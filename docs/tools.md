@@ -328,9 +328,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `id`: (Optional) An uuidV4 identifier for your new connected app.
      - `manual_connection`: (Optional) Indicates a manual connection.
      - `project_id`: (Optional) Specifies which Bitrise Project to associate with.
+     - `project_title`: (Optional) Title for the project created when no `project_id` is given. Rejected together with `project_id`.
      - `store_app_name`: (Optional) App name for manual connections.
      - `store_credential_id`: (Optional) Selection of credentials added on Bitrise.
      - `framework`: (Optional) The framework used to build the app (flutter/react_native/kotlin_multiplatform/other/native_ios/native_android), defaults to 'other'.
+     - `tester_groups`: (Optional) Tester groups created together with the app (array of objects with `name`, and optional `type`, `auto_notify`, `user_slugs` and `emails` properties). Created one by one, so check the response's `errors` array.
+     - `code_push_deployments`: (Optional) CodePush deployments created together with the app (array of objects with `name` and an optional `key` property). Created one by one, so check the response's `errors` array.
 
 47. `list_connected_apps`
    - List Release Management connected apps available for the authenticated account within a workspace.
@@ -417,12 +420,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `name`: The name for the new tester group.
-     - `auto_notify`: (Optional) Indicates automatic notifications for the group.
-     - `emails`: (Optional) Email addresses to add as testers for an external tester group.
+     - `auto_notify`: (Optional) Indicates automatic notifications for the group. Ignored for external tester groups.
+     - `user_slugs`: (Optional) Slugs of workspace members to add as internal testers. Ignored for external tester groups.
+     - `emails`: (Optional) Email addresses to add as testers for an external tester group (at most 1000).
      - `type`: (Optional) The type of the tester group, 'internal' or 'external' (default: internal).
 
 57. `notify_tester_group`
-   - Notifies a tester group about a new test build.
+   - Notifies an internal tester group about a new test build by email.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `id`: The uuidV4 identifier of the tester group.
@@ -460,11 +464,13 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `id`: The uuidV4 identifier of the tester group.
 
 62. `get_potential_testers`
-   - Gets a list of potential testers who can be added to a specific tester group.
+   - Gets a list of potential testers who can be added to a tester group, or workspace members before one exists.
    - Arguments:
-     - `connected_app_id`: The uuidV4 identifier of the connected app.
-     - `id`: The uuidV4 identifier of the tester group.
-     - `items_per_page`: (Optional) Maximum number of potential testers per page (default: 30).
+     - `workspace_slug`: (Optional) The slug of the workspace whose members are listed. Mutually exclusive with `connected_app_id`/`id`.
+     - `project_id`: (Optional) Used with `workspace_slug`; also lists the project's outside contributors.
+     - `connected_app_id`: (Optional) The uuidV4 identifier of the connected app. Required together with `id`.
+     - `id`: (Optional) The uuidV4 identifier of the tester group. Required together with `connected_app_id`.
+     - `items_per_page`: (Optional) Maximum number of potential testers per page, 1-1000 (default: 25).
      - `page`: (Optional) Page number to return (default: 1).
      - `search`: (Optional) Search for testers by email or username.
 
