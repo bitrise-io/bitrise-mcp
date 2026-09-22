@@ -12,7 +12,7 @@ import (
 var GetGooglePlayStagedRolloutSchedule = bitrise.Tool{
 	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
 	Definition: mcp.NewTool("get_google_play_staged_rollout_schedule",
-		mcp.WithDescription("Gives back the staged rollout schedule of an Android app version: the 'schedule' items (each with an 'id', 'rollout_percentage', 'when', 'has_run', 'last_run_at' and 'status'), the 'setup_location' time zone, whether it is 'paused', 'last_paused_at' and any 'failure_reason'. "+
+		mcp.WithDescription("Gives back the staged rollout schedule of an Android app version: the 'schedule' items (each with an 'id', 'rollout_percentage', 'when', 'has_run', 'last_run_at' and 'status'), the 'setup_location' time zone, whether it is 'paused', 'last_paused_at' and any 'failure_reason'. Returns null when no schedule exists. "+
 			"Android only, and a release candidate must already be chosen (400 otherwise)."),
 		mcp.WithString("app_version_id",
 			mcp.Description(appVersionIDDescription),

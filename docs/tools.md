@@ -826,7 +826,7 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `user_fraction`: Greater than 0 and at most 1, where 1 is a full release.
 
 116. `get_google_play_staged_rollout_schedule`
-   - Gives back the staged rollout schedule: its steps (each with `id`, `rollout_percentage`, `when`, `has_run`, `status`), time zone, paused state and failure reason. Android only.
+   - Gives back the staged rollout schedule: its steps (each with `id`, `rollout_percentage`, `when`, `has_run`, `status`), time zone, paused state and failure reason. `null` when no schedule exists. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
