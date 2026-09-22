@@ -14,7 +14,7 @@ var UpdateAppVersion = bitrise.Tool{
 	Definition: mcp.NewTool("update_app_version",
 		mcp.WithDescription("Updates a store release app version (a release in the Release Management UI). Only the given arguments change; omitted ones are left as they are. "+
 			"To pin a specific installable artifact as the release candidate, send 'release_candidate_id' together with 'release_candidate_locked' set to true, otherwise the call is rejected with 409. "+
-			"Sending 'approvals' or 'automation' replaces the whole existing list. "+
+			"Sending 'approvals' or 'automation' replaces the whole existing list. Send an empty string as 'description', 'slack_webhook_url' or 'teams_webhook_url' to clear it. "+
 			"Setting 'status' stops Release Management from managing the release for good: the app version moves to a final status and cannot be modified afterwards (409), so confirm with the user before doing so."),
 		mcp.WithString("app_version_id",
 			mcp.Description(appVersionIDDescription),
@@ -25,7 +25,7 @@ var UpdateAppVersion = bitrise.Tool{
 			mcp.Enum("ci", "api"),
 		),
 		mcp.WithString("description",
-			mcp.Description("The new description of the app version."),
+			mcp.Description("The new description of the app version. An empty string clears it."),
 		),
 		mcp.WithString("release_branch",
 			mcp.Description("The release branch part of the build configuration for the release candidate stage."),
@@ -43,13 +43,13 @@ var UpdateAppVersion = bitrise.Tool{
 			mcp.Description("If true, Release Management uploads every successful build of the given branch and workflow to the store. Turning it on also starts uploading the currently selected release candidate right away, if there is one."),
 		),
 		mcp.WithString("slack_webhook_url",
-			mcp.Description("Slack incoming webhook URL for release update notifications."),
+			mcp.Description("Slack incoming webhook URL for release update notifications. An empty string clears it."),
 		),
 		mcp.WithString("slack_notification_integration_id",
 			mcp.Description("Identifier of a Slack notification integration from the Workspace Settings, for release update notifications."),
 		),
 		mcp.WithString("teams_webhook_url",
-			mcp.Description("Microsoft Teams incoming webhook URL for release update notifications."),
+			mcp.Description("Microsoft Teams incoming webhook URL for release update notifications. An empty string clears it."),
 		),
 		mcp.WithString("status",
 			mcp.Description("Closes the release: 'abandoned' when it will not ship, 'completed_externally' when it shipped outside Release Management. Both are final and irreversible; any running staged rollout schedule is dropped."),
@@ -77,10 +77,19 @@ var UpdateAppVersion = bitrise.Tool{
 
 		body := map[string]any{}
 		for _, key := range []string{
-			"artifact_source", "description", "release_branch", "workflow", "release_candidate_id",
-			"slack_webhook_url", "slack_notification_integration_id", "teams_webhook_url", "status",
+			"artifact_source", "release_branch", "workflow", "release_candidate_id",
+			"slack_notification_integration_id", "status",
 		} {
 			if v := request.GetString(key, ""); v != "" {
+				body[key] = v
+			}
+		}
+		for _, key := range []string{"description", "slack_webhook_url", "teams_webhook_url"} {
+			v, ok, err := optionalString(request, key)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			if ok {
 				body[key] = v
 			}
 		}

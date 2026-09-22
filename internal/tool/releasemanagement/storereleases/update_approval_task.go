@@ -26,7 +26,7 @@ var UpdateApprovalTask = bitrise.Tool{
 			mcp.Description("The new name of the approval task."),
 		),
 		mcp.WithString("description",
-			mcp.Description("The new detailed explanation of the approval task."),
+			mcp.Description("The new detailed explanation of the approval task. An empty string clears it."),
 		),
 		mcp.WithString("assigned_user_slug",
 			mcp.Description("The slug of the user to assign the task to."),
@@ -51,10 +51,15 @@ var UpdateApprovalTask = bitrise.Tool{
 		}
 
 		body := map[string]any{}
-		for _, key := range []string{"summary", "description", "assigned_user_slug"} {
+		for _, key := range []string{"summary", "assigned_user_slug"} {
 			if v := request.GetString(key, ""); v != "" {
 				body[key] = v
 			}
+		}
+		if v, ok, err := optionalString(request, "description"); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		} else if ok {
+			body["description"] = v
 		}
 		v, ok, err := optionalBool(request, "completed")
 		if err != nil {

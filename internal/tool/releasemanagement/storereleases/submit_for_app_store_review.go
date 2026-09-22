@@ -40,7 +40,7 @@ var SubmitForAppStoreReview = bitrise.Tool{
 		),
 		mcp.WithTitleAnnotation("Submit for App Store Review"),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
 		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(false),
 	),

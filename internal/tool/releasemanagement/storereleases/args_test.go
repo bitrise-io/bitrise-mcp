@@ -74,3 +74,21 @@ func TestRequireArray(t *testing.T) {
 		t.Fatalf("array: got v=%v err=%v", v, err)
 	}
 }
+
+func TestOptionalString(t *testing.T) {
+	if _, ok, err := optionalString(requestWith(map[string]any{}), "field"); ok || err != nil {
+		t.Fatalf("absent: got ok=%v err=%v", ok, err)
+	}
+	if _, ok, err := optionalString(requestWith(map[string]any{"field": nil}), "field"); ok || err != nil {
+		t.Fatalf("null: got ok=%v err=%v", ok, err)
+	}
+	if v, ok, err := optionalString(requestWith(map[string]any{"field": ""}), "field"); !ok || err != nil || v != "" {
+		t.Fatalf("empty string must be forwarded to clear the field: got v=%q ok=%v err=%v", v, ok, err)
+	}
+	if v, ok, err := optionalString(requestWith(map[string]any{"field": "x"}), "field"); !ok || err != nil || v != "x" {
+		t.Fatalf("value: got v=%q ok=%v err=%v", v, ok, err)
+	}
+	if _, _, err := optionalString(requestWith(map[string]any{"field": 1.0}), "field"); err == nil {
+		t.Fatal("number: want error")
+	}
+}

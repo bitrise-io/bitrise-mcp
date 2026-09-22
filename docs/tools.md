@@ -643,7 +643,7 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `presets_id`: (Optional) Identifier of a preset template to fill the app version from.
 
 85. `update_app_version`
-   - Updates an app version; omitted arguments are left unchanged. Selecting a `release_candidate_id` requires `release_candidate_locked` set to true (409 otherwise). Turning on `automatic_store_upload` also starts uploading the currently selected release candidate right away. `approvals` and `automation` replace the whole existing list. Setting `status` moves the app version to a final status, after which it cannot be modified (409).
+   - Updates an app version; omitted arguments are left unchanged. Selecting a `release_candidate_id` requires `release_candidate_locked` set to true (409 otherwise). Turning on `automatic_store_upload` also starts uploading the currently selected release candidate right away. An empty string clears `description`, `slack_webhook_url` or `teams_webhook_url`. `approvals` and `automation` replace the whole existing list. Setting `status` moves the app version to a final status, after which it cannot be modified (409).
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `artifact_source`, `description`, `release_branch`, `workflow`, `automatic_store_upload`, `slack_webhook_url`, `slack_notification_integration_id`, `teams_webhook_url`, `approvals`, `automation`: (Optional) As in `create_app_version`.
@@ -744,7 +744,7 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `task_id`: The identifier of the approval task.
-     - `summary`, `description`, `assigned_user_slug`: (Optional) New values.
+     - `summary`, `description`, `assigned_user_slug`: (Optional) New values. An empty `description` clears it.
      - `completed`: (Optional) `true` to complete (approve), `false` to reopen.
 
 102. `delete_approval_task`

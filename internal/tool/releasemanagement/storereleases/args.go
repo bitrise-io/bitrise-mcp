@@ -36,6 +36,21 @@ func optionalBool(request mcp.CallToolRequest, key string) (value, ok bool, err 
 	}
 }
 
+// optionalString forwards a present argument even when it is empty, because an
+// empty string is how the API clears a field; only an omitted key means "leave
+// as is". A present non-string value is rejected rather than dropped.
+func optionalString(request mcp.CallToolRequest, key string) (value string, ok bool, err error) {
+	v, present := request.GetArguments()[key]
+	if !present || v == nil {
+		return "", false, nil
+	}
+	str, isString := v.(string)
+	if !isString {
+		return "", false, fmt.Errorf("%s must be a string", key)
+	}
+	return str, true, nil
+}
+
 // optionalArray rejects a present non-array value instead of dropping it, so a
 // caller sending a bare object instead of a one-element array is told so.
 func optionalArray(request mcp.CallToolRequest, key string) (value any, ok bool, err error) {
