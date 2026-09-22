@@ -14,6 +14,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/codepush"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/storereleases"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/user"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/webhooks"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/workspaces"
@@ -130,6 +131,51 @@ func NewBelt() *Belt {
 		codepush.GetUpdateStatus,
 		codepush.GenerateUpdateUploadURL,
 		codepush.GetMetrics,
+
+		// Store Releases
+		storereleases.ListAppVersions,
+		storereleases.GetAppVersion,
+		storereleases.CreateAppVersion,
+		storereleases.UpdateAppVersion,
+		storereleases.DeleteAppVersion,
+		storereleases.GetReleaseCandidate,
+		storereleases.UploadReleaseCandidate,
+		storereleases.GetReleaseCandidateUploadStatus,
+		storereleases.SubmitReleaseCandidateForBetaReview,
+		storereleases.ListBetaTestingGroups,
+		storereleases.StartBetaTesting,
+		storereleases.StopBetaTesting,
+		storereleases.ListWhatToTestDescriptions,
+		storereleases.CreateWhatToTestDescription,
+		storereleases.UpdateWhatToTestDescription,
+		storereleases.DeleteWhatToTestDescription,
+		storereleases.ListApprovalTasks,
+		storereleases.GetApprovalTask,
+		storereleases.CreateApprovalTask,
+		storereleases.UpdateApprovalTask,
+		storereleases.DeleteApprovalTask,
+		storereleases.SubmitForAppStoreReview,
+		storereleases.GetAppStoreReviewStatus,
+		storereleases.CancelAppStoreReview,
+		storereleases.ReleaseToAppStore,
+		storereleases.PauseAppStorePhasedRelease,
+		storereleases.ContinueAppStorePhasedRelease,
+		storereleases.CompleteAppStorePhasedRelease,
+		storereleases.GetAppStoreReleaseStatus,
+		storereleases.GetAppStoreReleaseSettings,
+		storereleases.UpdateAppStoreReleaseSettings,
+		storereleases.UpdateGooglePlayReleaseNotes,
+		storereleases.GetGooglePlayRelease,
+		storereleases.ReleaseToGooglePlay,
+		storereleases.GetGooglePlayStagedRolloutSchedule,
+		storereleases.CreateGooglePlayStagedRolloutSchedule,
+		storereleases.PauseGooglePlayStagedRolloutSchedule,
+		storereleases.ResumeGooglePlayStagedRolloutSchedule,
+		storereleases.DeleteGooglePlayStagedRolloutSchedule,
+		storereleases.ListReleaseEvents,
+		storereleases.CreateAppStoreVersion,
+		storereleases.GetAppStoreDraftVersion,
+		storereleases.UpdateAppStoreDraftVersion,
 
 		// Insights
 		insights.GetBuildTotals,
