@@ -2,7 +2,7 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, insights`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, release-management-store-releases, insights`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
@@ -608,6 +608,279 @@ By default, all API groups are enabled. You can specify which groups to enable u
    - Arguments:
      - `workspace_slug`: Slug of the Bitrise workspace.
 
+### Store Releases
+
+Store release tools take an app version (what the Release Management UI calls a release) of a connected app through the store: selecting and uploading the release candidate, beta testing, approvals, store review and the production rollout. They call the Store Releases API (`https://api.bitrise.io/release-management/v2/store-releases/v1`), except the three App Store version tools at the end, which call the Apps API. `app_version_id` is the `id` of an app version as returned by `list_app_versions`.
+
+Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` on the other platform. Most store operations need a release candidate to be chosen first (HTTP 400 otherwise) and a Standard license on the connected app (HTTP 412 otherwise). `release_to_app_store`, `complete_app_store_phased_release`, `release_to_google_play` and the staged rollout schedule tools publish to end users and cannot be undone, so an agent should confirm with the user before calling them. The delete, stop, cancel and status-closing tools are irreversible too, and every one of them is marked with `destructiveHint: true`.
+
+82. `list_app_versions`
+   - Lists the app versions of a connected app, newest first, with their stages, release candidate selection and status.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `items_per_page`: (Optional) Maximum number of app versions per page (default: 10).
+     - `page`: (Optional) Page number to return (default: 1).
+
+83. `get_app_version`
+   - Gives back an app version with its stages, release candidate selection, notification settings, automations and status.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+84. `create_app_version`
+   - Creates an app version under a connected app. Nothing is uploaded or published; the release opens with its release candidate stage in progress. Values given here override the ones from `presets_id`.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `name`: The name of the app version; for iOS apps the App Store Connect version in X.Y.Z format.
+     - `artifact_source`: (Optional) `ci` for Bitrise CI builds (required with `release_branch`/`workflow`) or `api` for uploaded artifacts.
+     - `description`: (Optional) The description of the app version.
+     - `release_branch`: (Optional) Release branch of the release candidate build configuration.
+     - `workflow`: (Optional) Workflow of the release candidate build configuration.
+     - `automatic_store_upload`: (Optional) Upload every successful build of the branch and workflow to the store.
+     - `release_candidate_locked`: (Optional) Do not select the latest matching artifact automatically.
+     - `slack_webhook_url`, `slack_notification_integration_id`, `teams_webhook_url`: (Optional) Release update notification targets.
+     - `approvals`: (Optional) Approval tasks (array of objects with `summary`, and optional `description` and `due_date`).
+     - `automation`: (Optional) Workflow or pipeline runs on release events (array of objects with `event_name` and `workflow_name` or `pipeline_name`).
+     - `presets_id`: (Optional) Identifier of a preset template to fill the app version from.
+
+85. `update_app_version`
+   - Updates an app version; omitted arguments are left unchanged. Selecting a `release_candidate_id` requires `release_candidate_locked` set to true (409 otherwise). Turning on `automatic_store_upload` also starts uploading the currently selected release candidate right away. An empty string clears `description`, `slack_webhook_url` or `teams_webhook_url`. `approvals` and `automation` replace the whole existing list. Setting `status` moves the app version to a final status, after which it cannot be modified (409).
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `artifact_source`, `description`, `release_branch`, `workflow`, `automatic_store_upload`, `slack_webhook_url`, `slack_notification_integration_id`, `teams_webhook_url`, `approvals`, `automation`: (Optional) As in `create_app_version`.
+     - `release_candidate_id`: (Optional) The uuidV4 identifier of the installable artifact to select as the release candidate.
+     - `release_candidate_locked`: (Optional) Lock the selected release candidate.
+     - `status`: (Optional) `abandoned` or `completed_externally`. Closes the release for good; it cannot be modified afterwards.
+
+86. `delete_app_version`
+   - Deletes an app version with its stages, approval tasks, automations and event history. Cannot be undone; nothing already uploaded to or published on the store is affected.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+87. `get_release_candidate`
+   - Gives back the release candidate of an app version: the selected installable artifact and the Bitrise CI build it came from.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+88. `upload_release_candidate`
+   - Starts uploading the release candidate to TestFlight (iOS) or the Google Play Console (Android) in an asynchronous Bitrise build, locking the release candidate unless `automatic_store_upload` is on. 422 without a suitable artifact, 409 when an upload cannot be started.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+89. `get_release_candidate_upload_status`
+   - Gives back the store upload status of the release candidate: `upload_state`, the uploading build's URL and, for iOS, the App Store Connect `processing_state`.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+90. `submit_release_candidate_for_beta_review`
+   - Submits the uploaded release candidate for TestFlight beta app review, which external testing groups require. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `auto_notify_enabled`: (Optional) Let TestFlight notify testers once the build is approved (default: false).
+
+91. `list_beta_testing_groups`
+   - Lists the TestFlight testing groups (iOS, each with an `id`) or the Google Play testing tracks (Android, grouped as internal, closed and open, each with a `name`) of an app version.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+92. `start_beta_testing`
+   - Distributes the uploaded release candidate to a TestFlight testing group or a Google Play testing track.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `group_id`: The TestFlight testing group id (iOS) or the Google Play track name (Android).
+
+93. `stop_beta_testing`
+   - Stops TestFlight beta testing of the release candidate on a testing group, removing the build from the group. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `group_id`: The TestFlight testing group id.
+
+94. `list_what_to_test_descriptions`
+   - Lists the TestFlight "What to Test" descriptions of the uploaded release candidate per locale, with the app's primary locale. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+95. `create_what_to_test_description`
+   - Adds a TestFlight "What to Test" description in a new locale. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `locale`: The App Store Connect locale shortcode, e.g. `en-US`.
+     - `whats_new`: The text shown to testers.
+
+96. `update_what_to_test_description`
+   - Replaces the text of an existing TestFlight "What to Test" description. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `what_to_test_id`: The description id from `list_what_to_test_descriptions`.
+     - `whats_new`: The new text shown to testers.
+
+97. `delete_what_to_test_description`
+   - Removes a TestFlight "What to Test" description. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `what_to_test_id`: The description id from `list_what_to_test_descriptions`.
+
+98. `list_approval_tasks`
+   - Lists the approval tasks of an app version. The approval stage completes once every task is completed.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+99. `get_approval_task`
+   - Gives back one approval task.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `task_id`: The identifier of the approval task.
+
+100. `create_approval_task`
+   - Adds an approval task to the approval stage of an app version.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `summary`: The name of the task.
+     - `description`: (Optional) Detailed explanation of the task.
+     - `assigned_user_slug`: (Optional) Slug of the user to assign the task to.
+     - `due_date`: (Optional) A date in the future.
+
+101. `update_approval_task`
+   - Updates an approval task, including completing or reopening it. On an assigned task only the assignee or a project admin may change `completed`, and only the creator or a project admin the other fields (403 otherwise).
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `task_id`: The identifier of the approval task.
+     - `summary`, `description`, `assigned_user_slug`: (Optional) New values. An empty `description` clears it.
+     - `completed`: (Optional) `true` to complete (approve), `false` to reopen.
+
+102. `delete_approval_task`
+   - Deletes an approval task; removing the last open task completes the approval stage. An assigned task can only be deleted by its creator or a project admin (403 otherwise).
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `task_id`: The identifier of the approval task.
+
+103. `submit_for_app_store_review`
+   - Submits the uploaded release candidate to App Store review, optionally setting App Store metadata per locale first. With release type `AFTER_APPROVAL` Apple publishes the version as soon as the review passes. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `copy_primary_whats_new`: (Optional) Copy the primary localization's `whats_new` into empty ones (default: false).
+     - `localizations`: (Optional) Array of objects with `locale` and optional `whats_new`, `description`, `keywords`, `promotional_text`, `marketing_url`, `support_url`.
+
+104. `get_app_store_review_status`
+   - Gives back the App Store review status as tracked by Release Management and as reported by App Store Connect. iOS only; 422 `ERR_REVIEW_NOT_REQUESTED` when never submitted.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+105. `cancel_app_store_review`
+   - Cancels the in-flight App Store review submission. The version loses its place in Apple's review queue and must be resubmitted. iOS only; 422 when the version is not under review.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+106. `release_to_app_store`
+   - Releases an approved `MANUAL` release-type app version to the App Store. Publishes to production and cannot be undone. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+107. `pause_app_store_phased_release`
+   - Pauses the in-progress App Store phased release; users who already have the update keep it. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+108. `continue_app_store_phased_release`
+   - Continues a paused App Store phased release on Apple's 7-day schedule. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+109. `complete_app_store_phased_release`
+   - Completes the phased release, making the update available to 100% of users immediately. Cannot be undone. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+110. `get_app_store_release_status`
+   - Gives back the App Store `app_release_status` and `phased_release_status` of an app version. iOS only; 422 `ERR_APP_STORE_VERSION_NOT_FOUND` when the version is missing from App Store Connect.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+111. `get_app_store_release_settings`
+   - Gives back the App Store Connect release settings: `release_type` (`MANUAL`, `AFTER_APPROVAL` or `SCHEDULED`), `phased_release` and `earliest_release_date`. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+112. `update_app_store_release_settings`
+   - Updates the App Store Connect release settings; both `release_type` and `phased_release` must be given. iOS only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `release_type`: `MANUAL`, `AFTER_APPROVAL` or `SCHEDULED` (case-insensitive).
+     - `phased_release`: Roll out over 7 days (`true`) or to everyone at once (`false`).
+     - `earliest_release_date`: (Optional) Earliest publish date-time; only with `SCHEDULED`.
+
+113. `update_google_play_release_notes`
+   - Sets the Google Play release notes of the uploaded release candidate per language. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `release_notes`: Array of objects with `language` (a Google Play language code) and `text` (max 500 characters).
+
+114. `get_google_play_release`
+   - Gives back the current Google Play production rollout as `user_fraction` (0 to 1, `1` is a full release, `null` when not on the production track). Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+115. `release_to_google_play`
+   - Releases the uploaded release candidate on the Google Play production track to a fraction of users, or raises an in-progress rollout. Publishes to production and cannot be undone. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `user_fraction`: Greater than 0 and at most 1, where 1 is a full release.
+
+116. `get_google_play_staged_rollout_schedule`
+   - Gives back the staged rollout schedule: its steps (each with `id`, `rollout_percentage`, `when`, `has_run`, `status`), time zone, paused state and failure reason. `null` when no schedule exists. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+117. `create_google_play_staged_rollout_schedule`
+   - Creates a staged rollout schedule: dates at which the production rollout is raised to the given percentage. Steps that have run cannot be undone. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `location`: Time zone of the dates: a TZ database name or `UTC`.
+     - `schedule`: Array of objects with `percentage` (0 to 100, `100` is a full release) and `when` (ISO 8601).
+
+118. `pause_google_play_staged_rollout_schedule`
+   - Pauses the running staged rollout schedule. 412 when there is no schedule, it has not started, or it has finished. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+119. `resume_google_play_staged_rollout_schedule`
+   - Resumes a paused staged rollout schedule with the remaining steps re-timed. 412 when the schedule is not paused or has finished. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `location`: Time zone of the dates: a TZ database name or `UTC`.
+     - `schedule`: Array of objects with the step `id` from `get_google_play_staged_rollout_schedule`, `percentage` and the new `when`.
+
+120. `delete_google_play_staged_rollout_schedule`
+   - Deletes the staged rollout schedule so no further steps run; steps that already ran stay in effect. 412 when there is no schedule or it has finished. Android only.
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+
+121. `list_release_events`
+   - Lists the event history of an app version, newest first, paginated with a cursor: pass `next_before` back as `before` until it is `null`. `total_count` and `available_actors` come with the first page only. Requires a Standard license (412 otherwise).
+   - Arguments:
+     - `app_version_id`: The uuidV4 identifier of the app version.
+     - `before`: (Optional) Cursor: the `next_before` of the previous response, verbatim.
+     - `limit`: (Optional) Maximum number of events per request (default: 10).
+     - `search`: (Optional) Case-insensitive filter on the event title.
+     - `from`, `to`: (Optional) Inclusive ISO 8601 time range; must be given together.
+     - `triggered_by`: (Optional) User slugs or machine actor types (`store`, `automation`, `preset`) to filter by.
+
+122. `create_app_store_version`
+   - Creates the App Store Connect version record needed before an iOS app version can be submitted for review. An app version named `version_string` must already exist under the connected app (404 otherwise). iOS only.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `version_string`: The version to create in App Store Connect, e.g. `1.2.3`.
+
+123. `get_app_store_draft_version`
+   - Gives back the App Store Connect draft version of a connected app: the latest unreleased version, with its state, release type and the matching `app_version_id`. 404 when there is none. iOS only.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+
+124. `update_app_store_draft_version`
+   - Renames the App Store Connect draft version to match an existing app version. iOS only.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `version_string`: The new version string, matching an existing app version's name.
+
 ### Insights
 
 Build and test metrics from Bitrise Insights (the public Insights API, `https://api.bitrise.io/insights/v1`). Requires a paid Insights plan on the workspace; without one every call fails with HTTP 402. Every tool reports on exactly one project, identified by its Insights project ID. Time windows are RFC3339 in UTC, `start` inclusive and `end` exclusive. Durations are seconds, rates are percentages in 0-100. The `branch` filter accepts `*` as a wildcard (`release/*`).
@@ -662,91 +935,134 @@ Common arguments of every Insights tool:
 
 The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | insights |
-|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|---|
-| list_apps | ✅ | | | | | | | | | ✅ | | | | |
-| register_app | ✅ | | | | | | | | | | | | | |
-| finish_bitrise_app | ✅ | | | | | | | | | | | | | |
-| get_app | ✅ | | | | | | | | | ✅ | | | | |
-| delete_app | ✅ | | | | | | | | | | | | | |
-| update_app | ✅ | | | | | | | | | | | | | |
-| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | | |
-| update_bitrise_yml | ✅ | | | | | | | | | | | | | |
-| list_branches | ✅ | | | | | | | | | ✅ | | | | |
-| register_ssh_key | ✅ | | | | | | | | | | | | | |
-| register_webhook | ✅ | | | | | | | | | | | | | |
-| list_builds | | ✅ | | | | | | | | ✅ | | | | |
-| trigger_bitrise_build | | ✅ | | | | | | | | | | | | |
-| get_build | | ✅ | | | | | | | | ✅ | | | | |
-| abort_build | | ✅ | | | | | | | | | | | | |
-| get_build_log | | ✅ | | | | | | | | ✅ | | | | |
-| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | | |
-| list_build_workflows | | ✅ | | | | | | | | ✅ | | | | |
-| get_build_steps | | ✅ | | | | | | | | ✅ | | | | |
-| list_artifacts | | | | | ✅ | | | | | ✅ | | | | |
-| get_artifact | | | | | ✅ | | | | | ✅ | | | | |
-| delete_artifact | | | | | ✅ | | | | | | | | | |
-| update_artifact | | | | | ✅ | | | | | | | | | |
-| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | | |
-| delete_outgoing_webhook | | | | ✅ | | | | | | | | | | |
-| update_outgoing_webhook | | | | ✅ | | | | | | | | | | |
-| create_outgoing_webhook | | | | ✅ | | | | | | | | | | |
-| list_cache_items | | | | | | | ✅ | | | ✅ | | | | |
-| delete_all_cache_items | | | | | | | ✅ | | | | | | | |
-| delete_cache_item | | | | | | | ✅ | | | | | | | |
-| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | | |
-| list_pipelines | | | | | | | | ✅ | | ✅ | | | | |
-| get_pipeline | | | | | | | | ✅ | | ✅ | | | | |
-| abort_pipeline | | | | | | | | ✅ | | | | | | |
-| rebuild_pipeline | | | | | | | | ✅ | | | | | | |
-| list_group_roles | | | | | | ✅ | | | | ✅ | | | | |
-| replace_group_roles | | | | | | ✅ | | | | | | | | |
-| list_workspaces | | | ✅ | | | | | | | ✅ | | | | |
-| get_workspace | | | ✅ | | | | | | | ✅ | | | | |
-| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | | |
-| create_workspace_group | | | ✅ | | | | | | | | | | | |
-| get_workspace_members | | | ✅ | | | | | | | ✅ | | | | |
-| invite_member_to_workspace | | | ✅ | | | | | | | | | | | |
-| add_member_to_group | | | ✅ | | | | | | | | | | | |
-| me | | | | | | | | | ✅ | ✅ | | | | |
-| create_connected_app | | | | | | | | | | | ✅ | | | |
-| list_connected_apps | | | | | | | | | | ✅ | ✅ | | | |
-| get_connected_app | | | | | | | | | | ✅ | ✅ | | | |
-| update_connected_app | | | | | | | | | | | ✅ | | | |
-| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | | |
-| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | | |
-| get_installable_artifact_upload_and_proc_status | | | | | | | | | | ✅ | ✅ | | | |
-| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | | |
-| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | | |
-| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | | |
-| create_tester_group | | | | | | | | | | | ✅ | | | |
-| notify_tester_group | | | | | | | | | | | ✅ | | | |
-| add_testers_to_tester_group | | | | | | | | | | | ✅ | | | |
-| update_tester_group | | | | | | | | | | | ✅ | | | |
-| list_tester_groups | | | | | | | | | | ✅ | ✅ | | | |
-| get_tester_group | | | | | | | | | | ✅ | ✅ | | | |
-| get_potential_testers | | | | | | | | | | ✅ | ✅ | | | |
-| get_testers | | | | | | | | | | ✅ | ✅ | | | |
-| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | | |
-| step_search | | | | | | | | | | ✅ | | ✅ | | |
-| step_inputs | | | | | | | | | | ✅ | | ✅ | | |
-| list_available_stacks | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| codepush_create_deployment | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_update_deployment | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_delete_deployment | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_promote_deployment | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_rollback_deployment | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| codepush_get_update | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| codepush_patch_update | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_delete_update | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ | |
-| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ | |
-| insights_get_build_totals | | | | | | | | | | ✅ | | | | ✅ |
-| insights_get_build_series | | | | | | | | | | ✅ | | | | ✅ |
-| insights_get_test_totals | | | | | | | | | | ✅ | | | | ✅ |
-| insights_get_test_series | | | | | | | | | | ✅ | | | | ✅ |
-| insights_list_flaky_tests | | | | | | | | | | ✅ | | | | ✅ |
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | release-management-store-releases | insights |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|-----------------------------------|---|
+| list_apps | ✅ | | | | | | | | | ✅ | | | | | |
+| register_app | ✅ | | | | | | | | | | | | | | |
+| finish_bitrise_app | ✅ | | | | | | | | | | | | | | |
+| get_app | ✅ | | | | | | | | | ✅ | | | | | |
+| delete_app | ✅ | | | | | | | | | | | | | | |
+| update_app | ✅ | | | | | | | | | | | | | | |
+| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | | | |
+| update_bitrise_yml | ✅ | | | | | | | | | | | | | | |
+| list_branches | ✅ | | | | | | | | | ✅ | | | | | |
+| register_ssh_key | ✅ | | | | | | | | | | | | | | |
+| register_webhook | ✅ | | | | | | | | | | | | | | |
+| list_builds | | ✅ | | | | | | | | ✅ | | | | | |
+| trigger_bitrise_build | | ✅ | | | | | | | | | | | | | |
+| get_build | | ✅ | | | | | | | | ✅ | | | | | |
+| abort_build | | ✅ | | | | | | | | | | | | | |
+| get_build_log | | ✅ | | | | | | | | ✅ | | | | | |
+| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | | | |
+| list_build_workflows | | ✅ | | | | | | | | ✅ | | | | | |
+| get_build_steps | | ✅ | | | | | | | | ✅ | | | | | |
+| list_artifacts | | | | | ✅ | | | | | ✅ | | | | | |
+| get_artifact | | | | | ✅ | | | | | ✅ | | | | | |
+| delete_artifact | | | | | ✅ | | | | | | | | | | |
+| update_artifact | | | | | ✅ | | | | | | | | | | |
+| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | | | |
+| delete_outgoing_webhook | | | | ✅ | | | | | | | | | | | |
+| update_outgoing_webhook | | | | ✅ | | | | | | | | | | | |
+| create_outgoing_webhook | | | | ✅ | | | | | | | | | | | |
+| list_cache_items | | | | | | | ✅ | | | ✅ | | | | | |
+| delete_all_cache_items | | | | | | | ✅ | | | | | | | | |
+| delete_cache_item | | | | | | | ✅ | | | | | | | | |
+| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | | | |
+| list_pipelines | | | | | | | | ✅ | | ✅ | | | | | |
+| get_pipeline | | | | | | | | ✅ | | ✅ | | | | | |
+| abort_pipeline | | | | | | | | ✅ | | | | | | | |
+| rebuild_pipeline | | | | | | | | ✅ | | | | | | | |
+| list_group_roles | | | | | | ✅ | | | | ✅ | | | | | |
+| replace_group_roles | | | | | | ✅ | | | | | | | | | |
+| list_workspaces | | | ✅ | | | | | | | ✅ | | | | | |
+| get_workspace | | | ✅ | | | | | | | ✅ | | | | | |
+| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | | | |
+| create_workspace_group | | | ✅ | | | | | | | | | | | | |
+| get_workspace_members | | | ✅ | | | | | | | ✅ | | | | | |
+| invite_member_to_workspace | | | ✅ | | | | | | | | | | | | |
+| add_member_to_group | | | ✅ | | | | | | | | | | | | |
+| me | | | | | | | | | ✅ | ✅ | | | | | |
+| create_connected_app | | | | | | | | | | | ✅ | | | | |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ | | | | |
+| get_connected_app | | | | | | | | | | ✅ | ✅ | | | | |
+| update_connected_app | | | | | | | | | | | ✅ | | | | |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | | | |
+| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | | | |
+| get_installable_artifact_upload_and_proc_status | | | | | | | | | | ✅ | ✅ | | | | |
+| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | | | |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | | | |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | | | |
+| create_tester_group | | | | | | | | | | | ✅ | | | | |
+| notify_tester_group | | | | | | | | | | | ✅ | | | | |
+| add_testers_to_tester_group | | | | | | | | | | | ✅ | | | | |
+| update_tester_group | | | | | | | | | | | ✅ | | | | |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ | | | | |
+| get_tester_group | | | | | | | | | | ✅ | ✅ | | | | |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ | | | | |
+| get_testers | | | | | | | | | | ✅ | ✅ | | | | |
+| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | | | |
+| step_search | | | | | | | | | | ✅ | | ✅ | | | |
+| step_inputs | | | | | | | | | | ✅ | | ✅ | | | |
+| list_available_stacks | | | | | | | | | | ✅ | | ✅ | | | |
+| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | ✅ | | |
+| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | ✅ | | |
+| codepush_create_deployment | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_update_deployment | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_delete_deployment | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_promote_deployment | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_rollback_deployment | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | ✅ | | |
+| codepush_get_update | | | | | | | | | | ✅ | ✅ | | ✅ | | |
+| codepush_patch_update | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_delete_update | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ | | |
+| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ | | |
+| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ | | |
+| list_app_versions |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| get_app_version |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| create_app_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| update_app_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| delete_app_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_release_candidate |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| upload_release_candidate |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_release_candidate_upload_status |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| submit_release_candidate_for_beta_review |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| list_beta_testing_groups |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| start_beta_testing |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| stop_beta_testing |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| list_what_to_test_descriptions |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| create_what_to_test_description |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| update_what_to_test_description |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| delete_what_to_test_description |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| list_approval_tasks |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| get_approval_task |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| create_approval_task |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| update_approval_task |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| delete_approval_task |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| submit_for_app_store_review |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_app_store_review_status |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| cancel_app_store_review |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| release_to_app_store |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| pause_app_store_phased_release |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| continue_app_store_phased_release |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| complete_app_store_phased_release |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_app_store_release_status |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| get_app_store_release_settings |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| update_app_store_release_settings |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| update_google_play_release_notes |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_google_play_release |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| release_to_google_play |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| create_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| pause_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| resume_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| delete_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| list_release_events |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| create_app_store_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| get_app_store_draft_version |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
+| update_app_store_draft_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
+| insights_get_build_totals | | | | | | | | | | ✅ | | | | | ✅ |
+| insights_get_build_series | | | | | | | | | | ✅ | | | | | ✅ |
+| insights_get_test_totals | | | | | | | | | | ✅ | | | | | ✅ |
+| insights_get_test_series | | | | | | | | | | ✅ | | | | | ✅ |
+| insights_list_flaky_tests | | | | | | | | | | ✅ | | | | | ✅ |
