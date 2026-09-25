@@ -14,6 +14,7 @@ import (
 	httptrace "github.com/DataDog/dd-trace-go/contrib/net/http/v2"
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/devenv"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool"
 	"github.com/jinzhu/configor"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -23,6 +24,15 @@ import (
 )
 
 const development = "development"
+
+// serverInstructions is sent to clients at initialize time: it tells the
+// model how the two product areas of the server relate, since tool
+// descriptions alone cannot say which product a request is about.
+const serverInstructions = `Bitrise MCP server. Two product areas:
+1. Bitrise CI, Release Management and Insights: unprefixed tools (list_apps, trigger_bitrise_build, get_build_log, list_connected_apps, insights_*). Apps are addressed by app_slug, workspaces by workspace_slug (organization_slug on register_app); results use snake_case fields.
+2. Bitrise Dev Environments (RDE): tools prefixed bitrise_devenv_*. Remote development sessions (VMs) created from templates or a stack, with shell execution, file transfer, virtual devices and macOS GUI automation. Workspace-scoped tools take workspace_id (the workspace slug); results use camelCase fields.
+trigger_bitrise_build runs a CI workflow on Bitrise; bitrise_devenv_execute runs a shell command inside an existing Dev Environments session. One Bitrise account covers both areas: me identifies the user, list_workspaces lists the workspaces (slugs) both areas use.
+Dev Environments workspace resolution: an explicit workspace_id argument (remembered for later calls), else the BITRISE_WORKSPACE_ID environment variable or the x-bitrise-workspace-id header, else the sole workspace the user belongs to; with several workspaces and none chosen, ask the user. A Workspace API Token has no user and no workspace discovery: it needs the workspace given explicitly.`
 
 // BuildVersion is overwritten with go build flags.
 var BuildVersion = development //nolint:gochecknoglobals
@@ -36,8 +46,14 @@ type config struct {
 	// the stdio transport. Only valid for the stdio transport, otherwise it is
 	// ignored.
 	BitriseToken string `env:"BITRISE_TOKEN"`
+	// BitriseWorkspaceID is the default workspace ID (slug) the Dev
+	// Environments tools operate in on the stdio transport. On the HTTP
+	// transport the workspace comes from the x-bitrise-workspace-id header.
+	// Optional: a workspace_id tool argument wins, and when the user belongs
+	// to exactly one workspace it is auto-detected.
+	BitriseWorkspaceID string `env:"BITRISE_WORKSPACE_ID"`
 	// EnabledAPIGroups is a comma-separated list of API groups that are enabled.
-	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,read-only,release-management,insights"`
+	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,user,read-only,release-management,release-management-code-push,configuration,insights,dev-environments,dev-environments-read-only"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
 	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
@@ -60,6 +76,21 @@ type config struct {
 	// (default: https://api.bitrise.io/v0.1). Useful for pointing at a
 	// test or local API instance.
 	BitriseAPIBaseURL string `env:"BITRISE_API_BASE_URL"`
+	// DevenvAPIBaseURL is the base URL of the Dev Environments (RDE) backend
+	// used by the bitrise_devenv_* tools.
+	DevenvAPIBaseURL string `env:"BITRISE_DEVENV_API_BASE_URL" default:"https://codespaces-api.services.bitrise.io"`
+}
+
+// splitGroups parses a comma-separated API group list, ignoring surrounding
+// whitespace and empty items.
+func splitGroups(s string) []string {
+	var groups []string
+	for _, g := range strings.Split(s, ",") {
+		if g = strings.TrimSpace(g); g != "" {
+			groups = append(groups, g)
+		}
+	}
+	return groups
 }
 
 func main() {
@@ -77,6 +108,7 @@ func run() error {
 	if cfg.BitriseAPIBaseURL != "" {
 		bitrise.APIBaseURL = cfg.BitriseAPIBaseURL
 	}
+	devenv.BaseURL = strings.TrimRight(cfg.DevenvAPIBaseURL, "/")
 
 	logger, err := newStructuredLogger(cfg.LogLevel)
 	if err != nil {
@@ -98,22 +130,11 @@ func run() error {
 	mcpServer := server.NewMCPServer(
 		"bitrise",
 		BuildVersion,
-		server.WithToolFilter(func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
-			enabledGroups, err := bitrise.EnabledGroupsFromCtx(ctx) // http transport only
-			if err != nil {
-				// stdio transport/no tool filtering in http transport
-				enabledGroups = strings.Split(cfg.EnabledAPIGroups, ",")
-			}
-			var filtered []mcp.Tool
-			for _, tool := range tools {
-				if toolBelt.ToolEnabled(tool.Name, enabledGroups) {
-					filtered = append(filtered, tool)
-				}
-			}
-			return filtered
-		}),
+		server.WithInstructions(serverInstructions),
+		server.WithToolFilter(toolBelt.ToolFilter(splitGroups(cfg.EnabledAPIGroups))),
 		server.WithRecovery(),
 		server.WithToolCapabilities(false),
+		server.WithResourceCapabilities(false, false),
 		server.WithLogging(),
 	)
 	toolBelt.RegisterAll(mcpServer)
@@ -151,31 +172,55 @@ func run() error {
 
 	if cfg.Addr == "" {
 		logger.Info("no address specified, starting stdio transport")
-		return runStdioTransport(cfg, mcpServer)
+		return runStdioTransport(cfg, toolBelt, mcpServer)
 	}
 	logger.Info("starting http transport")
-	return runHTTPTransport(mcpServer, logger, cfg)
+	return runHTTPTransport(mcpServer, toolBelt, logger, cfg)
 }
 
-func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
+func runStdioTransport(cfg config, toolBelt *tool.Belt, mcpServer *server.MCPServer) error {
 	if cfg.BitriseToken == "" {
 		return fmt.Errorf("BITRISE_TOKEN must be provided in stdio transport mode")
 	}
 
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			return fn(bitrise.ContextWithPAT(ctx, cfg.BitriseToken), request)
+			ctx = bitrise.ContextWithPAT(ctx, cfg.BitriseToken)
+			if cfg.BitriseWorkspaceID != "" {
+				ctx = devenv.ContextWithWorkspace(ctx, cfg.BitriseWorkspaceID)
+			}
+			return fn(ctx, request)
 		}
 	})(mcpServer)
+	server.WithToolHandlerMiddleware(workspaceGateMiddleware(toolBelt))(mcpServer)
 	if err := server.ServeStdio(mcpServer); err != nil {
 		return fmt.Errorf("serve stdio: %w", err)
 	}
 	return nil
 }
 
-func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cfg config) error {
+// workspaceGateMiddleware runs the Dev Environments per-call gate: it rejects
+// local-only tools on the hosted transport and resolves the workspace for
+// workspace-scoped bitrise_devenv_* tools. Every other tool passes through.
+// It must be registered after the middleware that puts the PAT in context.
+func workspaceGateMiddleware(toolBelt *tool.Belt) server.ToolHandlerMiddleware {
+	return func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
+		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			ctx, errRes := toolBelt.GateAndResolveWorkspace(ctx, request)
+			if errRes != nil {
+				return errRes, nil
+			}
+			return fn(ctx, request)
+		}
+	}
+}
+
+func runHTTPTransport(mcpServer *server.MCPServer, toolBelt *tool.Belt, logger *zap.SugaredLogger, cfg config) error {
 	if cfg.BitriseToken != "" {
 		return fmt.Errorf("BITRISE_TOKEN cannot be provided in http transport mode")
+	}
+	if cfg.ExternalOAuthIssuer != "" && (cfg.OIDCTokenEndpoint == "" || cfg.ServerBaseURL == "") {
+		return fmt.Errorf("EXTERNAL_OAUTH_ISSUER requires OIDC_TOKEN_ENDPOINT and SERVER_BASE_URL to be set")
 	}
 
 	var exchanger *jwtExchanger
@@ -195,6 +240,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	httpServerOpts := []server.StreamableHTTPOption{
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
+			ctx = devenv.ContextWithHostedMode(ctx)
 			pat, err := extractPAT(r, exchanger)
 			if err != nil {
 				logger.Warnw("JWT→PAT exchange failed", "error", err)
@@ -202,10 +248,12 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
 			// server.WithToolFilter can use it to limit the tools listed.
-			enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
-			if enabledGroups != "" {
-				a := strings.Split(enabledGroups, ",")
-				ctx = bitrise.ContextWithEnabledGroups(ctx, a)
+			if enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups"); enabledGroups != "" {
+				ctx = bitrise.ContextWithEnabledGroups(ctx, splitGroups(enabledGroups))
+			}
+			// Default workspace for the Dev Environments tools.
+			if ws := r.Header.Get("x-bitrise-workspace-id"); ws != "" {
+				ctx = devenv.ContextWithWorkspace(ctx, ws)
 			}
 			return ctx
 		}),
@@ -220,6 +268,10 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 		httpServerOpts = append(httpServerOpts, server.WithProtectedResourceMetadata(protectedResourceCfg))
 		metadataURL = cfg.ServerBaseURL + server.WellKnownProtectedResourcePath
 	}
+	// PAT and the header workspace are already in context from the HTTP
+	// context func above; gate the Dev Environments tools per call.
+	server.WithToolHandlerMiddleware(workspaceGateMiddleware(toolBelt))(mcpServer)
+
 	mcpHandler := server.NewStreamableHTTPServer(mcpServer, httpServerOpts...)
 
 	type router interface {

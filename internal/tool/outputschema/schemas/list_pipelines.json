@@ -1,0 +1,456 @@
+{
+  "description": "Response of GET /apps/{app-slug}/pipelines (Bitrise API, HTTP 200). pull_request_id is omitted when 0; trigger_params is included only with verbose=true.",
+  "properties": {
+    "data": {
+      "items": {
+        "properties": {
+          "artifacts": {
+            "items": {
+              "properties": {
+                "artifact_type": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "version_code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "version_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "build_number": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "build_tool_invocations": {
+            "items": {
+              "properties": {
+                "invocation_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "tool": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "tool_version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "commit_hash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "commit_message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finished_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_on_hold": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_pipeline": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "local_config": {
+            "properties": {
+              "host": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "pull_request_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "pull_request_target_branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rebuildable": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "tag": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "trigger_params": {
+            "properties": {
+              "base_repository_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "branch": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "branch_dest": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "branch_dest_repo_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "branch_repo_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "commit_hash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "commit_message": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "commit_messages": {
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "commit_paths": {
+                "items": {
+                  "properties": {
+                    "added": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": [
+                        "array",
+                        "null"
+                      ]
+                    },
+                    "modified": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": [
+                        "array",
+                        "null"
+                      ]
+                    },
+                    "removed": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": [
+                        "array",
+                        "null"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "environments": {
+                "items": {
+                  "properties": {
+                    "is_expand": {},
+                    "key": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "value": {}
+                  },
+                  "type": "object"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "head_repository_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "machine_type_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "priority": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "pull_request_author": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_comment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_comment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_head_branch": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_id": {},
+              "pull_request_labels": {
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "pull_request_labels_added": {
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "pull_request_merge_branch": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_ready_state": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_repository_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pull_request_unverified_merge_branch": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "skip_git_status_report": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "stack": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "tag": {}
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "triggered_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "triggered_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "triggered_workflow": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "utility": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "paging": {
+      "description": "pagination",
+      "properties": {
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_item_limit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_item_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

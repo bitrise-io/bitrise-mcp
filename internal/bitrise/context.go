@@ -21,6 +21,13 @@ func patFromCtx(ctx context.Context) (string, error) {
 	return u, nil
 }
 
+// PATFromCtx returns the caller's raw Bitrise token from context, or "" when
+// none is attached. Callers must never log or persist the value.
+func PATFromCtx(ctx context.Context) string {
+	v, _ := ctx.Value(keyPAT).(string)
+	return v
+}
+
 func ContextWithPAT(ctx context.Context, s string) context.Context {
 	return context.WithValue(ctx, keyPAT, s)
 }

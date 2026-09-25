@@ -12,7 +12,7 @@ import (
 var SetInstallableArtifactPublicInstallPage = bitrise.Tool{
 	APIGroups: []string{"release-management"},
 	Definition: mcp.NewTool("set_installable_artifact_public_install_page",
-		mcp.WithDescription("Changes whether public install page should be available for the installable artifact or not."),
+		mcp.WithDescription("Enable or disable the Release Management public install page of an installable artifact (an over-the-air install link for real devices). Not a browser simulator preview: see bitrise_devenv_create_preview_link."),
 		mcp.WithString("connected_app_id",
 			mcp.Description("Identifier of the Release Management connected app for the installable artifact. This field is mandatory."),
 			mcp.Required(),

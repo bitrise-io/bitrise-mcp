@@ -1,0 +1,158 @@
+{
+  "description": "Response of GET /apps/{app-slug}/builds/{build-slug} (Bitrise API, HTTP 200). pull_request_id is omitted when 0; original_build_params is included only with verbose=true.",
+  "properties": {
+    "data": {
+      "properties": {
+        "abort_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "build_number": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "commit_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commit_message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "finished_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_on_hold": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "machine_type_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "original_build_params": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "pipeline_workflow_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_id": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pull_request_target_branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_view_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rebuildable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stack_identifier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "started_on_worker_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "status_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "triggered_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "triggered_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "triggered_workflow": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "utility": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

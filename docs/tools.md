@@ -2,11 +2,17 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, insights`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, insights, dev-environments, dev-environments-read-only`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
 By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
+
+The `dev-environments` group holds the Bitrise Dev Environments (RDE) tools and `dev-environments-read-only` its read-only subset, see [Dev Environments](#dev-environments). The RDE tools are deliberately not part of the shared `read-only` group, so a CI-only configuration such as `apps,builds,read-only` does not gain them; enabling just `dev-environments` keeps the tool list small when you only work with dev environments. `list_workspaces` belongs to both product areas.
+
+## Output schemas
+
+Every tool advertises an `outputSchema` (a JSON Schema of its result) and returns the result as `structuredContent` alongside the text content, so MCP clients and directories that rely on it (for example the OpenAI connector directory) can interpret results. The only exception is `bitrise_devenv_screenshot`, whose result is an image. Schemas of tools that pass an API response through are generated from the APIs' published OpenAPI documents (`internal/tool/outputschema/`); results that are plain text (a `bitrise.yml`, a guide, a status message) are returned as `{"content": "<text>"}`. Optional fields may be `null`.
 
 ## Tools
 
@@ -99,13 +105,12 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `limit` (optional): Max number of elements per page (default: 50)
 
 13. `trigger_bitrise_build`
-    - Trigger a new build/pipeline for a specified Bitrise app
+    - Trigger a Bitrise CI build or pipeline of an app (not Dev Environments: `bitrise_devenv_create` makes a VM, `bitrise_devenv_execute` runs a command in one)
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `branch` (optional): The branch to build (default: main)
       - `pipeline_id` (optional): The pipeline to build
       - `workflow_id` (optional): The workflow to build
-      - `pipeline_id` (optional): The pipeline to build
       - `commit_message` (optional): The commit message for the build
       - `commit_hash` (optional): The commit hash for the build
       - `stack` (optional): Stack to run the build on, overriding the workflow's `meta.bitrise.io.stack` for this build only (e.g. "osx-xcode-16.0.x")
@@ -315,7 +320,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
 ### Account
 
 45. `me`
-    - Get info from the currently authenticated user account
+    - Get the currently authenticated Bitrise user account (username, slug, email). One account covers every Bitrise product, including Dev Environments
 
 ### Release Management
 
@@ -377,7 +382,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
      - `workflow`: (Optional) Filter for a specific Bitrise CI workflow.
 
 51. `generate_installable_artifact_upload_url`
-   - Generates a signed upload URL for an installable artifact to be uploaded to Bitrise.
+   - Generates a signed upload URL for an installable artifact (an app build) to be uploaded to Bitrise Release Management; not for copying files into a Dev Environments session (`bitrise_devenv_upload`, local server only).
    - Arguments:
      - `connected_app_id`: Identifier of the Release Management connected app.
      - `installable_artifact_id`: An uuidv4 identifier for the installable artifact.
@@ -504,7 +509,7 @@ By default, all API groups are enabled. You can specify which groups to enable u
       - `step_ref`: Step reference formatted as `step_lib_source::step_id@version`. `step_id` and an exact `version` are required, `step_lib_source` is only necessary for custom step sources.
 
 67. `list_available_stacks`
-    - List available stacks with their machine configurations and version information. When a workspace_slug is provided, returns stacks available for that workspace including any custom stacks. When omitted, returns globally available stacks.
+    - List the stacks Bitrise CI builds run on, with their machine configurations and version information. Dev Environments has a separate catalog with different IDs: `bitrise_devenv_list_stacks`. When a workspace_slug is provided, returns stacks available for that workspace including any custom stacks. When omitted, returns globally available stacks.
     - Arguments:
       - `workspace_slug` (optional): Slug of the Bitrise workspace. When provided, lists stacks available for that workspace (including custom stacks). When omitted, lists globally available stacks.
 
@@ -658,9 +663,63 @@ Common arguments of every Insights tool:
      - `page` (optional): 1-based page (default: 1)
      - `per_page` (optional): Test cases per page, 1-100 (default: 20)
 
+### Dev Environments
+
+Bitrise Dev Environments (RDE) tools: create and manage remote development sessions from templates, run commands on them, transfer files and drive macOS GUIs. They all belong to the `dev-environments` API group (read-only ones also to `dev-environments-read-only`). Request arguments are snake_case; response fields (see each tool's output schema) are camelCase, e.g. `sshConnectionOpen`, `templateSnapshot`, `agentSessionStatus`.
+
+**Workspace:** session, template, warm-pool, stack and machine-type tools operate within one workspace, resolved in this order: a `workspace_id` argument on the call, then the `workspace_id` you last passed (remembered for about 12 hours per access token, per server instance), then `BITRISE_WORKSPACE_ID` (local stdio) or the `x-bitrise-workspace-id` header (remote), then auto-detection when you belong to exactly one workspace. `list_workspaces` lists your workspace IDs (slugs). With a Workspace API Token the workspace must be given explicitly, because discovery calls the main Bitrise API.
+
+**Hosted vs local:** `bitrise_devenv_upload` and `bitrise_devenv_download` move files between *your* machine and the session, so they are only available when the server runs locally (stdio); the remote server hides them. `bitrise_devenv_execute` works on both, but forwards your local SSH agent only when run locally.
+
+**Tokens:** a Workspace API Token (`bitwat_…`) can drive the Dev Environments tools but is rejected by the Bitrise API tools (`me`, `list_apps`, ...); use a Personal Access Token or OAuth for the full server.
+
+**Resources:** the server also serves the guides as MCP resources (`bitrise-devenv://guides/device-sessions`, `.../ios`, `.../android`, `bitrise-devenv://guides/macos-automation`); `bitrise_devenv_device_guide` returns the same text for clients that cannot read resources.
+
+| Tool | Description |
+|------|-------------|
+| `bitrise_devenv_list` | List sessions (own by default, or workspace-owned with `scope="workspace"`), filterable by `key=value` label selectors; own sessions by default, so `ownerId` needs no lookup |
+| `bitrise_devenv_get` | Get a session incl. status, machine info, device state and SSH/VNC details |
+| `bitrise_devenv_create` | Create a session from a template or from a stack + machine type, optionally booting an iOS simulator / Android emulator (`device_spec`), owned by you or the workspace, or claimed from a warm pool |
+| `bitrise_devenv_update` | Update a session's name, description, labels or auto-terminate settings |
+| `bitrise_devenv_restore` | Restore a terminated (or failed/drained) session |
+| `bitrise_devenv_terminate` | Stop a session's VM but keep it for a later restore |
+| `bitrise_devenv_delete` | Permanently delete a session in any state |
+| `bitrise_devenv_delete_terminated` | Delete all terminated sessions in the chosen scope |
+| `bitrise_devenv_compare_template` | Diff a session against the current version of its template |
+| `bitrise_devenv_list_session_notifications` | List a session's notifications (agent stopped, permission prompt, ...) with cursor-based polling |
+| `bitrise_devenv_list_templates` | List templates |
+| `bitrise_devenv_get_template` | Get a template incl. scripts, stack, variables, session inputs, feature flags and device spec |
+| `bitrise_devenv_create_template` | Create a template |
+| `bitrise_devenv_update_template` | Update a template |
+| `bitrise_devenv_delete_template` | Delete a template |
+| `bitrise_devenv_list_warm_pools` | List warm pools (pre-booted session inventories) |
+| `bitrise_devenv_get_warm_pool` | Get a warm pool with its live ready / warming / claimed counts |
+| `bitrise_devenv_create_warm_pool` | Create a warm pool from a template |
+| `bitrise_devenv_update_warm_pool` | Scale, rename or reconfigure a warm pool (`pool_size: 0` drains it) |
+| `bitrise_devenv_delete_warm_pool` | Delete a warm pool |
+| `bitrise_devenv_list_saved_inputs` | List saved inputs (personal credentials/values) |
+| `bitrise_devenv_get_saved_input` | Get a saved input |
+| `bitrise_devenv_create_saved_input` | Create a saved input |
+| `bitrise_devenv_update_saved_input` | Update a saved input |
+| `bitrise_devenv_delete_saved_input` | Delete a saved input |
+| `bitrise_devenv_list_stacks` | List the stacks a Dev Environments session or template can be provisioned on (a separate catalog from `list_available_stacks`) |
+| `bitrise_devenv_list_machine_types` | List the machine types for Dev Environments sessions and templates |
+| `bitrise_devenv_get_workspace_usage` | Active sessions and vCPU/memory totals, workspace-wide and per user |
+| `bitrise_devenv_execute` | Run a shell command on a running session over SSH; returns `exit_code`, `stdout`, `stderr` |
+| `bitrise_devenv_upload` | Upload local files/folders to a session (local server only) |
+| `bitrise_devenv_download` | Download files/folders from a session (local server only) |
+| `bitrise_devenv_screenshot` | Capture the session's macOS display (image result) |
+| `bitrise_devenv_click` | Click at coordinates on the display (macOS) |
+| `bitrise_devenv_type` | Type text as keyboard input (macOS) |
+| `bitrise_devenv_scroll` | Scroll at the current mouse position (macOS) |
+| `bitrise_devenv_mouse_drag` | Drag the mouse between two points (macOS) |
+| `bitrise_devenv_open_remote_access` | Open SSH/VNC remote access and get connection details |
+| `bitrise_devenv_create_preview_link` | Mint a shareable link that opens an app build on a live simulator/emulator in a browser |
+| `bitrise_devenv_device_guide` | Return a guide as markdown: `device-sessions`, `ios`, `android` or `macos-automation` (driving a macOS session's desktop from the shell instead of screenshots and clicks) |
+
 ## API Groups
 
-The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
+The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to. The `bitrise_devenv_*` tools (see [Dev Environments](#dev-environments)) are not listed: they all belong to `dev-environments`, and the read-only ones to `dev-environments-read-only` as well.
 
 | Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | insights |
 |------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|---|

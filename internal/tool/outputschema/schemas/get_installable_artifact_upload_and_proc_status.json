@@ -1,0 +1,24 @@
+{
+  "description": "Response of GET /installable-artifacts/{id}/status (Release Management API, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "installable_artifact_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

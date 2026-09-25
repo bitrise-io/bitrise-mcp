@@ -1,0 +1,24 @@
+{
+  "description": "Response of GET /updates/{id}/status (Release Management API - CodePush, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "update_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

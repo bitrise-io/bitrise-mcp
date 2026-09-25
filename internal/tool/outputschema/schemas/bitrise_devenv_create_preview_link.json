@@ -1,0 +1,35 @@
+{
+  "description": "Response of POST /v1/workspaces/{workspaceId}/preview-links (Bitrise Remote Dev Environments API, HTTP 200). CreatePreviewLinkResponse carries the minted link.",
+  "properties": {
+    "expiresAt": {
+      "description": "When the link expires.",
+      "format": "date-time",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "jti": {
+      "description": "The link's id, also embedded in the token.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "token": {
+      "description": "The signed link token (\"\u003cbase64url payload\u003e.\u003cbase64url signature\u003e\").",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "url": {
+      "description": "The shareable viewer URL — post this on the pull request or paste it into chat.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

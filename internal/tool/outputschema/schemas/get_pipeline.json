@@ -1,0 +1,434 @@
+{
+  "description": "Response of GET /apps/{app-slug}/pipelines/{pipeline-id} (Bitrise API, HTTP 200). trigger_params and attempts are included only with verbose=true; workflows[].startFailureReason is omitted when empty.",
+  "properties": {
+    "abort_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attempts": {
+      "items": {
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "number_in_pipeline_build_scope": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "triggered_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "current_attempt_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finished_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rebuildable": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "stages": {
+      "items": {
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workflows": {
+            "items": {
+              "properties": {
+                "credit_cost": {},
+                "depends_on": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                },
+                "external_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "finished_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "is_generator": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "startFailureReason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "started_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "started_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "aborted",
+        "failed",
+        "initializing",
+        "on_hold",
+        "running",
+        "succeeded",
+        "succeeded_with_abort",
+        null
+      ],
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "trigger_params": {
+      "properties": {
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch_dest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch_dest_repo_owner": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch_repo_owner": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commit_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commit_message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commit_messages": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "commit_paths": {
+          "items": {
+            "properties": {
+              "added": {
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "modified": {
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              },
+              "removed": {
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "environments": {
+          "items": {
+            "properties": {
+              "is_expand": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "value": {}
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "pull_request_author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_head_branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_merge_branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_repository_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pull_request_unverified_merge_branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "triggered_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "triggered_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "workflows": {
+      "items": {
+        "properties": {
+          "depends_on": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "external_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finished_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_generator": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startFailureReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

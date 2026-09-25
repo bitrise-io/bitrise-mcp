@@ -1,0 +1,66 @@
+{
+  "description": "Response of GET /v1/workspaces/{workspaceId}/sessions/{sessionId}/notifications (Bitrise Remote Dev Environments API, HTTP 200). ListSessionNotificationsResponse is the response for listing session notifications.",
+  "properties": {
+    "notifications": {
+      "description": "The notifications for the session.",
+      "items": {
+        "properties": {
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sessionId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "default": "SESSION_NOTIFICATION_TYPE_UNSPECIFIED",
+            "enum": [
+              "SESSION_NOTIFICATION_TYPE_UNSPECIFIED",
+              "SESSION_NOTIFICATION_TYPE_AGENT_STOP",
+              "SESSION_NOTIFICATION_TYPE_AGENT_PERMISSION_PROMPT",
+              "SESSION_NOTIFICATION_TYPE_AGENT_IDLE_PROMPT",
+              "SESSION_NOTIFICATION_TYPE_AGENT_AUTH_SUCCESS",
+              "SESSION_NOTIFICATION_TYPE_AGENT_ELICITATION_DIALOG",
+              "SESSION_NOTIFICATION_TYPE_AGENT_WORKING",
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

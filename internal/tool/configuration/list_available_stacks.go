@@ -12,11 +12,11 @@ import (
 var ListAvailableStacks = bitrise.Tool{
 	APIGroups: []string{"configuration", "read-only"},
 	Definition: mcp.NewTool("list_available_stacks",
-		mcp.WithDescription("List available stacks with their machine configurations and version information. When a workspace_slug is provided, returns stacks available for that workspace including any custom stacks. When omitted, returns globally available stacks."),
+		mcp.WithDescription("List the stacks Bitrise CI builds run on (the stack values for bitrise.yml, finish_bitrise_app and trigger_bitrise_build), with their machine configurations and version information. Dev Environments has a separate catalog with different IDs: for a session or template call bitrise_devenv_list_stacks instead, and never call both for one question. When a workspace_slug is provided, returns stacks available for that workspace including any custom stacks. When omitted, returns globally available stacks."),
 		mcp.WithString("workspace_slug",
 			mcp.Description("Slug of the Bitrise workspace. When provided, lists stacks available for that workspace (including custom stacks). When omitted, lists globally available stacks."),
 		),
-		mcp.WithTitleAnnotation("List Available Stacks"),
+		mcp.WithTitleAnnotation("List CI Build Stacks"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
 		mcp.WithOpenWorldHintAnnotation(true),

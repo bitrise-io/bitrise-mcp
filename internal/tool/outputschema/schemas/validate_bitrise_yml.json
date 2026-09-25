@@ -1,0 +1,26 @@
+{
+  "description": "Response of POST /validate-bitrise-yml (Bitrise API, HTTP 200).",
+  "properties": {
+    "errors": {
+      "description": "Validation errors",
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "warnings": {
+      "description": "Validation warnings",
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

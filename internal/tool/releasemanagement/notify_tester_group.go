@@ -12,7 +12,7 @@ import (
 var NotifyTesterGroup = bitrise.Tool{
 	APIGroups: []string{"release-management"},
 	Definition: mcp.NewTool("notify_tester_group",
-		mcp.WithDescription("Notifies an internal tester group about a new test build by email."),
+		mcp.WithDescription("Bitrise Release Management: emails an internal tester group about a new test build to install on their devices. Not a Dev Environments preview link (bitrise_devenv_create_preview_link)."),
 		mcp.WithString("connected_app_id",
 			mcp.Description("The uuidV4 identifier of the related Release Management connected app."),
 			mcp.Required(),

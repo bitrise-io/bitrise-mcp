@@ -84,7 +84,11 @@ Available API groups:
 - `release-management` - Release and distribution
 - `group-roles` - Role management
 - `account` - User account operations
-- `read-only` - Read-only operations
+- `configuration` - bitrise.yml validation, step search, CI stacks
+- `release-management-code-push` - CodePush
+- `insights` - Build and test analytics
+- `dev-environments` - Dev Environments (remote dev sessions); `dev-environments-read-only` for its read-only subset
+- `read-only` - Read-only operations of the Bitrise API tools
 
 By default, all groups are enabled. To customize, modify the Power configuration after installation.
 

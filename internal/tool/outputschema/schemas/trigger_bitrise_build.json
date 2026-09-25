@@ -1,0 +1,111 @@
+{
+  "description": "Response of POST /apps/{app-slug}/builds (Bitrise API, HTTP 201).",
+  "properties": {
+    "build_number": {
+      "description": "Deprecated",
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "build_slug": {
+      "description": "Deprecated",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "build_url": {
+      "description": "Deprecated",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "results": {
+      "items": {
+        "properties": {
+          "build_number": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "build_slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "build_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "triggered_pipeline": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "triggered_workflow": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "service": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "triggered_workflow": {
+      "description": "Deprecated",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

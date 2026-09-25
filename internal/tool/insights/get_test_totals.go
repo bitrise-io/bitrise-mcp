@@ -25,6 +25,7 @@ var GetTestTotals = bitrise.Tool{
 			buildFilterOptions("test runs from builds"),
 			[]mcp.ToolOption{testSuiteOption},
 			readOnlyAnnotations("Get Insights Test Totals"),
+			[]mcp.ToolOption{mcp.WithOutputSchema[insights.TestTotalsResponse]()},
 		)...,
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

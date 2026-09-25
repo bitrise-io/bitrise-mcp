@@ -14,7 +14,7 @@ import (
 var List = bitrise.Tool{
 	APIGroups: []string{"builds", "read-only"},
 	Definition: mcp.NewTool("list_builds",
-		mcp.WithDescription("List all the builds of a specified Bitrise app or all accessible builds."),
+		mcp.WithDescription("List Bitrise CI builds of an app, or all accessible builds. Not Dev Environments sessions (bitrise_devenv_list)."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 		),

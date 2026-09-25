@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.bitrise-io/bitrise-mcp",
   "title": "Bitrise",
-  "description": "Set up & manage mobile CI/CD on Bitrise: build, test, distribute iOS, Android, Flutter, RN apps.",
+  "description": "Bitrise for AI agents: mobile CI/CD, Release Management, Insights and remote Dev Environments.",
   "version": "",
   "remotes": [
     {
@@ -17,15 +17,20 @@
         },
         {
           "name": "x-bitrise-enabled-api-groups",
-          "description": "Comma-separated list of API groups to enable (e.g., 'apps,builds,workspaces'). Leave empty to enable all groups.",
+          "description": "Comma-separated list of API groups to enable (e.g., 'apps,builds,workspaces' or 'dev-environments'). Leave empty to enable all groups.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "x-bitrise-workspace-id",
+          "description": "Optional. Default Bitrise workspace ID (slug) for the Dev Environments tools. If unset, a workspace_id tool argument is used, or the workspace is auto-detected when you belong to exactly one.",
           "isRequired": false,
           "isSecret": false
         }
       ]
     }
   ],
-  "homepage": "https://github.com/bitrise-io/bitrise-mcp",
-  "license": "MIT",
+  "websiteUrl": "https://github.com/bitrise-io/bitrise-mcp",
   "repository": {
     "url": "https://github.com/bitrise-io/bitrise-mcp",
     "source": "github"

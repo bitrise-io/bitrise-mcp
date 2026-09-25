@@ -12,7 +12,7 @@ import (
 var Get = bitrise.Tool{
 	APIGroups: []string{"artifacts", "read-only"},
 	Definition: mcp.NewTool("get_artifact",
-		mcp.WithDescription("Get a specific build artifact."),
+		mcp.WithDescription("Get one Bitrise CI build artifact of a build, including its download URL. Not a file on a Dev Environments session (bitrise_devenv_download)."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),

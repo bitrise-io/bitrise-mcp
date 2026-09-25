@@ -1,0 +1,24 @@
+{
+  "description": "Response of POST /organizations/{org-slug}/members (Bitrise API, HTTP 201).",
+  "properties": {
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "username": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

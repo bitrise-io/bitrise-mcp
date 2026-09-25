@@ -12,7 +12,7 @@ import (
 var RegisterSSHKey = bitrise.Tool{
 	APIGroups: []string{"apps"},
 	Definition: mcp.NewTool("register_ssh_key",
-		mcp.WithDescription("Add an SSH-key to a specific app."),
+		mcp.WithDescription("Add an SSH key pair to a Bitrise CI app so CI can clone its repository. Not for Dev Environments sessions: their SSH access is provisioned automatically (bitrise_devenv_get / bitrise_devenv_open_remote_access) and a local SSH agent is forwarded by bitrise_devenv_execute."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),

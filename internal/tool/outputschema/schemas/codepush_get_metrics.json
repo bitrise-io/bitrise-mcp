@@ -1,0 +1,68 @@
+{
+  "description": "Response of GET /metrics (Release Management API - CodePush, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "cycle": {
+      "properties": {
+        "end": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "start": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "data_transfer": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "data_transfer_limit": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "monthly_active_users": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "monthly_active_users_limit": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "overage_enabled": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "storage": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "storage_limit": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

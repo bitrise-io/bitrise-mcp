@@ -11,7 +11,7 @@ import (
 var StepInputs = bitrise.Tool{
 	APIGroups: []string{"configuration", "read-only"},
 	Definition: mcp.NewTool("step_inputs",
-		mcp.WithDescription("List inputs of a step with their defaults, allowed values etc."),
+		mcp.WithDescription("List the inputs of a Bitrise CI step (for bitrise.yml) with their defaults and allowed values. Not Dev Environments saved inputs or template session inputs (bitrise_devenv_list_saved_inputs, bitrise_devenv_get_template)."),
 		mcp.WithString("step_ref",
 			// Step reference format: https://docs.bitrise.io/en/bitrise-ci/references/steps-reference/step-reference-id-format.html
 			mcp.Description("Step reference formatted as `step_lib_source::step_id@version`. `step_id` and an exact `version` are required, `step_lib_source` is only necessary for custom step sources."),
