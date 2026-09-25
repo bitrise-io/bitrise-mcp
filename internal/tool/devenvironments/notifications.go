@@ -51,10 +51,13 @@ Results are ordered by creation time (newest first by default). Supports cursor-
 		if v := request.GetString("created_after", ""); v != "" {
 			params["createdAfter"] = v
 		}
-		if v, ok := request.GetArguments()["limit"]; ok {
-			if num, ok := v.(float64); ok {
-				params["limit"] = strconv.Itoa(int(num))
+		if limit, ok, err := getOptionalInt(request, "limit"); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		} else if ok {
+			if limit < 1 || limit > 100 {
+				return mcp.NewToolResultError("limit must be between 1 and 100"), nil
 			}
+			params["limit"] = strconv.Itoa(limit)
 		}
 		if v := request.GetString("order", ""); v != "" {
 			params["order"] = "SORT_ORDER_" + v

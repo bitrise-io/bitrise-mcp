@@ -470,6 +470,7 @@ Prefer this over bitrise_devenv_terminate unless the user explicitly wants to re
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("delete session", err), nil
 		}
+		devenv.ForgetScreenResolution(sessionID)
 		if strings.TrimSpace(res) == "" || strings.TrimSpace(res) == "{}" {
 			// The API returns an empty body on success; say what happened so
 			// the model doesn't have to guess from a blank result.

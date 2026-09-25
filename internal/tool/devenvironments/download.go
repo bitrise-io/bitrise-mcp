@@ -135,6 +135,21 @@ const (
 	maxExtractedBytes int64 = 10 << 30
 )
 
+// withinDir reports whether path, with every symlink in it resolved, lies
+// under realDir (itself already symlink-free). It guards against a
+// pre-existing symlinked parent directory redirecting a write outside the
+// destination, which the lexical check in safeExtractTarget cannot see.
+func withinDir(realDir, path string) error {
+	real, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		return fmt.Errorf("resolve %q: %w", path, err)
+	}
+	if real != realDir && !strings.HasPrefix(real, realDir+string(filepath.Separator)) {
+		return fmt.Errorf("%q resolves outside the destination folder", path)
+	}
+	return nil
+}
+
 // safeExtractTarget returns the extraction path of an archive entry, or an
 // error when the entry would land outside destDir.
 func safeExtractTarget(destDir, name string) (string, error) {
@@ -154,6 +169,10 @@ func extractTarGz(data []byte, destDir string) error {
 		return fmt.Errorf("create destination: %w", err)
 	}
 	destDir, err := filepath.Abs(destDir)
+	if err != nil {
+		return fmt.Errorf("resolve destination: %w", err)
+	}
+	realDest, err := filepath.EvalSymlinks(destDir)
 	if err != nil {
 		return fmt.Errorf("resolve destination: %w", err)
 	}
@@ -184,9 +203,15 @@ func extractTarGz(data []byte, destDir string) error {
 			if err := os.MkdirAll(target, 0o755); err != nil {
 				return fmt.Errorf("create dir: %w", err)
 			}
+			if err := withinDir(realDest, target); err != nil {
+				return err
+			}
 		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return fmt.Errorf("create parent dir: %w", err)
+			}
+			if err := withinDir(realDest, filepath.Dir(target)); err != nil {
+				return err
 			}
 			if fi, err := os.Lstat(target); err == nil && fi.Mode()&os.ModeSymlink != 0 {
 				return fmt.Errorf("refusing to write through symlink %q", target)

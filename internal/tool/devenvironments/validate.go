@@ -2,6 +2,7 @@ package devenvironments
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/google/uuid"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -43,6 +44,9 @@ func getOptionalInt(request mcp.CallToolRequest, name string) (int, bool, error)
 	f, ok := val.(float64)
 	if !ok {
 		return 0, false, fmt.Errorf("%s must be a number", name)
+	}
+	if f != math.Trunc(f) {
+		return 0, false, fmt.Errorf("%s must be a whole number", name)
 	}
 	n := int(f)
 	if n < 0 {
