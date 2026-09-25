@@ -1,0 +1,581 @@
+{
+  "description": "Response of PATCH /v1/workspaces/{workspaceId}/sessions/{sessionId} (Bitrise Remote Dev Environments API, HTTP 200). UpdateSessionResponse is the response for updating a session.",
+  "properties": {
+    "session": {
+      "description": "The updated session.",
+      "properties": {
+        "agentSessionStatus": {
+          "default": "AGENT_SESSION_STATUS_UNSPECIFIED",
+          "enum": [
+            "AGENT_SESSION_STATUS_UNSPECIFIED",
+            "AGENT_SESSION_STATUS_WORKING",
+            "AGENT_SESSION_STATUS_WAITING_FOR_INPUT",
+            "AGENT_SESSION_STATUS_IDLE",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "agentSessionStatusUpdatedAt": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "aiConfigured": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "aiEnabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "aiPrompt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "autoTerminateAt": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "autoTerminateMinutes": {
+          "format": "int32",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "device": {
+          "properties": {
+            "appName": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "buildNumber": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "commitSha": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "deviceNotes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "installReason": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "installStatus": {
+              "default": "PREVIEW_INSTALL_STATUS_UNSPECIFIED",
+              "enum": [
+                "PREVIEW_INSTALL_STATUS_UNSPECIFIED",
+                "PREVIEW_INSTALL_STATUS_PENDING",
+                "PREVIEW_INSTALL_STATUS_RUNNING",
+                "PREVIEW_INSTALL_STATUS_OK",
+                "PREVIEW_INSTALL_STATUS_FAILED",
+                null
+              ],
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "pageUrl": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "spec": {
+              "properties": {
+                "coldBoot": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "cores": {
+                  "format": "int64",
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "deviceModel": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "osVersion": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "platform": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "ramMb": {
+                  "format": "int64",
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "systemImage": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "state": {
+              "default": "PREVIEW_DEVICE_STATE_UNSPECIFIED",
+              "enum": [
+                "PREVIEW_DEVICE_STATE_UNSPECIFIED",
+                "PREVIEW_DEVICE_STATE_BOOTING",
+                "PREVIEW_DEVICE_STATE_READY",
+                "PREVIEW_DEVICE_STATE_FAILED",
+                null
+              ],
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ownerId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ownerType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "persistentDiskStatus": {
+          "default": "PERSISTENT_DISK_STATUS_UNSPECIFIED",
+          "enum": [
+            "PERSISTENT_DISK_STATUS_UNSPECIFIED",
+            "PERSISTENT_DISK_STATUS_AVAILABLE",
+            "PERSISTENT_DISK_STATUS_UNAVAILABLE_SOON",
+            "PERSISTENT_DISK_STATUS_UNAVAILABLE",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sshAddress": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sshConnectionOpen": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "sshPassword": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "default": "SESSION_STATUS_UNSPECIFIED",
+          "enum": [
+            "SESSION_STATUS_UNSPECIFIED",
+            "SESSION_STATUS_PENDING",
+            "SESSION_STATUS_STARTING",
+            "SESSION_STATUS_RUNNING",
+            "SESSION_STATUS_TERMINATING",
+            "SESSION_STATUS_FAILED",
+            "SESSION_STATUS_TERMINATED",
+            "SESSION_STATUS_DRAINING",
+            "SESSION_STATUS_DRAINED",
+            "SESSION_STATUS_UNKNOWN",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "templateDeleted": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "templateId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "templateOutdated": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "templateSnapshot": {
+          "properties": {
+            "androidEmulator": {
+              "properties": {
+                "coldBoot": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "cores": {
+                  "format": "int64",
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "deviceProfile": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "ramMb": {
+                  "format": "int64",
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "systemImage": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "androidEmulatorEnabled": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "featureFlags": {
+              "items": {
+                "properties": {
+                  "enabled": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "hasStartupScript": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "hasWarmupScript": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "image": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "machineType": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "servicePorts": {
+              "items": {
+                "properties": {
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "localPort": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "port": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "sortOrder": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "sessionInputs": {
+              "items": {
+                "properties": {
+                  "exposeAsEnvVar": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "isSecret": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "key": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "value": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "stackId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "templateName": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "updatedAt": {
+              "format": "date-time",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "workingDirectory": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "workspaceLinks": {
+              "items": {
+                "properties": {
+                  "folderPath": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "label": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "sortOrder": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vncAddress": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vncPassword": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vncUsername": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "warmPoolId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "warmState": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

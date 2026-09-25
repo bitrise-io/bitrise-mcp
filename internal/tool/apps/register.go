@@ -11,7 +11,7 @@ import (
 var Register = bitrise.Tool{
 	APIGroups: []string{"apps"},
 	Definition: mcp.NewTool("register_app",
-		mcp.WithDescription("Add a new app to Bitrise. After this app should be finished on order to be registered completely on Bitrise (via the finish_bitrise_app tool). Before doing this step, try understanding the repository details from the repository URL. This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup. The first step creates a new app in Bitrise, and the second step configures it with the necessary settings. If the user has multiple workspaces, always prompt the user to choose which one you should use. Don't prompt the user for finishing the app, just do it automatically."),
+		mcp.WithDescription("Add a new app to Bitrise. After this app should be finished on order to be registered completely on Bitrise (via the finish_bitrise_app tool). Before doing this step, try understanding the repository details from the repository URL. This is a two-step process. First, you register the app with the Bitrise API, and then you finish the setup. The first step creates a new app in Bitrise, and the second step configures it with the necessary settings. The workspace (organization_slug) must be chosen by the user when they belong to several."),
 		mcp.WithString("repo_url",
 			mcp.Description("Repository URL"),
 			mcp.Required(),

@@ -1,0 +1,148 @@
+{
+  "description": "Response of GET /apps (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "items": {
+        "properties": {
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_disabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_github_checks_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_public": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "owner": {
+            "properties": {
+              "account_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "slug": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "project_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "project_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo_owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo_slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "paging": {
+      "description": "pagination",
+      "properties": {
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_item_limit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_item_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

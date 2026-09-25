@@ -1,0 +1,18 @@
+{
+  "description": "Response of POST /apps/register (Bitrise API, HTTP 200).",
+  "properties": {
+    "slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

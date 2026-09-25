@@ -1,0 +1,122 @@
+{
+  "description": "Response of POST / (Release Management API, HTTP 201). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "app_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "current_user_release_management_admin": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "errors": {
+      "items": {
+        "properties": {
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "framework": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "icon_id": {
+      "description": "Only null appears in the published examples."
+    },
+    "icon_url": {
+      "description": "Only null appears in the published examples."
+    },
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latest_build_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latest_build_version_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latest_version": {
+      "description": "Only null appears in the published examples."
+    },
+    "latest_version_date": {
+      "description": "Only null appears in the published examples."
+    },
+    "license": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "platform": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "store_app_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "store_connected": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "store_credential_id": {
+      "description": "Only null appears in the published examples."
+    },
+    "workspace_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

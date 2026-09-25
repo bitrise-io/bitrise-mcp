@@ -1,0 +1,18 @@
+{
+  "description": "Response of POST /organizations/{org-slug}/groups (Bitrise API, HTTP 201).",
+  "properties": {
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

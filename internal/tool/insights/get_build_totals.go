@@ -18,6 +18,7 @@ var GetBuildTotals = bitrise.Tool{
 			scopeOptions(),
 			buildFilterOptions("builds"),
 			readOnlyAnnotations("Get Insights Build Totals"),
+			[]mcp.ToolOption{mcp.WithOutputSchema[insights.BuildTotalsResponse]()},
 		)...,
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

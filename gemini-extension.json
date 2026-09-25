@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"mcpServers": {
 		"bitrise": {
-			"description": "Set up & manage mobile CI/CD on Bitrise: build, test, distribute iOS, Android, Flutter, RN apps.",
+			"description": "Bitrise for AI agents: mobile CI/CD, Release Management, Insights and remote Dev Environments.",
 			"httpUrl": "https://mcp.bitrise.io"
 		}
 	}

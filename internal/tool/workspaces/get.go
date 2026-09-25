@@ -12,7 +12,7 @@ import (
 var Get = bitrise.Tool{
 	APIGroups: []string{"workspaces", "read-only"},
 	Definition: mcp.NewTool("get_workspace",
-		mcp.WithDescription("Get details for one workspace"),
+		mcp.WithDescription("Get the profile of one Bitrise workspace (name, slug, plan). Not a usage report: see bitrise_devenv_get_workspace_usage (Dev Environments) or codepush_get_metrics (CodePush)."),
 		mcp.WithString("workspace_slug",
 			mcp.Description("Slug of the Bitrise workspace"),
 			mcp.Required(),

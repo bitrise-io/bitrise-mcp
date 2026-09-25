@@ -12,7 +12,7 @@ import (
 var Rebuild = bitrise.Tool{
 	APIGroups: []string{"pipelines"},
 	Definition: mcp.NewTool("rebuild_pipeline",
-		mcp.WithDescription("Rebuild a pipeline."),
+		mcp.WithDescription("Re-run a Bitrise CI pipeline. Not a Dev Environments session (bitrise_devenv_restore)."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),

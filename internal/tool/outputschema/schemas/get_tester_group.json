@@ -1,0 +1,67 @@
+{
+  "description": "Response of GET /tester-groups/{id} (Release Management API - Build Distributions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "auto_notify": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "enabled_notification_types": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notification_types": {
+      "properties": {
+        "email": {
+          "properties": {
+            "enabled": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "tester_count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

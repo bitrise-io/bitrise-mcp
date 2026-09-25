@@ -24,7 +24,7 @@ var Finish = bitrise.Tool{
 			mcp.DefaultString("other"),
 		),
 		mcp.WithString("stack_id",
-			mcp.Description("The stack ID to use for the app."),
+			mcp.Description("Bitrise CI stack ID for the app (from list_available_stacks). Not a Dev Environments stack."),
 			mcp.DefaultString("linux-docker-android-22.04"),
 			mcp.Required(),
 		),

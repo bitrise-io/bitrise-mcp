@@ -1,0 +1,53 @@
+{
+  "description": "Response of GET /potential-testers (Release Management API - Build Distributions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "items": {
+      "items": {
+        "properties": {
+          "already_member": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "has_app_access": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "total_count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

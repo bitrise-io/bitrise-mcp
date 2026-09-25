@@ -1,0 +1,15 @@
+{
+  "description": "Response of GET /apps/{app-slug}/build-workflows (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

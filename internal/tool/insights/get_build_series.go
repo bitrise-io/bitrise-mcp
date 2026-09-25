@@ -20,6 +20,7 @@ var GetBuildSeries = bitrise.Tool{
 			buildFilterOptions("builds"),
 			seriesOptions("workflow", "pipeline", "stage", "step"),
 			readOnlyAnnotations("Get Insights Build Series"),
+			[]mcp.ToolOption{mcp.WithOutputSchema[insights.BuildSeriesResponse]()},
 		)...,
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

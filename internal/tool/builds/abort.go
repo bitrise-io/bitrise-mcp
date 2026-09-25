@@ -12,7 +12,7 @@ import (
 var Abort = bitrise.Tool{
 	APIGroups: []string{"builds"},
 	Definition: mcp.NewTool("abort_build",
-		mcp.WithDescription("Abort a specific build."),
+		mcp.WithDescription("Abort a running Bitrise CI build (final; it cannot be resumed). To stop a Dev Environments session use bitrise_devenv_terminate (keeps it) or bitrise_devenv_delete."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),

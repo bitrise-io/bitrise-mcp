@@ -1,0 +1,29 @@
+{
+  "description": "Response of GET /organizations/{org-slug}/groups (Bitrise API, HTTP 201).",
+  "properties": {
+    "items": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "type": "object"
+}

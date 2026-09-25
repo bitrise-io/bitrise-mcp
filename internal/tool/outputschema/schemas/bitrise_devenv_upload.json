@@ -1,0 +1,10 @@
+{
+  "description": "A status message confirming the upload and where the files were extracted on the session.",
+  "properties": {
+    "content": {
+      "description": "The text result of the tool.",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

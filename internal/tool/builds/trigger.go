@@ -12,7 +12,7 @@ import (
 var Trigger = bitrise.Tool{
 	APIGroups: []string{"builds"},
 	Definition: mcp.NewTool("trigger_bitrise_build",
-		mcp.WithDescription("Trigger a new build/pipeline for a specified Bitrise app"),
+		mcp.WithDescription("Trigger a Bitrise CI build or pipeline of an app. Not Dev Environments: bitrise_devenv_create makes an interactive VM and bitrise_devenv_execute runs a command in one."),
 		mcp.WithString("app_slug",
 			mcp.Description(`Identifier of the Bitrise app (e.g., "d8db74e2675d54c4" or "8eb495d0-f653-4eed-910b-8d6b56cc0ec7")`),
 			mcp.Required(),
@@ -34,7 +34,7 @@ var Trigger = bitrise.Tool{
 			mcp.Description("The commit hash for the build"),
 		),
 		mcp.WithString("stack",
-			mcp.Description("Stack to run the build on, overriding the workflow's meta.bitrise.io.stack for this build only (e.g. \"osx-xcode-16.0.x\"). Undocumented by the Bitrise API reference but honored by the trigger endpoint."),
+			mcp.Description("Bitrise CI stack (from list_available_stacks; not a Dev Environments stack_id) to run the build on, overriding the workflow's meta.bitrise.io.stack for this build only (e.g. \"osx-xcode-16.0.x\"). Undocumented by the Bitrise API reference but honored by the trigger endpoint."),
 		),
 		mcp.WithArray("environments",
 			mcp.Description(`Custom environment variables for the build.`),

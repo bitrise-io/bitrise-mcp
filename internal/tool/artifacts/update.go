@@ -12,7 +12,7 @@ import (
 var Update = bitrise.Tool{
 	APIGroups: []string{"artifacts"},
 	Definition: mcp.NewTool("update_artifact",
-		mcp.WithDescription("Update a build artifact."),
+		mcp.WithDescription("Update a Bitrise CI build artifact, e.g. enable its public install page (is_public_page_enabled). Not a Dev Environments preview link (bitrise_devenv_create_preview_link)."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),

@@ -1,0 +1,12 @@
+{
+  "description": "Response of PATCH /apps/{app-slug} (Bitrise API, HTTP 200).",
+  "properties": {
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}
