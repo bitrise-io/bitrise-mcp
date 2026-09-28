@@ -1,0 +1,15 @@
+{
+  "description": "Response of GET /apps/{app-slug}/roles/{role-name} (Bitrise API, HTTP 200).",
+  "properties": {
+    "groups": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

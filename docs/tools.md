@@ -8,6 +8,10 @@ We recommend using the `release-management` API group separately to avoid any co
 
 By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
 
+## Output schemas
+
+Every tool advertises an `outputSchema` (a JSON Schema of its result) and returns the result as `structuredContent` alongside the text content, so MCP clients and directories that rely on it (for example the OpenAI connector directory) can interpret results. Schemas of tools that pass an API response through are generated from the APIs' published OpenAPI documents (`internal/tool/outputschema/`); results that are plain text (a `bitrise.yml`, a guide, a status message) are returned as `{"content": "<text>"}`. Optional fields may be `null`.
+
 ## Tools
 
 ### Apps

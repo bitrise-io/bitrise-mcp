@@ -1,0 +1,26 @@
+{
+  "description": "Response of POST /tester-groups/{id}/add-testers (Release Management API - Build Distributions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "errors": {
+      "properties": {
+        "invalid-slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tester4example.com": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/configuration"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/insights"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/outputschema"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/codepush"
@@ -138,8 +139,22 @@ func NewBelt() *Belt {
 		insights.GetTestSeries,
 		insights.ListFlakyTests,
 	}
-	belt := &Belt{tools: make(map[string]bitrise.Tool)}
+	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList))}
 	for _, tool := range toolList {
+		if _, dup := belt.tools[tool.Definition.Name]; dup {
+			panic("duplicate tool name: " + tool.Definition.Name)
+		}
+		// Every tool advertises the schema of its result (declared in code or
+		// generated from the API document) and, to honour it, returns the
+		// result as structuredContent too. Tools without a schema (image
+		// results) are served as they are.
+		if outputschema.Apply(&tool.Definition) {
+			tool.Handler = outputschema.WithStructuredContent(tool.Handler)
+		}
+		// Clients prefer the spec-level title over annotations.title.
+		if tool.Definition.Title == "" {
+			tool.Definition.Title = tool.Definition.Annotations.Title
+		}
 		belt.tools[tool.Definition.Name] = tool
 	}
 	return belt
@@ -149,6 +164,15 @@ func (b *Belt) RegisterAll(server *server.MCPServer) {
 	for _, tool := range b.tools {
 		server.AddTool(tool.Definition, tool.Handler)
 	}
+}
+
+// Tools returns every registered tool, in no particular order.
+func (b *Belt) Tools() []bitrise.Tool {
+	out := make([]bitrise.Tool, 0, len(b.tools))
+	for _, t := range b.tools {
+		out = append(out, t)
+	}
+	return out
 }
 
 func (b *Belt) ToolEnabled(name string, enabledGroups []string) bool {

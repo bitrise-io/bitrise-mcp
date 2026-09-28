@@ -1,0 +1,20 @@
+{
+  "description": "Response of GET /apps/{app-slug}/cache-items/{cache-item-id}/download (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "properties": {
+        "download_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

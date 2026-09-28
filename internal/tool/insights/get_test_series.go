@@ -21,6 +21,7 @@ var GetTestSeries = bitrise.Tool{
 			[]mcp.ToolOption{testSuiteOption},
 			seriesOptions("workflow", "pipeline", "stage", "branch", "test_suite"),
 			readOnlyAnnotations("Get Insights Test Series"),
+			[]mcp.ToolOption{mcp.WithOutputSchema[insights.TestSeriesResponse]()},
 		)...,
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

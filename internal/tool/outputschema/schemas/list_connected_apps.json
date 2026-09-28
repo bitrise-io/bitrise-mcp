@@ -1,0 +1,163 @@
+{
+  "description": "Response of GET / (Release Management API, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "counts": {
+      "properties": {
+        "total": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "with_basic_license": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "with_standard_license": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "items": {
+      "items": {
+        "properties": {
+          "app_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "current_user_release_management_admin": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "framework": {},
+          "icon_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "icon_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latest_build_version": {},
+          "latest_build_version_code": {},
+          "latest_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latest_version_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "license": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "project_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "project_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "store_app_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "store_connected": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "store_credential_id": {},
+          "workspace_slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "pagination": {
+      "properties": {
+        "current_page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "items_per_page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

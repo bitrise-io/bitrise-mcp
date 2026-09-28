@@ -1,0 +1,130 @@
+{
+  "description": "Step-level summary of a build: every workflow that ran with the status, timing and identity of each step. Not in the published API document; mirrors a live response.",
+  "properties": {
+    "cli_info": {
+      "description": "Bitrise CLI details of the run (verbose only).",
+      "type": "object"
+    },
+    "execution": {
+      "properties": {
+        "build_environment_setup": {
+          "properties": {
+            "finished_at": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "started_at": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "step_bundles": {
+          "additionalProperties": {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "with_groups": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "workflows": {
+          "items": {
+            "properties": {
+              "steps": {
+                "items": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "code": {
+                            "type": "integer"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "finished_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "source_code_url": {
+                      "type": "string"
+                    },
+                    "started_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "status_reason": {
+                      "type": "string"
+                    },
+                    "step_bundle_uuid": {
+                      "type": "string"
+                    },
+                    "step_id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "uuid": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "uuid": {
+                "type": "string"
+              },
+              "workflow_id": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "has_build_environment_setup_logs": {
+      "description": "verbose only",
+      "type": "boolean"
+    },
+    "is_log_archived": {
+      "description": "verbose only",
+      "type": "boolean"
+    }
+  },
+  "type": "object"
+}
