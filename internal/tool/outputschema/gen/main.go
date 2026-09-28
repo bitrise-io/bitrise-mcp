@@ -54,8 +54,14 @@ type mapping struct {
 	// Note is appended to the schema description.
 	Note string
 	// Add lists properties the tool handler adds to the response, keyed by
-	// the dotted path of the object they are added to ("" for the root).
+	// the dotted path of the object they are added to ("" for the root; a
+	// "[]" suffix steps into an array's items).
 	Add map[string]map[string]any
+	// Override replaces the schema of the property at a dotted path, for the
+	// places where the published document misdescribes a field (an example
+	// with placeholder strings for booleans, or example keys standing in for
+	// a dynamic map).
+	Override map[string]map[string]any
 }
 
 var mappings = []mapping{
@@ -76,7 +82,19 @@ var mappings = []mapping{
 	{Tool: "trigger_bitrise_build", Spec: "ci", Method: "post", Path: "/apps/{app-slug}/builds"},
 	{Tool: "list_builds", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds",
 		Drop: []string{"data[].credit_cost", "data[].commit_view_url", "data[].environment_prepare_finished_at", "data[].is_processed", "data[].is_status_sent", "data[].log_format"},
-		Note: "pull_request_id is omitted when 0; original_build_params and the full repository object are included only with verbose=true (otherwise repository is reduced to slug, title, repo_owner and repo_name, and dropped entirely when app_slug was given)."},
+		Note: "pull_request_id is omitted when 0; original_build_params and the full repository object are included only with verbose=true (otherwise repository is reduced to slug, title, repo_owner and repo_name, and dropped entirely when app_slug was given).",
+		Add: map[string]map[string]any{"data[]": {
+			"repository": map[string]any{
+				"type":        []any{"object", "null"},
+				"description": "The app the build belongs to. Reduced to slug, title, repo_owner and repo_name unless verbose=true (then the full app object); omitted when app_slug was given without verbose.",
+				"properties": map[string]any{
+					"slug":       map[string]any{"type": []any{"string", "null"}},
+					"title":      map[string]any{"type": []any{"string", "null"}},
+					"repo_owner": map[string]any{"type": []any{"string", "null"}},
+					"repo_name":  map[string]any{"type": []any{"string", "null"}},
+				},
+			},
+		}}},
 	{Tool: "get_build", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}",
 		Drop: []string{"data.credit_cost", "data.commit_view_url", "data.environment_prepare_finished_at", "data.is_processed", "data.is_status_sent", "data.log_format"},
 		Note: "pull_request_id is omitted when 0; original_build_params is included only with verbose=true."},
@@ -133,7 +151,12 @@ var mappings = []mapping{
 	{Tool: "list_build_distribution_version_test_builds", Spec: "rm-bd", Method: "get", Path: "/test-builds"},
 	{Tool: "create_tester_group", Spec: "rm-bd", Method: "post", Path: "/tester-groups"},
 	{Tool: "notify_tester_group", Spec: "rm-bd", Method: "post", Path: "/tester-groups/{id}/notify"},
-	{Tool: "add_testers_to_tester_group", Spec: "rm-bd", Method: "post", Path: "/tester-groups/{id}/add-testers"},
+	{Tool: "add_testers_to_tester_group", Spec: "rm-bd", Method: "post", Path: "/tester-groups/{id}/add-testers",
+		Override: map[string]map[string]any{"errors": {
+			"type":                 []any{"object", "null"},
+			"description":          "Testers that could not be added, keyed by the submitted tester slug or email, with the reason as the value.",
+			"additionalProperties": map[string]any{"type": []any{"string", "null"}},
+		}}},
 	{Tool: "update_tester_group", Spec: "rm-bd", Method: "put", Path: "/tester-groups/{id}"},
 	{Tool: "list_tester_groups", Spec: "rm-bd", Method: "get", Path: "/tester-groups"},
 	{Tool: "get_tester_group", Spec: "rm-bd", Method: "get", Path: "/tester-groups/{id}"},
@@ -146,8 +169,8 @@ var mappings = []mapping{
 	{Tool: "codepush_create_deployment", Spec: "rm-cp", Method: "post", Path: "/deployments"},
 	{Tool: "codepush_update_deployment", Spec: "rm-cp", Method: "patch", Path: "/deployments/{id}"},
 	{Tool: "codepush_delete_deployment", Spec: "rm-cp", Method: "delete", Path: "/deployments/{id}"},
-	{Tool: "codepush_promote_deployment", Spec: "rm-cp", Method: "post", Path: "/deployments/{id}/promote"},
-	{Tool: "codepush_rollback_deployment", Spec: "rm-cp", Method: "post", Path: "/deployments/{id}/rollback"},
+	{Tool: "codepush_promote_deployment", Spec: "rm-cp", Method: "post", Path: "/deployments/{id}/promote", Override: codePushUpdateFieldTypes},
+	{Tool: "codepush_rollback_deployment", Spec: "rm-cp", Method: "post", Path: "/deployments/{id}/rollback", Override: codePushUpdateFieldTypes},
 	{Tool: "codepush_list_updates", Spec: "rm-cp", Method: "get", Path: "/updates"},
 	{Tool: "codepush_get_update", Spec: "rm-cp", Method: "get", Path: "/updates/{id}"},
 	{Tool: "codepush_patch_update", Spec: "rm-cp", Method: "patch", Path: "/updates/{id}"},
@@ -189,6 +212,16 @@ var mappings = []mapping{
 	{Tool: "bitrise_devenv_mouse_drag", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/mouse-drag"},
 	{Tool: "bitrise_devenv_open_remote_access", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/open-remote-access"},
 	{Tool: "bitrise_devenv_create_preview_link", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/preview-links"},
+}
+
+// codePushUpdateFieldTypes corrects the CodePush update fields whose published
+// examples use placeholder strings ("false", "100") on the promote and
+// rollback responses; the update resource elsewhere in the same document
+// types them as booleans and an integer.
+var codePushUpdateFieldTypes = map[string]map[string]any{
+	"disabled":  {"type": []any{"boolean", "null"}},
+	"mandatory": {"type": []any{"boolean", "null"}},
+	"rollout":   {"type": []any{"integer", "null"}, "description": "Rollout percentage."},
 }
 
 // textEnvelope is the schema of a tool whose result is plain text: the tool
@@ -480,15 +513,9 @@ func schemaFor(specs map[string]map[string]any, m mapping) (map[string]any, erro
 		}
 	}
 	for path, props := range m.Add {
-		target := schema
-		if path != "" {
-			for _, seg := range strings.Split(path, ".") {
-				next, ok := target["properties"].(map[string]any)[seg].(map[string]any)
-				if !ok {
-					return nil, fmt.Errorf("add: property %q not found", seg)
-				}
-				target = next
-			}
+		target, err := objectAt(schema, path)
+		if err != nil {
+			return nil, fmt.Errorf("add %q: %w", path, err)
 		}
 		existing, _ := target["properties"].(map[string]any)
 		if existing == nil {
@@ -499,11 +526,53 @@ func schemaFor(specs map[string]map[string]any, m mapping) (map[string]any, erro
 			existing[name] = prop
 		}
 	}
+	for path, replacement := range m.Override {
+		parentPath, key := "", path
+		if i := strings.LastIndex(path, "."); i >= 0 {
+			parentPath, key = path[:i], path[i+1:]
+		}
+		parent, err := objectAt(schema, parentPath)
+		if err != nil {
+			return nil, fmt.Errorf("override %q: %w", path, err)
+		}
+		props, _ := parent["properties"].(map[string]any)
+		if _, ok := props[key]; !ok {
+			return nil, fmt.Errorf("override %q: property not found", path)
+		}
+		props[key] = replacement
+	}
 	if existing, _ := schema["description"].(string); existing != "" {
 		desc += " " + existing
 	}
 	schema["description"] = desc
 	return schema, nil
+}
+
+// objectAt descends schema along a dotted property path ("" is the root); a
+// "[]" suffix on a segment steps into that array's items.
+func objectAt(schema map[string]any, path string) (map[string]any, error) {
+	target := schema
+	if path == "" {
+		return target, nil
+	}
+	for _, seg := range strings.Split(path, ".") {
+		intoItems := strings.HasSuffix(seg, "[]")
+		seg = strings.TrimSuffix(seg, "[]")
+		props, _ := target["properties"].(map[string]any)
+		next, ok := props[seg].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("property %q not found", seg)
+		}
+		if intoItems {
+			items, ok := next["items"].(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("%q is not an array of objects", seg)
+			}
+			next = items
+		}
+		target = next
+	}
+	return target, nil
 }
 
 // envelope makes sure the schema describes a JSON object, mirroring how the

@@ -59,7 +59,7 @@
     },
     "disabled": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ]
     },
@@ -95,13 +95,14 @@
     },
     "mandatory": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ]
     },
     "rollout": {
+      "description": "Rollout percentage.",
       "type": [
-        "string",
+        "integer",
         "null"
       ]
     },
