@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
@@ -52,16 +51,16 @@ type Belt struct {
 	// multi-workspace user states it once instead of on every call.
 	lastWorkspace sync.Map
 	// callerWorkspace is the same memory keyed by a hash of the caller's
-	// access token. The hosted server runs the streamable HTTP transport
+	// access token, guarded by callerMu so the size bound is exact. The hosted server runs the streamable HTTP transport
 	// stateless, so every request is a fresh client session and lastWorkspace
 	// never repeats there; the token is the only thing that identifies the
 	// same caller across requests. Entries expire after callerWorkspaceTTL
 	// and are swept opportunistically so the map cannot grow without bound.
 	// The memory is per server instance: a replica that never saw the
 	// explicit value still asks. Scripts and CI should pass workspace_id.
-	callerWorkspace sync.Map
-	callerSweeps    atomic.Uint32
-	callerCount     atomic.Int64
+	callerMu        sync.Mutex
+	callerWorkspace map[string]callerWorkspaceEntry
+	callerSweeps    uint32
 }
 
 // callerWorkspaceTTL bounds how long a caller's last explicit workspace_id is
@@ -85,6 +84,7 @@ const workspaceIDParamDesc = "Workspace ID (slug) to operate in; list_workspaces
 // NewBelt creates a new tool belt with all tools registered.
 func NewBelt() *Belt {
 	b := &Belt{
+		callerWorkspace: map[string]callerWorkspaceEntry{},
 		tools: []bitrise.Tool{
 			// Sessions
 			ListSessions,
@@ -334,26 +334,27 @@ func callerKey(ctx context.Context) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// rememberCallerWorkspace stores ws for callerKey (no-op for an empty key) and
-// every callerSweepEvery stores drops entries older than callerWorkspaceTTL.
+// rememberCallerWorkspace stores ws for callerKey (no-op for an empty key).
+// Every callerSweepEvery stores drops entries older than callerWorkspaceTTL,
+// and a full memory drops expired entries before admitting a new key; if it
+// is still full of live entries the new key is not remembered.
 func (b *Belt) rememberCallerWorkspace(callerKey, ws string) {
 	if callerKey == "" || ws == "" {
 		return
 	}
 	now := time.Now()
-	if _, known := b.callerWorkspace.Load(callerKey); !known {
-		if b.callerCount.Load() >= maxCallerWorkspaces {
-			b.sweepCallerWorkspaces(now)
-		}
-		if b.callerCount.Load() >= maxCallerWorkspaces {
-			// Still full of live entries: forget nothing, remember nothing.
+	b.callerMu.Lock()
+	defer b.callerMu.Unlock()
+	if _, known := b.callerWorkspace[callerKey]; !known && len(b.callerWorkspace) >= maxCallerWorkspaces {
+		b.sweepCallerWorkspacesLocked(now)
+		if len(b.callerWorkspace) >= maxCallerWorkspaces {
 			return
 		}
-		b.callerCount.Add(1)
 	}
-	b.callerWorkspace.Store(callerKey, callerWorkspaceEntry{workspace: ws, storedAt: now})
-	if b.callerSweeps.Add(1)%callerSweepEvery == 0 {
-		b.sweepCallerWorkspaces(now)
+	b.callerWorkspace[callerKey] = callerWorkspaceEntry{workspace: ws, storedAt: now}
+	b.callerSweeps++
+	if b.callerSweeps%callerSweepEvery == 0 {
+		b.sweepCallerWorkspacesLocked(now)
 	}
 }
 
@@ -363,14 +364,14 @@ func (b *Belt) callerWorkspaceFor(callerKey string, now time.Time) string {
 	if callerKey == "" {
 		return ""
 	}
-	v, ok := b.callerWorkspace.Load(callerKey)
+	b.callerMu.Lock()
+	defer b.callerMu.Unlock()
+	e, ok := b.callerWorkspace[callerKey]
 	if !ok {
 		return ""
 	}
-	e, _ := v.(callerWorkspaceEntry)
 	if now.Sub(e.storedAt) > callerWorkspaceTTL {
-		b.callerWorkspace.Delete(callerKey)
-		b.callerCount.Add(-1)
+		delete(b.callerWorkspace, callerKey)
 		return ""
 	}
 	return e.workspace
@@ -379,13 +380,18 @@ func (b *Belt) callerWorkspaceFor(callerKey string, now time.Time) string {
 // sweepCallerWorkspaces drops every remembered caller workspace older than
 // callerWorkspaceTTL at now.
 func (b *Belt) sweepCallerWorkspaces(now time.Time) {
-	b.callerWorkspace.Range(func(k, v any) bool {
-		if e, ok := v.(callerWorkspaceEntry); !ok || now.Sub(e.storedAt) > callerWorkspaceTTL {
-			b.callerWorkspace.Delete(k)
-			b.callerCount.Add(-1)
+	b.callerMu.Lock()
+	defer b.callerMu.Unlock()
+	b.sweepCallerWorkspacesLocked(now)
+}
+
+// sweepCallerWorkspacesLocked is sweepCallerWorkspaces with callerMu held.
+func (b *Belt) sweepCallerWorkspacesLocked(now time.Time) {
+	for k, e := range b.callerWorkspace {
+		if now.Sub(e.storedAt) > callerWorkspaceTTL {
+			delete(b.callerWorkspace, k)
 		}
-		return true
-	})
+	}
 }
 
 // clientSessionKey identifies the MCP client session a call belongs to, or ""

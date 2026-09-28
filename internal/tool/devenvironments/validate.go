@@ -33,6 +33,37 @@ func optionalUUID(request mcp.CallToolRequest, name string) (string, error) {
 	return value, nil
 }
 
+// requireInt extracts a required whole-number parameter (a screen coordinate or
+// size); a missing, non-numeric or fractional value is an error, so a
+// schema-valid call is never silently moved to a different pixel.
+func requireInt(request mcp.CallToolRequest, name string) (int, error) {
+	val, ok := request.GetArguments()[name]
+	if !ok {
+		return 0, fmt.Errorf("%s is required", name)
+	}
+	f, ok := val.(float64)
+	if !ok {
+		return 0, fmt.Errorf("%s must be a number", name)
+	}
+	if f != math.Trunc(f) {
+		return 0, fmt.Errorf("%s must be a whole number", name)
+	}
+	return int(f), nil
+}
+
+// requireInts is requireInt for four parameters at once.
+func requireInts(request mcp.CallToolRequest, a, b, c, d string) (int, int, int, int, error) {
+	var out [4]int
+	for i, name := range []string{a, b, c, d} {
+		v, err := requireInt(request, name)
+		if err != nil {
+			return 0, 0, 0, 0, err
+		}
+		out[i] = v
+	}
+	return out[0], out[1], out[2], out[3], nil
+}
+
 // getOptionalInt extracts an optional numeric parameter as an int.
 // Returns (value, true, nil) if present and valid, (0, false, nil) if absent,
 // or (0, false, error) if the value is not a valid number or is negative.

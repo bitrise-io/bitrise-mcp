@@ -41,6 +41,7 @@ Device preview is enabled per workspace and per platform. PermissionDenied means
 			mcp.Description("Serve the link's opens from this workspace-owned warm pool (UUID, from bitrise_devenv_list_warm_pools) whose configuration boots a device. When set, omit device_spec, stack_id and machine_type — the pool fixes them (stack_id / machine_type are rejected alongside it; device_spec only if it differs from the pool's). Sessions the link spawns are owned by the workspace."),
 		),
 		mcp.WithObject("artifact",
+			mcp.Required(),
 			mcp.Description(`The app build installed on every device this link opens (required — a preview link without an app has nothing to preview). url is an absolute http(s) URL fetched by anonymous GET; a presigned URL is fine and is never shown to viewers. iOS: a zipped simulator .app. Android: an .apk. app_name / build_number / commit_sha are display metadata shown on the viewer page — fill them in when you know them, so the reviewer can see which build they are looking at.`),
 			mcp.Properties(map[string]any{
 				"url":          map[string]any{"type": "string", "description": "absolute http(s) download URL of the simulator/emulator app build"},

@@ -72,10 +72,60 @@ type wsCacheEntry struct {
 	expiresAt time.Time
 }
 
-var (
-	workspaceCache    sync.Map // wsCacheKey(pat) -> wsCacheEntry
-	workspaceCacheTTL = 5 * time.Minute
+// The sole-workspace cache is process-global and keyed by token hash. Entries
+// expire after workspaceCacheTTL; expired entries are swept on every
+// workspaceCacheSweepEvery stores and whenever the cache is full, and a cache
+// that is still full of live entries admits no new key, so it cannot grow with
+// the lifetime number of users of a hosted server.
+const (
+	workspaceCacheTTL        = 5 * time.Minute
+	workspaceCacheMaxEntries = 10000
+	workspaceCacheSweepEvery = 256
 )
+
+var (
+	workspaceCacheMu     sync.Mutex
+	workspaceCache       = map[string]wsCacheEntry{} // wsCacheKey(pat) -> entry
+	workspaceCacheStores uint32
+)
+
+func cachedSoleWorkspace(key string, now time.Time) (string, bool) {
+	workspaceCacheMu.Lock()
+	defer workspaceCacheMu.Unlock()
+	e, ok := workspaceCache[key]
+	if !ok {
+		return "", false
+	}
+	if !now.Before(e.expiresAt) {
+		delete(workspaceCache, key)
+		return "", false
+	}
+	return e.slug, true
+}
+
+func storeSoleWorkspace(key, slug string, now time.Time) {
+	workspaceCacheMu.Lock()
+	defer workspaceCacheMu.Unlock()
+	if _, known := workspaceCache[key]; !known && len(workspaceCache) >= workspaceCacheMaxEntries {
+		sweepWorkspaceCacheLocked(now)
+		if len(workspaceCache) >= workspaceCacheMaxEntries {
+			return
+		}
+	}
+	workspaceCache[key] = wsCacheEntry{slug: slug, expiresAt: now.Add(workspaceCacheTTL)}
+	workspaceCacheStores++
+	if workspaceCacheStores%workspaceCacheSweepEvery == 0 {
+		sweepWorkspaceCacheLocked(now)
+	}
+}
+
+func sweepWorkspaceCacheLocked(now time.Time) {
+	for k, e := range workspaceCache {
+		if !now.Before(e.expiresAt) {
+			delete(workspaceCache, k)
+		}
+	}
+}
 
 // ResolveSoleWorkspace returns the slug of the user's only workspace,
 // auto-detecting it via GET /organizations. The result is cached per PAT for a
@@ -89,12 +139,8 @@ func ResolveSoleWorkspace(ctx context.Context) (string, error) {
 	pat := bitrise.PATFromCtx(ctx)
 	key := wsCacheKey(pat)
 	if pat != "" {
-		if v, ok := workspaceCache.Load(key); ok {
-			entry := v.(wsCacheEntry) //nolint:forcetypeassert
-			if time.Now().Before(entry.expiresAt) {
-				return entry.slug, nil
-			}
-			workspaceCache.Delete(key)
+		if slug, ok := cachedSoleWorkspace(key, time.Now()); ok {
+			return slug, nil
 		}
 	}
 
@@ -107,7 +153,7 @@ func ResolveSoleWorkspace(ctx context.Context) (string, error) {
 		return "", err
 	}
 	if pat != "" {
-		workspaceCache.Store(key, wsCacheEntry{slug: ws.Slug, expiresAt: time.Now().Add(workspaceCacheTTL)})
+		storeSoleWorkspace(key, ws.Slug, time.Now())
 	}
 	return ws.Slug, nil
 }

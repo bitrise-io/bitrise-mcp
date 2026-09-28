@@ -46,10 +46,10 @@ coordinates also works.
 
 NOTE: This tool only works on macOS sessions.`),
 		mcp.WithString("session_id", mcp.Description("The unique identifier of the running session"), mcp.Required()),
-		mcp.WithNumber("x", mcp.Description("X coordinate in the screenshot view's coordinate space"), mcp.Required()),
-		mcp.WithNumber("y", mcp.Description("Y coordinate in the screenshot view's coordinate space"), mcp.Required()),
-		mcp.WithNumber("max_x", mcp.Description("Width of the screenshot view you reasoned about when picking x (e.g. the width of the image you're looking at)"), mcp.Required()),
-		mcp.WithNumber("max_y", mcp.Description("Height of the screenshot view you reasoned about when picking y (e.g. the height of the image you're looking at)"), mcp.Required()),
+		mcp.WithInteger("x", mcp.Description("X coordinate in the screenshot view's coordinate space"), mcp.Required()),
+		mcp.WithInteger("y", mcp.Description("Y coordinate in the screenshot view's coordinate space"), mcp.Required()),
+		mcp.WithInteger("max_x", mcp.Description("Width of the screenshot view you reasoned about when picking x (e.g. the width of the image you're looking at)"), mcp.Required()),
+		mcp.WithInteger("max_y", mcp.Description("Height of the screenshot view you reasoned about when picking y (e.g. the height of the image you're looking at)"), mcp.Required()),
 		mcp.WithString("button", mcp.Description("Mouse button: left (default), right, or middle"), mcp.Enum("left", "right", "middle"), mcp.DefaultString("left")),
 		mcp.WithBoolean("double_click", mcp.Description("Whether to perform a double-click (default: false)")),
 		mcp.WithDestructiveHintAnnotation(true),
@@ -60,10 +60,10 @@ NOTE: This tool only works on macOS sessions.`),
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		x := request.GetInt("x", 0)
-		y := request.GetInt("y", 0)
-		maxX := request.GetInt("max_x", 0)
-		maxY := request.GetInt("max_y", 0)
+		x, y, maxX, maxY, err := requireInts(request, "x", "y", "max_x", "max_y")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
 
 		realX, realY, errRes := rescaleToScreen(sessionID, x, y, maxX, maxY)
 		if errRes != nil {
@@ -138,7 +138,7 @@ Prefer scripted automation through bitrise_devenv_execute ("open", "osascript", 
 NOTE: This tool only works on macOS sessions.`),
 		mcp.WithString("session_id", mcp.Description("The unique identifier of the running session"), mcp.Required()),
 		mcp.WithString("direction", mcp.Description("Scroll direction"), mcp.Enum("up", "down"), mcp.Required()),
-		mcp.WithNumber("amount", mcp.Description("Number of lines to scroll (default: 3)"), mcp.DefaultNumber(3)),
+		mcp.WithInteger("amount", mcp.Description("Number of lines to scroll (default: 3)"), mcp.DefaultNumber(3)),
 		mcp.WithDestructiveHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -147,12 +147,19 @@ NOTE: This tool only works on macOS sessions.`),
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		amount, ok, err := getOptionalInt(request, "amount")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+		if !ok {
+			amount = 3
+		}
 		res, err := devenv.CallAPI(ctx, devenv.CallAPIParams{
 			Method: http.MethodPost,
 			Path:   devenv.WsPath(ctx, fmt.Sprintf("/sessions/%s/scroll", sessionID)),
 			Body: map[string]any{
 				"direction": request.GetString("direction", "down"),
-				"amount":    request.GetInt("amount", 3),
+				"amount":    amount,
 			},
 		})
 		if err != nil {
@@ -180,12 +187,12 @@ max_x=1920 and max_y=1080 with raw screen coordinates also works.
 
 NOTE: This tool only works on macOS sessions.`),
 		mcp.WithString("session_id", mcp.Description("The unique identifier of the running session"), mcp.Required()),
-		mcp.WithNumber("start_x", mcp.Description("Starting X coordinate in the screenshot view's coordinate space"), mcp.Required()),
-		mcp.WithNumber("start_y", mcp.Description("Starting Y coordinate in the screenshot view's coordinate space"), mcp.Required()),
-		mcp.WithNumber("end_x", mcp.Description("Ending X coordinate in the screenshot view's coordinate space"), mcp.Required()),
-		mcp.WithNumber("end_y", mcp.Description("Ending Y coordinate in the screenshot view's coordinate space"), mcp.Required()),
-		mcp.WithNumber("max_x", mcp.Description("Width of the screenshot view you reasoned about when picking the coordinates"), mcp.Required()),
-		mcp.WithNumber("max_y", mcp.Description("Height of the screenshot view you reasoned about when picking the coordinates"), mcp.Required()),
+		mcp.WithInteger("start_x", mcp.Description("Starting X coordinate in the screenshot view's coordinate space"), mcp.Required()),
+		mcp.WithInteger("start_y", mcp.Description("Starting Y coordinate in the screenshot view's coordinate space"), mcp.Required()),
+		mcp.WithInteger("end_x", mcp.Description("Ending X coordinate in the screenshot view's coordinate space"), mcp.Required()),
+		mcp.WithInteger("end_y", mcp.Description("Ending Y coordinate in the screenshot view's coordinate space"), mcp.Required()),
+		mcp.WithInteger("max_x", mcp.Description("Width of the screenshot view you reasoned about when picking the coordinates"), mcp.Required()),
+		mcp.WithInteger("max_y", mcp.Description("Height of the screenshot view you reasoned about when picking the coordinates"), mcp.Required()),
 		mcp.WithDestructiveHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -194,12 +201,14 @@ NOTE: This tool only works on macOS sessions.`),
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		startX := request.GetInt("start_x", 0)
-		startY := request.GetInt("start_y", 0)
-		endX := request.GetInt("end_x", 0)
-		endY := request.GetInt("end_y", 0)
-		maxX := request.GetInt("max_x", 0)
-		maxY := request.GetInt("max_y", 0)
+		startX, startY, endX, endY, err := requireInts(request, "start_x", "start_y", "end_x", "end_y")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+		maxX, maxY, _, _, err := requireInts(request, "max_x", "max_y", "max_x", "max_y")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
 
 		realStartX, realStartY, errRes := rescaleToScreen(sessionID, startX, startY, maxX, maxY)
 		if errRes != nil {

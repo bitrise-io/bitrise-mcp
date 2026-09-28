@@ -2,6 +2,7 @@ package devenvironments
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -244,29 +245,28 @@ func TestGateAndResolveWorkspace_RemembersParamPerCallerToken(t *testing.T) {
 	assert.Equal(t, "session-ws", devenv.WorkspaceFromCtx(gotCtx))
 
 	// The raw token is never used as the key.
-	b.callerWorkspace.Range(func(k, _ any) bool {
-		assert.NotContains(t, k.(string), "pat-")
-		assert.Len(t, k.(string), 64)
-		return true
-	})
+	for k := range callerEntries(b) {
+		assert.NotContains(t, k, "pat-")
+		assert.Len(t, k, 64)
+	}
 }
 
 func TestCallerWorkspaceExpiresAndSweeps(t *testing.T) {
 	b := NewBelt()
 	now := time.Now()
 	b.rememberCallerWorkspace("k-fresh", "ws-fresh")
-	b.callerWorkspace.Store("k-old", callerWorkspaceEntry{workspace: "ws-old", storedAt: now.Add(-callerWorkspaceTTL - time.Minute)})
+	putCallerEntry(b, "k-old", callerWorkspaceEntry{workspace: "ws-old", storedAt: now.Add(-callerWorkspaceTTL - time.Minute)})
 
 	assert.Equal(t, "ws-fresh", b.callerWorkspaceFor("k-fresh", now))
 	// Expired on read: dropped and not returned.
 	assert.Equal(t, "", b.callerWorkspaceFor("k-old", now))
-	_, still := b.callerWorkspace.Load("k-old")
+	_, still := callerEntries(b)["k-old"]
 	assert.False(t, still)
 
 	// The periodic sweep drops expired entries without a read.
-	b.callerWorkspace.Store("k-old2", callerWorkspaceEntry{workspace: "ws-old", storedAt: now.Add(-2 * callerWorkspaceTTL)})
+	putCallerEntry(b, "k-old2", callerWorkspaceEntry{workspace: "ws-old", storedAt: now.Add(-2 * callerWorkspaceTTL)})
 	b.sweepCallerWorkspaces(now)
-	_, still = b.callerWorkspace.Load("k-old2")
+	_, still = callerEntries(b)["k-old2"]
 	assert.False(t, still)
 	assert.Equal(t, "ws-fresh", b.callerWorkspaceFor("k-fresh", now))
 
@@ -275,4 +275,34 @@ func TestCallerWorkspaceExpiresAndSweeps(t *testing.T) {
 	b.rememberCallerWorkspace("k-empty", "")
 	assert.Equal(t, "", b.callerWorkspaceFor("", now))
 	assert.Equal(t, "", b.callerWorkspaceFor("k-empty", now))
+}
+
+// callerEntries snapshots the caller workspace memory.
+func callerEntries(b *Belt) map[string]callerWorkspaceEntry {
+	b.callerMu.Lock()
+	defer b.callerMu.Unlock()
+	out := make(map[string]callerWorkspaceEntry, len(b.callerWorkspace))
+	for k, v := range b.callerWorkspace {
+		out[k] = v
+	}
+	return out
+}
+
+// putCallerEntry writes an entry directly, bypassing the TTL bookkeeping.
+func putCallerEntry(b *Belt, key string, e callerWorkspaceEntry) {
+	b.callerMu.Lock()
+	defer b.callerMu.Unlock()
+	b.callerWorkspace[key] = e
+}
+
+// TestCallerWorkspaceIsBounded checks the memory never exceeds its cap.
+func TestCallerWorkspaceIsBounded(t *testing.T) {
+	b := NewBelt()
+	for i := 0; i < maxCallerWorkspaces+50; i++ {
+		b.rememberCallerWorkspace(fmt.Sprintf("k-%d", i), "ws")
+	}
+	assert.LessOrEqual(t, len(callerEntries(b)), maxCallerWorkspaces)
+	// Known keys are still updatable when the memory is full.
+	b.rememberCallerWorkspace("k-1", "ws-2")
+	assert.Equal(t, "ws-2", b.callerWorkspaceFor("k-1", time.Now()))
 }
