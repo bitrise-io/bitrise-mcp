@@ -177,7 +177,18 @@ func NewBelt() *Belt {
 		// (centralised here rather than repeated across ~40 definitions).
 		name := b.tools[i].Definition.Name
 		ann := &b.tools[i].Definition.Annotations
-		readOnly := ann.ReadOnlyHint != nil && *ann.ReadOnlyHint
+		// mcp-go fills all four hints with defaults, but normalise here so the
+		// wire format never depends on the library: every tool sends an
+		// explicit readOnlyHint/destructiveHint.
+		if ann.ReadOnlyHint == nil {
+			f := false
+			ann.ReadOnlyHint = &f
+		}
+		if ann.DestructiveHint == nil {
+			t := true
+			ann.DestructiveHint = &t
+		}
+		readOnly := *ann.ReadOnlyHint
 		groups := []string{APIGroup}
 		if readOnly {
 			groups = append(groups, ReadOnlyAPIGroup)

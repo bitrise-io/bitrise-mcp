@@ -2,7 +2,6 @@ package devenvironments
 
 import (
 	"archive/tar"
-	"bytes"
 	"compress/gzip"
 	"context"
 	"encoding/json"
@@ -73,14 +72,16 @@ Example: Upload a local project directory to the VM:
 			return mcp.NewToolResultError(fmt.Sprintf("parse start upload response: %v", err)), nil
 		}
 
-		// Step 2: Create tar.gz archive from local path
-		archive, err := createTarGz(sourcePath)
+		// Step 2: Create the tar.gz archive in a temporary file, so memory use
+		// does not grow with the size of the project being uploaded.
+		archivePath, err := createTarGz(sourcePath)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("create archive: %v", err)), nil
 		}
+		defer os.Remove(archivePath)
 
 		// Step 3: Upload to GCS via signed PUT URL
-		if err := uploadToGCS(ctx, startResp.SignedURL, archive); err != nil {
+		if err := uploadToGCS(ctx, startResp.SignedURL, archivePath); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("upload to cloud storage: %v", err)), nil
 		}
 
@@ -101,15 +102,27 @@ Example: Upload a local project directory to the VM:
 	},
 }
 
-func createTarGz(sourcePath string) ([]byte, error) {
-	var buf bytes.Buffer
-	gw := gzip.NewWriter(&buf)
-	tw := tar.NewWriter(gw)
-
+// createTarGz archives sourcePath into a temporary tar.gz file and returns
+// its path; the caller removes the file when done.
+func createTarGz(sourcePath string) (string, error) {
 	info, err := os.Stat(sourcePath)
 	if err != nil {
-		return nil, fmt.Errorf("stat source: %w", err)
+		return "", fmt.Errorf("stat source: %w", err)
 	}
+
+	tmp, err := os.CreateTemp("", "bitrise-devenv-upload-*.tar.gz")
+	if err != nil {
+		return "", fmt.Errorf("create temporary archive: %w", err)
+	}
+	archivePath := tmp.Name()
+	// Every error path removes the partial archive.
+	fail := func(err error) (string, error) {
+		_ = tmp.Close()
+		_ = os.Remove(archivePath)
+		return "", err
+	}
+	gw := gzip.NewWriter(tmp)
+	tw := tar.NewWriter(gw)
 
 	baseDir := filepath.Dir(sourcePath)
 	if info.IsDir() {
@@ -160,44 +173,57 @@ func createTarGz(sourcePath string) ([]byte, error) {
 
 	if info.IsDir() {
 		if err := filepath.WalkDir(sourcePath, walkFn); err != nil {
-			return nil, fmt.Errorf("walk directory: %w", err)
+			return fail(fmt.Errorf("walk directory: %w", err))
 		}
 	} else {
 		// Single file
 		header, err := tar.FileInfoHeader(info, "")
 		if err != nil {
-			return nil, fmt.Errorf("file info header: %w", err)
+			return fail(fmt.Errorf("file info header: %w", err))
 		}
 		clearTarOwner(header)
 		header.Name = filepath.Base(sourcePath)
 		if err := tw.WriteHeader(header); err != nil {
-			return nil, fmt.Errorf("write header: %w", err)
+			return fail(fmt.Errorf("write header: %w", err))
 		}
 		f, err := os.Open(sourcePath)
 		if err != nil {
-			return nil, fmt.Errorf("open file: %w", err)
+			return fail(fmt.Errorf("open file: %w", err))
 		}
 		defer f.Close()
 		if _, err := io.Copy(tw, f); err != nil {
-			return nil, fmt.Errorf("copy file: %w", err)
+			return fail(fmt.Errorf("copy file: %w", err))
 		}
 	}
 
 	if err := tw.Close(); err != nil {
-		return nil, fmt.Errorf("close tar: %w", err)
+		return fail(fmt.Errorf("close tar: %w", err))
 	}
 	if err := gw.Close(); err != nil {
-		return nil, fmt.Errorf("close gzip: %w", err)
+		return fail(fmt.Errorf("close gzip: %w", err))
 	}
-
-	return buf.Bytes(), nil
+	if err := tmp.Close(); err != nil {
+		return fail(fmt.Errorf("close temporary archive: %w", err))
+	}
+	return archivePath, nil
 }
 
-func uploadToGCS(ctx context.Context, signedURL string, data []byte) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, signedURL, bytes.NewReader(data))
+// uploadToGCS streams the archive file to the signed PUT URL.
+func uploadToGCS(ctx context.Context, signedURL, archivePath string) error {
+	f, err := os.Open(archivePath)
+	if err != nil {
+		return fmt.Errorf("open archive: %w", err)
+	}
+	defer f.Close()
+	fi, err := f.Stat()
+	if err != nil {
+		return fmt.Errorf("stat archive: %w", err)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, signedURL, f)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
+	req.ContentLength = fi.Size()
 	req.Header.Set("Content-Type", "application/gzip")
 
 	client := http.Client{Timeout: 10 * time.Minute}

@@ -2,11 +2,20 @@ package devenvironments
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/devenv"
 	"github.com/mark3labs/mcp-go/mcp"
+)
+
+// Documented limits of a preview link, enforced before the bearer link is
+// minted: a link lives at most 72 hours, and a device's idle window must be
+// long enough not to reap it mid-boot.
+const (
+	maxPreviewLinkTTLSeconds       = 72 * 60 * 60
+	minPreviewAutoTerminateMinutes = 10
 )
 
 // CreatePreviewLink mints a shareable device preview link for an app build.
@@ -114,11 +123,17 @@ Device preview is enabled per workspace and per platform. PermissionDenied means
 		if ttl, ok, err := getOptionalInt(request, "ttl_seconds"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		} else if ok {
+			if ttl < 1 || ttl > maxPreviewLinkTTLSeconds {
+				return mcp.NewToolResultError(fmt.Sprintf("ttl_seconds must be between 1 and %d (72 hours)", maxPreviewLinkTTLSeconds)), nil
+			}
 			body["ttl_seconds"] = ttl
 		}
 		if minutes, ok, err := getOptionalInt(request, "session_auto_terminate_minutes"); err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		} else if ok {
+			if minutes < minPreviewAutoTerminateMinutes {
+				return mcp.NewToolResultError(fmt.Sprintf("session_auto_terminate_minutes must be at least %d", minPreviewAutoTerminateMinutes)), nil
+			}
 			body["session_auto_terminate_minutes"] = minutes
 		}
 		if stackID != "" {

@@ -253,10 +253,14 @@ var UpdateTemplate = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		// String fields are forwarded when present, including an empty string:
+		// the backend's request fields carry presence, so "" clears a value
+		// (e.g. removes a stale warmup script) while an omitted field leaves it
+		// unchanged.
 		body := map[string]any{}
 		for _, key := range []string{"name", "description", "startup_script", "warmup_script", "stack_id", "machine_type", "working_directory"} {
-			if v := request.GetString(key, ""); v != "" {
-				body[key] = v
+			if _, present := request.GetArguments()[key]; present {
+				body[key] = request.GetString(key, "")
 			}
 		}
 		// Array fields: auto-set the corresponding update_* flag when the array is provided.
