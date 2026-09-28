@@ -88,6 +88,38 @@
               "null"
             ]
           },
+          "repository": {
+            "properties": {
+              "repo_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "repo_owner": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "slug": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
           "slug": {
             "type": [
               "string",
