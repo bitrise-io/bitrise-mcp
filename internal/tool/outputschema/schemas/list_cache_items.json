@@ -1,0 +1,97 @@
+{
+  "description": "Response of GET /apps/{app-slug}/cache-items (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "items": {
+        "properties": {
+          "app_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "archive_filename": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "archive_size": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cache_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_used_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "storage_provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "paging": {
+      "properties": {
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_item_limit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_item_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

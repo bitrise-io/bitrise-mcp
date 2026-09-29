@@ -1,0 +1,10 @@
+{
+  "description": "Response of POST /groups/{group-slug}/add_member (Bitrise API, HTTP 201). The tool calls PUT /groups/{group-slug}/members/{user-slug}, which is not in the published API document; this is the schema of the equivalent add_member operation. The API returns an empty body on success, so content is empty.",
+  "properties": {
+    "content": {
+      "description": "The text result of the tool.",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

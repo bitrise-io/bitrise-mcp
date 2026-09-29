@@ -1,0 +1,35 @@
+{
+  "description": "Response of GET /organizations/{org-slug}/members (Bitrise API, HTTP 200).",
+  "properties": {
+    "items": {
+      "items": {
+        "properties": {
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "type": "object"
+}
