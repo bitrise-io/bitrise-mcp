@@ -1,0 +1,594 @@
+{
+  "description": "Response of GET /v1/workspaces/{workspaceId}/sessions/{sessionId}/template-diff (Bitrise Remote Dev Environments API, HTTP 200). CompareSessionTemplateResponse contains both the snapshot and current template configurations.",
+  "properties": {
+    "changedVariableKeys": {
+      "description": "Keys of template variables whose values differ between snapshot and current.",
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "current": {
+      "description": "Current template configuration (null if the template is deleted).",
+      "properties": {
+        "deviceSpec": {
+          "properties": {
+            "coldBoot": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "cores": {
+              "format": "int64",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "deviceModel": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "osVersion": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "platform": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ramMb": {
+              "format": "int64",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "systemImage": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "featureFlags": {
+          "items": {
+            "properties": {
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "enabled": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "machineType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "servicePorts": {
+          "items": {
+            "properties": {
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "localPort": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "port": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "sortOrder": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "sessionInputs": {
+          "items": {
+            "properties": {
+              "defaultValue": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "exposeAsEnvVar": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "isSecret": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "required": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stackId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startupScript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "templateName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "templateVariables": {
+          "items": {
+            "properties": {
+              "exposeAsEnvVar": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "isSecret": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "warmupScript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workingDirectory": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspaceLinks": {
+          "items": {
+            "properties": {
+              "folderPath": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sortOrder": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "snapshot": {
+      "description": "Template configuration from the session's snapshot (at creation time).",
+      "properties": {
+        "deviceSpec": {
+          "properties": {
+            "coldBoot": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "cores": {
+              "format": "int64",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "deviceModel": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "osVersion": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "platform": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ramMb": {
+              "format": "int64",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "systemImage": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "featureFlags": {
+          "items": {
+            "properties": {
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "enabled": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "machineType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "servicePorts": {
+          "items": {
+            "properties": {
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "localPort": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "port": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "sortOrder": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "sessionInputs": {
+          "items": {
+            "properties": {
+              "defaultValue": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "exposeAsEnvVar": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "isSecret": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "required": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stackId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startupScript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "templateName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "templateVariables": {
+          "items": {
+            "properties": {
+              "exposeAsEnvVar": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "isSecret": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "warmupScript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workingDirectory": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspaceLinks": {
+          "items": {
+            "properties": {
+              "folderPath": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sortOrder": {
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

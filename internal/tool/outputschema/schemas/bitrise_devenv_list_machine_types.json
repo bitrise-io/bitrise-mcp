@@ -1,0 +1,66 @@
+{
+  "description": "Response of GET /v1/workspaces/{workspaceId}/machine-types (Bitrise Remote Dev Environments API, HTTP 200). ListMachineTypesResponse is the response for listing machine types.",
+  "properties": {
+    "machineTypes": {
+      "description": "List of available machine types.",
+      "items": {
+        "properties": {
+          "clusterName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cpu": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isDefault": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "os": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ram": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

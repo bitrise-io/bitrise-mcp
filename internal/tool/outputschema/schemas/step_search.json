@@ -97,11 +97,10 @@
             ]
           },
           "maintainer": {
-            "enum": [
+            "examples": [
               "bitrise",
               "verified",
-              "community",
-              null
+              "community"
             ],
             "type": [
               "string",

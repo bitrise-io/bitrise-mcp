@@ -1,0 +1,14 @@
+{
+  "description": "Response of POST /v1/workspaces/{workspaceId}/sessions:delete-terminated (Bitrise Remote Dev Environments API, HTTP 200). DeleteTerminatedSessionsResponse is the response for deleting all terminated sessions.",
+  "properties": {
+    "deletedCount": {
+      "description": "Number of sessions that were deleted.",
+      "format": "int32",
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

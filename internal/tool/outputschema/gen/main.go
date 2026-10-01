@@ -36,6 +36,7 @@ import (
 // specURLs are the hosted OpenAPI documents, one per backend.
 var specURLs = map[string]string{
 	"ci":      "https://api-docs.bitrise.io/docs/swagger.json",
+	"rde":     "https://api.bitrise.io/rde/api-docs/swagger.json",
 	"rm-apps": "https://api.bitrise.io/release-management/api-docs/release_management/v2/swagger.json",
 	"rm-bd":   "https://api.bitrise.io/release-management/api-docs/release_management/v2/build_distributions/swagger.json",
 	"rm-cp":   "https://api.bitrise.io/release-management/api-docs/release_management/v2/code_push/swagger.json",
@@ -177,6 +178,40 @@ var mappings = []mapping{
 	{Tool: "codepush_get_update_status", Spec: "rm-cp", Method: "get", Path: "/updates/{id}/status"},
 	{Tool: "codepush_generate_update_upload_url", Spec: "rm-cp", Method: "get", Path: "/updates/{id}/upload-url"},
 	{Tool: "codepush_get_metrics", Spec: "rm-cp", Method: "get", Path: "/metrics"},
+
+	// Dev Environments (RDE).
+	{Tool: "bitrise_devenv_list", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/sessions"},
+	{Tool: "bitrise_devenv_get", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}"},
+	{Tool: "bitrise_devenv_create", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions"},
+	{Tool: "bitrise_devenv_update", Spec: "rde", Method: "patch", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}"},
+	{Tool: "bitrise_devenv_restore", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/restore"},
+	{Tool: "bitrise_devenv_terminate", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/terminate"},
+	{Tool: "bitrise_devenv_delete_terminated", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions:delete-terminated"},
+	{Tool: "bitrise_devenv_compare_template", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/template-diff"},
+	{Tool: "bitrise_devenv_list_session_notifications", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/notifications"},
+	{Tool: "bitrise_devenv_list_templates", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/templates"},
+	{Tool: "bitrise_devenv_get_template", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/templates/{templateId}"},
+	{Tool: "bitrise_devenv_create_template", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/templates"},
+	{Tool: "bitrise_devenv_update_template", Spec: "rde", Method: "patch", Path: "/v1/workspaces/{workspaceId}/templates/{templateId}"},
+	{Tool: "bitrise_devenv_delete_template", Spec: "rde", Method: "delete", Path: "/v1/workspaces/{workspaceId}/templates/{templateId}"},
+	{Tool: "bitrise_devenv_list_warm_pools", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/warm-pools"},
+	{Tool: "bitrise_devenv_get_warm_pool", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/warm-pools/{warmPoolId}"},
+	{Tool: "bitrise_devenv_create_warm_pool", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/warm-pools"},
+	{Tool: "bitrise_devenv_update_warm_pool", Spec: "rde", Method: "patch", Path: "/v1/workspaces/{workspaceId}/warm-pools/{warmPoolId}"},
+	{Tool: "bitrise_devenv_list_saved_inputs", Spec: "rde", Method: "get", Path: "/v1/saved-inputs"},
+	{Tool: "bitrise_devenv_get_saved_input", Spec: "rde", Method: "get", Path: "/v1/saved-inputs/{savedInputId}"},
+	{Tool: "bitrise_devenv_create_saved_input", Spec: "rde", Method: "post", Path: "/v1/saved-inputs"},
+	{Tool: "bitrise_devenv_update_saved_input", Spec: "rde", Method: "patch", Path: "/v1/saved-inputs/{savedInputId}"},
+	{Tool: "bitrise_devenv_delete_saved_input", Spec: "rde", Method: "delete", Path: "/v1/saved-inputs/{savedInputId}"},
+	{Tool: "bitrise_devenv_list_stacks", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/stacks"},
+	{Tool: "bitrise_devenv_list_machine_types", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/machine-types"},
+	{Tool: "bitrise_devenv_get_workspace_usage", Spec: "rde", Method: "get", Path: "/v1/workspaces/{workspaceId}/usage"},
+	{Tool: "bitrise_devenv_click", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/click"},
+	{Tool: "bitrise_devenv_type", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/type"},
+	{Tool: "bitrise_devenv_scroll", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/scroll"},
+	{Tool: "bitrise_devenv_mouse_drag", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/mouse-drag"},
+	{Tool: "bitrise_devenv_open_remote_access", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/sessions/{sessionId}/open-remote-access"},
+	{Tool: "bitrise_devenv_create_preview_link", Spec: "rde", Method: "post", Path: "/v1/workspaces/{workspaceId}/preview-links"},
 }
 
 // codePushUpdateFieldTypes corrects the CodePush update fields whose published
@@ -203,6 +238,11 @@ func textEnvelope(description string) map[string]any {
 
 // manuals are schemas that cannot be derived from a published API document.
 var manuals = map[string]map[string]any{
+	"bitrise_devenv_device_guide":     textEnvelope("The requested device-session guide as markdown."),
+	"bitrise_devenv_upload":           textEnvelope("A status message confirming the upload and where the files were extracted on the session."),
+	"bitrise_devenv_download":         textEnvelope("A status message confirming the download and where the files were extracted locally."),
+	"bitrise_devenv_delete":           textEnvelope("A status message confirming the session was deleted (the API returns an empty body on success)."),
+	"bitrise_devenv_delete_warm_pool": textEnvelope("A status message confirming the warm pool was deleted (the API returns an empty body on success)."),
 	// GET /apps/{app-slug}/builds/{build-slug}/log/summary is not in the
 	// published API document; this mirrors a live response, without the fields
 	// the tool strips (app_id, build_id, agent_info; and unless verbose:
@@ -625,7 +665,7 @@ func definitions(doc map[string]any) map[string]any {
 	return map[string]any{}
 }
 
-var copiedKeywords = []string{"type", "description", "format", "enum", "minimum", "maximum", "minLength", "maxLength", "pattern", "default", "title"}
+var copiedKeywords = []string{"type", "description", "format", "minimum", "maximum", "minLength", "maxLength", "pattern", "default", "title"}
 
 func (c *converter) convert(s map[string]any, seen map[string]bool) map[string]any {
 	if ref, ok := s["$ref"].(string); ok {
@@ -652,6 +692,13 @@ func (c *converter) convert(s map[string]any, seen map[string]bool) map[string]a
 		if v, ok := s[k]; ok {
 			out[k] = v
 		}
+	}
+	// An enum documents the values the backend returns today, not a contract:
+	// a value added later would fail clients that validate structuredContent
+	// against the schema (the MCP TypeScript SDK client does). Keep the known
+	// values as non-validating examples.
+	if enum, ok := s["enum"].([]any); ok {
+		out["examples"] = enum
 	}
 	if allOf, ok := s["allOf"].([]any); ok {
 		merged := map[string]any{"type": "object", "properties": map[string]any{}}
@@ -724,9 +771,6 @@ func allowNull(schema map[string]any) {
 			return
 		}
 		schema["type"] = []any{t, "null"}
-		if enum, ok := schema["enum"].([]any); ok {
-			schema["enum"] = append(enum, nil)
-		}
 	}
 }
 

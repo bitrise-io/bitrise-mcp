@@ -1,0 +1,247 @@
+{
+  "description": "Response of GET /v1/workspaces/{workspaceId}/usage (Bitrise Remote Dev Environments API, HTTP 200). GetWorkspaceUsageResponse is the workspace usage report: a point-in-time snapshot of who is running how many active sessions, on how many vCPUs and how much memory, split by OS.",
+  "properties": {
+    "totals": {
+      "description": "Workspace-wide totals across all users.",
+      "properties": {
+        "linux": {
+          "properties": {
+            "memoryGb": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "sessionCount": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "vcpu": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "macos": {
+          "properties": {
+            "memoryGb": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "sessionCount": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "vcpu": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "unknown": {
+          "properties": {
+            "memoryGb": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "sessionCount": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "vcpu": {
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "unknownMachineTypeCount": {
+      "description": "Number of active sessions whose machine type had no resolvable vCPU/RAM spec — those sessions are counted in session co…",
+      "format": "int32",
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "users": {
+      "description": "Per-user breakdown, plus at most one workspace-owned bucket row.",
+      "items": {
+        "properties": {
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isWorkspace": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "totals": {
+            "properties": {
+              "linux": {
+                "properties": {
+                  "memoryGb": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "sessionCount": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "vcpu": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "macos": {
+                "properties": {
+                  "memoryGb": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "sessionCount": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "vcpu": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "unknown": {
+                "properties": {
+                  "memoryGb": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "sessionCount": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "vcpu": {
+                    "format": "int32",
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "userId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userSlug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

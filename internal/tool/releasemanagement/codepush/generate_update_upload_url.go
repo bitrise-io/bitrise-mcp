@@ -13,7 +13,7 @@ import (
 var GenerateUpdateUploadURL = bitrise.Tool{
 	APIGroups: []string{"release-management-code-push", "release-management"},
 	Definition: mcp.NewTool("codepush_generate_update_upload_url",
-		mcp.WithDescription("Generate a signed upload URL (valid 1 hour) for uploading a CodePush update bundle. The response contains the URL, HTTP method, and headers needed for a direct upload. After uploading, check status with codepush_get_update_status."),
+		mcp.WithDescription("Generate a signed upload URL (valid 1 hour) for uploading a CodePush update bundle (a JS bundle; not an app build, see generate_installable_artifact_upload_url, and not files into a Dev Environments session). The response contains the URL, HTTP method, and headers needed for a direct upload. After uploading, check status with codepush_get_update_status."),
 		mcp.WithString("id",
 			mcp.Description("Client-generated UUID for the new update"),
 			mcp.Required(),

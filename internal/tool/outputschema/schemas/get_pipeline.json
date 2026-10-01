@@ -171,15 +171,14 @@
       ]
     },
     "status": {
-      "enum": [
+      "examples": [
         "aborted",
         "failed",
         "initializing",
         "on_hold",
         "running",
         "succeeded",
-        "succeeded_with_abort",
-        null
+        "succeeded_with_abort"
       ],
       "type": [
         "string",

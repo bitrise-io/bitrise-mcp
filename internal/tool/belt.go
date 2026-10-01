@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"context"
 	"slices"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
@@ -9,6 +10,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/builds"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/cache"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/configuration"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/devenvironments"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/grouproles"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/insights"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/outputschema"
@@ -18,11 +20,16 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/user"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/webhooks"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/workspaces"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
 type Belt struct {
 	tools map[string]bitrise.Tool
+	// devenv is the Dev Environments sub-belt: it owns the bitrise_devenv_*
+	// tools, their MCP resources, and the per-request workspace resolution
+	// those tools need.
+	devenv *devenvironments.Belt
 }
 
 func NewBelt() *Belt {
@@ -139,7 +146,12 @@ func NewBelt() *Belt {
 		insights.GetTestSeries,
 		insights.ListFlakyTests,
 	}
-	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList))}
+
+	// Dev Environments (RDE)
+	devenvBelt := devenvironments.NewBelt()
+	toolList = append(toolList, devenvBelt.Tools()...)
+
+	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList)), devenv: devenvBelt}
 	for _, tool := range toolList {
 		if _, dup := belt.tools[tool.Definition.Name]; dup {
 			panic("duplicate tool name: " + tool.Definition.Name)
@@ -164,6 +176,7 @@ func (b *Belt) RegisterAll(server *server.MCPServer) {
 	for _, tool := range b.tools {
 		server.AddTool(tool.Definition, tool.Handler)
 	}
+	b.devenv.RegisterResources(server)
 }
 
 // Tools returns every registered tool, in no particular order.
@@ -173,6 +186,36 @@ func (b *Belt) Tools() []bitrise.Tool {
 		out = append(out, t)
 	}
 	return out
+}
+
+// ToolFilter returns the server.WithToolFilter function: it lists only the
+// tools whose API group is enabled (from the x-bitrise-enabled-api-groups
+// header on the HTTP transport, else defaultGroups) and hides the
+// local-only Dev Environments tools on the hosted transport.
+func (b *Belt) ToolFilter(defaultGroups []string) server.ToolFilterFunc {
+	return func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
+		enabledGroups, err := bitrise.EnabledGroupsFromCtx(ctx) // http transport only
+		if err != nil {
+			// stdio transport, or no per-request override on the http transport
+			enabledGroups = defaultGroups
+		}
+		filtered := make([]mcp.Tool, 0, len(tools))
+		for _, tool := range tools {
+			if b.ToolEnabled(tool.Name, enabledGroups) {
+				filtered = append(filtered, tool)
+			}
+		}
+		return b.devenv.FilterTools(ctx, filtered)
+	}
+}
+
+// GateAndResolveWorkspace is the per-call middleware step for the Dev
+// Environments tools: it rejects local-only tools on the hosted transport and
+// resolves the workspace the call operates in. Other tools pass through
+// untouched. The PAT (and any per-connection default workspace) must already
+// be in ctx.
+func (b *Belt) GateAndResolveWorkspace(ctx context.Context, request mcp.CallToolRequest) (context.Context, *mcp.CallToolResult) {
+	return b.devenv.GateAndResolveWorkspace(ctx, request)
 }
 
 func (b *Belt) ToolEnabled(name string, enabledGroups []string) bool {

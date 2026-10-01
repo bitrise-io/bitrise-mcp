@@ -1,0 +1,56 @@
+{
+  "description": "Response of GET /v1/saved-inputs (Bitrise Remote Dev Environments API, HTTP 200). ListSavedInputsResponse is the response for listing saved inputs.",
+  "properties": {
+    "savedInputs": {
+      "description": "List of saved inputs.",
+      "items": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isSecret": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

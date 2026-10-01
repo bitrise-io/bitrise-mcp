@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"sort"
 	"testing"
 
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/devenv"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/devenvironments"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/outputschema"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/santhosh-tekuri/jsonschema/v6"
@@ -13,9 +17,10 @@ import (
 )
 
 // noOutputSchema lists the tools whose result is not structured data (an
-// image), so they carry no output schema. Every current tool returns
-// structured data or text.
-var noOutputSchema = map[string]bool{}
+// image), so they carry no output schema.
+var noOutputSchema = map[string]bool{
+	"bitrise_devenv_screenshot": true,
+}
 
 // TestEveryToolHasAnOutputSchema enforces the connector directory requirement
 // (OpenAI asks for an outputSchema on every tool): each tool either declares
@@ -42,6 +47,45 @@ func TestEveryToolHasAnOutputSchema(t *testing.T) {
 		}
 		assert.Equalf(t, "object", wire.OutputSchema["type"], "%s: output schema must describe an object", name)
 		compileSchema(t, name, wire.OutputSchema)
+	}
+}
+
+// TestOutputSchemasHaveNoEnums keeps backend value sets open: an enum in an
+// output schema would make validating clients reject a result as soon as the
+// API returns a value added after the schema was written. Known values go in
+// examples instead.
+func TestOutputSchemasHaveNoEnums(t *testing.T) {
+	var findEnum func(v any, path string) string
+	findEnum = func(v any, path string) string {
+		switch n := v.(type) {
+		case map[string]any:
+			if _, ok := n["enum"]; ok {
+				return path
+			}
+			for k, c := range n {
+				if p := findEnum(c, path+"/"+k); p != "" {
+					return p
+				}
+			}
+		case []any:
+			for _, c := range n {
+				if p := findEnum(c, path); p != "" {
+					return p
+				}
+			}
+		}
+		return ""
+	}
+	for _, tl := range NewBelt().Tools() {
+		raw, err := json.Marshal(tl.Definition)
+		mustOK(t, err)
+		var wire struct {
+			OutputSchema map[string]any `json:"outputSchema"`
+		}
+		mustOK(t, json.Unmarshal(raw, &wire))
+		if p := findEnum(wire.OutputSchema, ""); p != "" {
+			t.Errorf("%s: output schema has an enum at %q; use examples so new backend values still validate", tl.Definition.Name, p)
+		}
 	}
 }
 
@@ -116,6 +160,65 @@ func TestWithStructuredContent(t *testing.T) {
 	t.Run("image results are untouched", func(t *testing.T) {
 		res := &mcp.CallToolResult{Content: []mcp.Content{mcp.NewImageContent("AAAA", "image/png")}}
 		assert.Nil(t, call(res).StructuredContent)
+	})
+}
+
+// TestDevEnvironmentsToolsAreGrouped checks the merged belt exposes the RDE
+// tools under their own API group and through the group filter.
+func TestDevEnvironmentsToolsAreGrouped(t *testing.T) {
+	b := NewBelt()
+	var devenvNames []string
+	for _, tl := range b.Tools() {
+		if b.devenv.Owns(tl.Definition.Name) {
+			devenvNames = append(devenvNames, tl.Definition.Name)
+			assert.Containsf(t, tl.APIGroups, devenvironments.APIGroup, "%s", tl.Definition.Name)
+			assert.Truef(t, b.ToolEnabled(tl.Definition.Name, []string{devenvironments.APIGroup}), "%s", tl.Definition.Name)
+			assert.Falsef(t, b.ToolEnabled(tl.Definition.Name, []string{"apps", "builds"}), "%s must not be enabled by Bitrise API groups", tl.Definition.Name)
+		}
+	}
+	sort.Strings(devenvNames)
+	assert.NotEmpty(t, devenvNames)
+	assert.Contains(t, devenvNames, "bitrise_devenv_list")
+
+	t.Run("filter hides disabled groups, and local-only tools when hosted", func(t *testing.T) {
+		filter := b.ToolFilter([]string{devenvironments.APIGroup})
+		all := []mcp.Tool{{Name: "bitrise_devenv_list"}, {Name: "bitrise_devenv_upload"}, {Name: "list_apps"}}
+		names := func(listed []mcp.Tool) []string {
+			out := []string{}
+			for _, tl := range listed {
+				out = append(out, tl.Name)
+			}
+			return out
+		}
+		assert.ElementsMatch(t, []string{"bitrise_devenv_list", "bitrise_devenv_upload"}, names(filter(context.Background(), all)))
+		assert.ElementsMatch(t, []string{"bitrise_devenv_list"}, names(filter(devenv.ContextWithHostedMode(context.Background()), all)))
+		// A header enabling the group by name still cannot list local-only tools when hosted.
+		hostedWithHeader := bitrise.ContextWithEnabledGroups(devenv.ContextWithHostedMode(context.Background()), []string{devenvironments.APIGroup})
+		assert.ElementsMatch(t, []string{"bitrise_devenv_list"}, names(filter(hostedWithHeader, all)))
+		// No matching group yields an empty list, never null.
+		assert.Equal(t, []mcp.Tool{}, filter(bitrise.ContextWithEnabledGroups(context.Background(), []string{"nope"}), all))
+	})
+
+	t.Run("RDE tools stay out of the shared read-only group", func(t *testing.T) {
+		for _, tl := range b.Tools() {
+			if b.devenv.Owns(tl.Definition.Name) {
+				assert.NotContainsf(t, tl.APIGroups, "read-only", "%s", tl.Definition.Name)
+				if ro := tl.Definition.Annotations.ReadOnlyHint; ro != nil && *ro {
+					assert.Containsf(t, tl.APIGroups, devenvironments.ReadOnlyAPIGroup, "%s", tl.Definition.Name)
+				}
+			}
+			assert.NotEmptyf(t, tl.Definition.Title, "%s has no title", tl.Definition.Name)
+			a := tl.Definition.Annotations
+			assert.NotNilf(t, a.IdempotentHint, "%s idempotentHint unset", tl.Definition.Name)
+			assert.NotNilf(t, a.OpenWorldHint, "%s openWorldHint unset", tl.Definition.Name)
+		}
+	})
+
+	t.Run("workspace gate leaves Bitrise API tools alone", func(t *testing.T) {
+		var req mcp.CallToolRequest
+		req.Params.Name = "list_apps"
+		_, errRes := b.GateAndResolveWorkspace(context.Background(), req)
+		assert.Nil(t, errRes)
 	})
 }
 

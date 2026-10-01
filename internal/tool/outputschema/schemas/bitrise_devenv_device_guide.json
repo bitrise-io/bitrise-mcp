@@ -1,0 +1,10 @@
+{
+  "description": "The requested device-session guide as markdown.",
+  "properties": {
+    "content": {
+      "description": "The text result of the tool.",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

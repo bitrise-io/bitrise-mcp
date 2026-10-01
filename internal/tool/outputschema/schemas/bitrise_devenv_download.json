@@ -1,0 +1,10 @@
+{
+  "description": "A status message confirming the download and where the files were extracted locally.",
+  "properties": {
+    "content": {
+      "description": "The text result of the tool.",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

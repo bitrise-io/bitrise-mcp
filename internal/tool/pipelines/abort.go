@@ -12,7 +12,7 @@ import (
 var Abort = bitrise.Tool{
 	APIGroups: []string{"pipelines"},
 	Definition: mcp.NewTool("abort_pipeline",
-		mcp.WithDescription("Abort a pipeline."),
+		mcp.WithDescription("Abort a running Bitrise CI pipeline (final). Not a Dev Environments session: see bitrise_devenv_terminate / bitrise_devenv_delete."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),

@@ -9,9 +9,9 @@ import (
 )
 
 var List = bitrise.Tool{
-	APIGroups: []string{"workspaces", "read-only"},
+	APIGroups: []string{"workspaces", "read-only", "dev-environments", "dev-environments-read-only"},
 	Definition: mcp.NewTool("list_workspaces",
-		mcp.WithDescription("List the workspaces the user has access to"),
+		mcp.WithDescription("List the workspaces (slugs) the user has access to; the same workspaces serve Bitrise CI and Dev Environments. Needs a user token (OAuth or Personal Access Token)."),
 		mcp.WithTitleAnnotation("List Workspaces"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),

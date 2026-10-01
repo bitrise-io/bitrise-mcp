@@ -108,7 +108,7 @@ To verify that the Bitrise MCP server has been configured, start Gemini CLI in y
     ```
     ℹ Configured MCP servers:
 
-    🟢 bitrise - Ready (62 tools)
+    🟢 bitrise - Ready (125 tools)
         - abort_build
         - abort_pipeline
         - add_member_to_group
