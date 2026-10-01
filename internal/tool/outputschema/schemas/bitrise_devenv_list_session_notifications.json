@@ -38,15 +38,14 @@
           },
           "type": {
             "default": "SESSION_NOTIFICATION_TYPE_UNSPECIFIED",
-            "enum": [
+            "examples": [
               "SESSION_NOTIFICATION_TYPE_UNSPECIFIED",
               "SESSION_NOTIFICATION_TYPE_AGENT_STOP",
               "SESSION_NOTIFICATION_TYPE_AGENT_PERMISSION_PROMPT",
               "SESSION_NOTIFICATION_TYPE_AGENT_IDLE_PROMPT",
               "SESSION_NOTIFICATION_TYPE_AGENT_AUTH_SUCCESS",
               "SESSION_NOTIFICATION_TYPE_AGENT_ELICITATION_DIALOG",
-              "SESSION_NOTIFICATION_TYPE_AGENT_WORKING",
-              null
+              "SESSION_NOTIFICATION_TYPE_AGENT_WORKING"
             ],
             "type": [
               "string",

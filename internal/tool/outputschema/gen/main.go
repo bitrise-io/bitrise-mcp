@@ -665,7 +665,7 @@ func definitions(doc map[string]any) map[string]any {
 	return map[string]any{}
 }
 
-var copiedKeywords = []string{"type", "description", "format", "enum", "minimum", "maximum", "minLength", "maxLength", "pattern", "default", "title"}
+var copiedKeywords = []string{"type", "description", "format", "minimum", "maximum", "minLength", "maxLength", "pattern", "default", "title"}
 
 func (c *converter) convert(s map[string]any, seen map[string]bool) map[string]any {
 	if ref, ok := s["$ref"].(string); ok {
@@ -692,6 +692,13 @@ func (c *converter) convert(s map[string]any, seen map[string]bool) map[string]a
 		if v, ok := s[k]; ok {
 			out[k] = v
 		}
+	}
+	// An enum documents the values the backend returns today, not a contract:
+	// a value added later would fail clients that validate structuredContent
+	// against the schema (the MCP TypeScript SDK client does). Keep the known
+	// values as non-validating examples.
+	if enum, ok := s["enum"].([]any); ok {
+		out["examples"] = enum
 	}
 	if allOf, ok := s["allOf"].([]any); ok {
 		merged := map[string]any{"type": "object", "properties": map[string]any{}}
@@ -764,9 +771,6 @@ func allowNull(schema map[string]any) {
 			return
 		}
 		schema["type"] = []any{t, "null"}
-		if enum, ok := schema["enum"].([]any); ok {
-			schema["enum"] = append(enum, nil)
-		}
 	}
 }
 

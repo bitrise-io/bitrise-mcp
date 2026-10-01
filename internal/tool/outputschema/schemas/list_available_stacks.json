@@ -17,10 +17,9 @@
       },
       "os": {
         "description": "Operating system of the stack",
-        "enum": [
+        "examples": [
           "linux",
-          "macos",
-          null
+          "macos"
         ],
         "type": [
           "string",
@@ -50,11 +49,10 @@
       },
       "status": {
         "description": "Current status of the stack.",
-        "enum": [
+        "examples": [
           "stable",
           "edge",
-          "frozen",
-          null
+          "frozen"
         ],
         "type": [
           "string",

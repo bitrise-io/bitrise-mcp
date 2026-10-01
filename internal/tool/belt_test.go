@@ -50,6 +50,45 @@ func TestEveryToolHasAnOutputSchema(t *testing.T) {
 	}
 }
 
+// TestOutputSchemasHaveNoEnums keeps backend value sets open: an enum in an
+// output schema would make validating clients reject a result as soon as the
+// API returns a value added after the schema was written. Known values go in
+// examples instead.
+func TestOutputSchemasHaveNoEnums(t *testing.T) {
+	var findEnum func(v any, path string) string
+	findEnum = func(v any, path string) string {
+		switch n := v.(type) {
+		case map[string]any:
+			if _, ok := n["enum"]; ok {
+				return path
+			}
+			for k, c := range n {
+				if p := findEnum(c, path+"/"+k); p != "" {
+					return p
+				}
+			}
+		case []any:
+			for _, c := range n {
+				if p := findEnum(c, path); p != "" {
+					return p
+				}
+			}
+		}
+		return ""
+	}
+	for _, tl := range NewBelt().Tools() {
+		raw, err := json.Marshal(tl.Definition)
+		mustOK(t, err)
+		var wire struct {
+			OutputSchema map[string]any `json:"outputSchema"`
+		}
+		mustOK(t, json.Unmarshal(raw, &wire))
+		if p := findEnum(wire.OutputSchema, ""); p != "" {
+			t.Errorf("%s: output schema has an enum at %q; use examples so new backend values still validate", tl.Definition.Name, p)
+		}
+	}
+}
+
 // TestGeneratedSchemasMatchTools guards against stale generated files: every
 // schemas/<name>.json belongs to a registered tool.
 func TestGeneratedSchemasMatchTools(t *testing.T) {

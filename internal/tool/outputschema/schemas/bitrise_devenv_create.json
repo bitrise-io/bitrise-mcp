@@ -30,12 +30,11 @@
       "properties": {
         "agentSessionStatus": {
           "default": "AGENT_SESSION_STATUS_UNSPECIFIED",
-          "enum": [
+          "examples": [
             "AGENT_SESSION_STATUS_UNSPECIFIED",
             "AGENT_SESSION_STATUS_WORKING",
             "AGENT_SESSION_STATUS_WAITING_FOR_INPUT",
-            "AGENT_SESSION_STATUS_IDLE",
-            null
+            "AGENT_SESSION_STATUS_IDLE"
           ],
           "type": [
             "string",
@@ -128,13 +127,12 @@
             },
             "installStatus": {
               "default": "PREVIEW_INSTALL_STATUS_UNSPECIFIED",
-              "enum": [
+              "examples": [
                 "PREVIEW_INSTALL_STATUS_UNSPECIFIED",
                 "PREVIEW_INSTALL_STATUS_PENDING",
                 "PREVIEW_INSTALL_STATUS_RUNNING",
                 "PREVIEW_INSTALL_STATUS_OK",
-                "PREVIEW_INSTALL_STATUS_FAILED",
-                null
+                "PREVIEW_INSTALL_STATUS_FAILED"
               ],
               "type": [
                 "string",
@@ -201,12 +199,11 @@
             },
             "state": {
               "default": "PREVIEW_DEVICE_STATE_UNSPECIFIED",
-              "enum": [
+              "examples": [
                 "PREVIEW_DEVICE_STATE_UNSPECIFIED",
                 "PREVIEW_DEVICE_STATE_BOOTING",
                 "PREVIEW_DEVICE_STATE_READY",
-                "PREVIEW_DEVICE_STATE_FAILED",
-                null
+                "PREVIEW_DEVICE_STATE_FAILED"
               ],
               "type": [
                 "string",
@@ -254,12 +251,11 @@
         },
         "persistentDiskStatus": {
           "default": "PERSISTENT_DISK_STATUS_UNSPECIFIED",
-          "enum": [
+          "examples": [
             "PERSISTENT_DISK_STATUS_UNSPECIFIED",
             "PERSISTENT_DISK_STATUS_AVAILABLE",
             "PERSISTENT_DISK_STATUS_UNAVAILABLE_SOON",
-            "PERSISTENT_DISK_STATUS_UNAVAILABLE",
-            null
+            "PERSISTENT_DISK_STATUS_UNAVAILABLE"
           ],
           "type": [
             "string",
@@ -286,7 +282,7 @@
         },
         "status": {
           "default": "SESSION_STATUS_UNSPECIFIED",
-          "enum": [
+          "examples": [
             "SESSION_STATUS_UNSPECIFIED",
             "SESSION_STATUS_PENDING",
             "SESSION_STATUS_STARTING",
@@ -296,8 +292,7 @@
             "SESSION_STATUS_TERMINATED",
             "SESSION_STATUS_DRAINING",
             "SESSION_STATUS_DRAINED",
-            "SESSION_STATUS_UNKNOWN",
-            null
+            "SESSION_STATUS_UNKNOWN"
           ],
           "type": [
             "string",
