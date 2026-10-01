@@ -162,6 +162,27 @@ func TestCreateTemplateForwardsDeviceSpec(t *testing.T) {
 	})
 }
 
+// bitrise_devenv_update_template forwards only non-empty string fields, so a
+// client that fills unused optional parameters with "" or null cannot wipe the
+// template's stack, machine type or scripts.
+func TestUpdateTemplateSkipsEmptyStringFields(t *testing.T) {
+	ctx, got := captureBody(t, http.MethodPatch, "/v1/workspaces/ws/templates/"+testTemplateID)
+	callOK(t, UpdateTemplate, ctx, map[string]any{
+		"template_id":       testTemplateID,
+		"warmup_script":     "echo hi",
+		"name":              "",
+		"stack_id":          "",
+		"machine_type":      nil,
+		"description":       "",
+		"startup_script":    nil,
+		"working_directory": "",
+	})
+	want := map[string]any{"warmup_script": "echo hi"}
+	if !reflect.DeepEqual(*got, want) {
+		t.Errorf("body = %v, want %v", *got, want)
+	}
+}
+
 // bitrise_devenv_update_template mirrors the array-field convention for the
 // device: device_spec sets update_device_spec alongside the new object,
 // clear_device_spec sends the flag alone, and omitting both leaves the wire

@@ -44,7 +44,7 @@ WHEN TO USE THIS: before creating a session, to find a pool that already has you
 
 By default returns the workspace's pools plus your own personal pools, never another user's. Set all=true to list every pool in the workspace read-only (cost visibility; requires the workspace's view_billing_data permission). Optionally restrict to one template with template_id.
 
-Each pool carries its configuration (secret input values redacted), pool_size and a status with ready / warming counts, lifetime claimedTotal / coldTotal (a high coldTotal means pool_size is too low for the demand), lastError, configError (the stored configuration no longer builds — fix it with bitrise_devenv_update_warm_pool) and pausedUntil. The list view omits the per-session inventory; use bitrise_devenv_get_warm_pool for status.sessions.`),
+Each pool carries its configuration (secret input values redacted), poolSize and a status with ready / warming counts, lifetime claimedTotal / coldTotal (a high coldTotal means pool_size is too low for the demand), lastError, configError (the stored configuration no longer builds — fix it with bitrise_devenv_update_warm_pool) and pausedUntil. The list view omits the per-session inventory; use bitrise_devenv_get_warm_pool for status.sessions.`),
 		mcp.WithString("template_id",
 			mcp.Description("Optional: only list pools created from this template (UUID)."),
 		),
@@ -84,7 +84,7 @@ var GetWarmPool = bitrise.Tool{
 		mcp.WithTitleAnnotation("Get warm pool"),
 		mcp.WithDescription(`Get one warm pool with its full live status. `+warmPoolConceptDoc+`
 
-WHEN TO USE THIS: to check whether a pool has a session ready before claiming from it (status.ready > 0 means bitrise_devenv_create with warm_pool_id returns instantly), to diagnose a pool that is not filling (status.lastError, status.configError, status.pausedUntil), or to see its inventory — status.sessions lists every warming / ready session with session_id, state, created_at and readyAt, oldest first (this call only; the list view omits it).
+WHEN TO USE THIS: to check whether a pool has a session ready before claiming from it (status.ready > 0 means bitrise_devenv_create with warm_pool_id returns instantly), to diagnose a pool that is not filling (status.lastError, status.configError, status.pausedUntil), or to see its inventory — status.sessions lists every warming / ready session with sessionId, state, createdAt and readyAt, oldest first (this call only; the list view omits it).
 
 Secret session input values are redacted in the response.`),
 		mcp.WithString("warm_pool_id",
@@ -239,7 +239,7 @@ WHEN TO USE THIS:
 - Change the device the warm sessions boot: device_spec (a new device, or a per-field tweak of the template's when it has no platform), device_spec {} to drop the pool's device override and boot the template's device as declared, or no_device true/false to skip or restore the template's device.
 - Rename it: name.
 
-Array fields: passing session_inputs or enabled_feature_flag_names replaces ALL existing entries (pass an empty array to clear); omit to leave unchanged. Secrets survive a resend: the session_inputs that bitrise_devenv_get_warm_pool returns has every secret value redacted to "", and sending that list back as is keeps each stored secret — only an input whose key is left out is removed, and a new value or a saved_input_id replaces the stored one. So to change one input, read the pool, edit that entry and send the whole list; nothing needs retyping. Override fields: pass stack_id, machine_type or cluster to set the override, an empty string "" to clear it back to the template's value; omit to leave unchanged.
+Array fields: passing session_inputs or enabled_feature_flag_names replaces ALL existing entries (pass an empty array to clear); omit to leave unchanged. Secrets survive a resend: the sessionInputs that bitrise_devenv_get_warm_pool returns has every secret value redacted to "", and sending that list back as is keeps each stored secret — only an input whose key is left out is removed, and a new value or a saved_input_id replaces the stored one. So to change one input, read the pool, edit that entry and send the whole list; nothing needs retyping. Override fields: pass stack_id, machine_type or cluster to set the override, an empty string "" to clear it back to the template's value; omit to leave unchanged.
 
 A configuration change (anything but name and pool_size) invalidates the current warm sessions: the backend replaces them with sessions of the new configuration.`),
 		mcp.WithString("warm_pool_id", mcp.Description("The unique identifier (UUID) of the warm pool to update"), mcp.Required()),

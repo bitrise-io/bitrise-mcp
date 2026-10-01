@@ -20,7 +20,7 @@ Each stack describes a provisionable development environment:
 - title: human-friendly label (e.g. 'Xcode 16.0'). Show this to the user; fall back to id when title is empty.
 - description / descriptionLink: summary and a link to the stack's pre-installed tools / system report.
 - os: 'macos' or 'linux'.
-- os_version: numeric OS version (e.g. 26 for macOS, 24 for Ubuntu 24.04).
+- osVersion: numeric OS version (e.g. 26 for macOS, 24 for Ubuntu 24.04).
 - status: 'edge', 'stable', or 'frozen'.
 - xcodeVersion: Xcode version (e.g. '16.0'); empty for non-Xcode stacks. Informational.
 - isDefault: when true, this is the deployment's default stack — preselect it when the user has expressed no preference.

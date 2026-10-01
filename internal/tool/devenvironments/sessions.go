@@ -17,11 +17,11 @@ var ListSessions = bitrise.Tool{
 		mcp.WithTitleAnnotation("List sessions"),
 		mcp.WithDescription(`List Dev Environments sessions (remote VMs); not CI builds (see list_builds). By default (scope="mine") returns the currently authenticated user's own sessions; set scope="workspace" to list sessions owned by the workspace itself instead.
 
-Returns a lightweight view of each session: ID, name, description, status, agentSessionStatus, labels, owner_type ("user" or "workspace"), ownerId (user UUID or workspace slug), template_id, templateDeleted flag, SSH/VNC connection details, AI config, and a templateSnapshot containing the templateName, stack_id, and machine_type.
+Returns a lightweight view of each session: ID, name, description, status, agentSessionStatus, labels, ownerType ("user" or "workspace"), ownerId (user UUID or workspace slug), templateId, templateDeleted flag, SSH/VNC connection details, AI config, and a templateSnapshot containing the templateName, stackId, and machineType.
 
 agentSessionStatus reflects the current state of the AI agent running in the session (working, waiting_for_input, idle, or unspecified). It is reset whenever the session is stopped or started.
 
-Sessions created without a template have an empty template_id and a templateSnapshot with stack_id and machine_type but no templateName.
+Sessions created without a template have an empty templateId and a templateSnapshot with stackId and machineType but no templateName.
 
 Use label_selectors to filter sessions server-side by their labels. Each selector is a "key=value" exact-match equality; multiple selectors are ANDed, so a session must match all of them. For example, label_selectors=["team=mobile", "branch=main"] returns only sessions carrying both labels, instead of listing everything and filtering client-side.
 
@@ -69,12 +69,12 @@ var GetSession = bitrise.Tool{
 
 Returns status, SSH/VNC connection details, AI config, and the complete templateSnapshot which contains:
 - templateName: name of the template at creation time
-- stack_id: stack ID
-- machine_type: machine type name
-- session_inputs: input values (key, value, is_secret, expose_as_env_var) snapshotted at creation
-- feature_flags: flag states (name, enabled) snapshotted at creation
-- workspace_links: IDE folder links (label, folder_path) filtered by enabled flags
-- working_directory: terminal working directory
+- stackId: stack ID
+- machineType: machine type name
+- sessionInputs: input values (key, value, isSecret, exposeAsEnvVar) snapshotted at creation
+- featureFlags: flag states (name, enabled) snapshotted at creation
+- workspaceLinks: IDE folder links (label, folderPath) filtered by enabled flags
+- workingDirectory: terminal working directory
 - hasWarmupScript / hasStartupScript: whether scripts were configured
 
 Also includes:
@@ -85,7 +85,7 @@ Also includes:
 - labels: key/value metadata attached to the session (set at creation or via bitrise_devenv_update; filterable in bitrise_devenv_list via label_selectors)
 - device (on sessions that boot a virtual device): the device and its readiness. device.state is VM-asserted — PREVIEW_DEVICE_STATE_BOOTING while the VM runs but the device is not proven (wait; touch nothing on the VM), PREVIEW_DEVICE_STATE_READY once the device is booted AND streaming (start working), PREVIEW_DEVICE_STATE_FAILED when this boot gave up — or only its stream did: device.deviceNotes says which, and a stream-only failure leaves the device fully drivable over adb / simctl. Always read device.state together with the session status: PREVIEW_DEVICE_STATE_UNSPECIFIED with status pending/starting means the VM is not up yet (wait); UNSPECIFIED with a terminal status (terminated, terminating, draining, drained, failed) means the device is gone with the VM — restore the session or create a new one, do not keep polling. device.spec echoes the REQUEST, not the result: an explicitly requested os_version / system_image the stack lacks is substituted and only device.deviceNotes says so ("requested … not installed; using …") — diff the notes against your request before trusting the OS version. device.installStatus / installReason track the optional app install (the installer also launches the app). sshAddress (a ready-made "ssh user@host -p port" command), sshPassword, sshConnectionOpen and templateSnapshot.servicePorts are on THIS call only (not on bitrise_devenv_list): device-web-view is the browser view on both platforms, forwarded to local 3200 (VM side: serve-sim 3200 on iOS, ws-scrcpy 8000 on Android); Android adds adb (VM 5555 → local 15555). device.pageUrl is the device's page in the RDE web UI (the session page's "Open device view"): when a human should watch or drive the device, open it in a browser where the user is logged in to Bitrise, or give it to the user. It is not a shareable link — opening it needs a Bitrise login with access to the session (for someone outside the workspace, mint a bitrise_devenv_create_preview_link); it is empty on a warm pool's unclaimed sessions. Full know-how: bitrise_devenv_device_guide (or the resource bitrise-devenv://guides/device-sessions — the same text).
 
-For sessions created without a template, template_id is empty and the snapshot is minimal: only stack_id and machine_type are populated, hasWarmupScript/hasStartupScript are false, and there is no templateName, session_inputs, feature_flags, or workspace_links. templateOutdated is always false for such sessions.
+For sessions created without a template, templateId is empty and the snapshot is minimal: only stackId and machineType are populated, hasWarmupScript/hasStartupScript are false, and there is no templateName, sessionInputs, featureFlags, or workspaceLinks. templateOutdated is always false for such sessions.
 
 By default, secret session input values are redacted from the snapshot; set include_secrets=true to receive plaintext values.`),
 		mcp.WithString("session_id",
@@ -133,7 +133,7 @@ Three ways to create a session:
 1) With a virtual device (device_spec set, or a template that declares one) — the default for anything mobile:
 Boots an iOS simulator (platform "ios") or Android emulator (platform "android") alongside the session and streams it — ready for adb / xcrun simctl / serve-sim; optionally a human can watch and drive it on its page in the RDE web UI — device.pageUrl in the response, for a browser where the user is logged in to Bitrise. Zero-config rule: OMIT BOTH stack_id and machine_type (and cluster) — the deployment's known-good per-platform defaults apply; giving exactly one of the two is rejected. Name them only when you must (the guide says which stacks fit); with a template, its stack and machine type are used and must fit. Optionally pass artifact to pre-install an app build. Delete the session when done.
 "running" is NOT "device ready": poll bitrise_devenv_get until session.device.state is PREVIEW_DEVICE_STATE_READY (and installStatus is PREVIEW_INSTALL_STATUS_OK if you passed an artifact). While it is PREVIEW_DEVICE_STATE_BOOTING touch nothing on the VM — do not run recovery scripts, do not recreate. On PREVIEW_DEVICE_STATE_FAILED read device.deviceNotes: a stream-only failure leaves the device fully drivable over adb / simctl (guide §6).
-Templates can declare a device (device_spec on bitrise_devenv_get_template). Creating from one: omit device_spec to boot it as declared; pass a device_spec WITHOUT a platform to tweak it per field (empty fields inherit the template's); WITH a platform it is the complete device to boot (the template's is ignored); no_device=true skips the device (not combinable with device_spec; ignored when the template declares none).
+Templates can declare a device (deviceSpec on bitrise_devenv_get_template). Creating from one: omit device_spec to boot it as declared; pass a device_spec WITHOUT a platform to tweak it per field (empty fields inherit the template's); WITH a platform it is the complete device to boot (the template's is ignored); no_device=true skips the device (not combinable with device_spec; ignored when the template declares none).
 
 2) From a template (template_id set), no device unless the template declares one:
 1. List templates with bitrise_devenv_list_templates to find available templates and their session inputs
@@ -145,7 +145,7 @@ The session inherits the template's stack, machine type, scripts, feature flags,
 Supply stack_id and machine_type directly to get a base environment with no warmup/startup scripts and no template configuration (no session inputs, feature flags, or workspace links). Use bitrise_devenv_list_stacks and bitrise_devenv_list_machine_types to discover valid values. This is the quickest way to spin up an environment for a repo when no template and no device is needed.
 
 4) From a warm pool (warm_pool_id set) — the fastest path when a pool exists:
-A warm pool (bitrise_devenv_list_warm_pools) keeps sessions of one stored configuration booted and idle. Pass its id as warm_pool_id and the backend hands you one of them, renamed to your name, with no machine to boot (the response's warmState is "claimed", and a device pool's session is usually READY at once — device.pageUrl opens it in the browser); when none is available it creates a session from the pool's configuration instead (warmState "cold"), so the call always succeeds. The pool fixes the configuration: do NOT pass template_id, session_inputs, map_saved_to_session_inputs, enabled_feature_flag_names, stack_id, machine_type, cluster, device_spec, no_device or ai_prompt — they are rejected, not ignored. Only name, description, labels, auto_terminate_minutes and artifact (pools whose configuration boots a device) apply to the claimed session; owner, if given, must be the pool's owner_type. Check bitrise_devenv_list_warm_pools before creating a session from a template that a pool already covers.
+A warm pool (bitrise_devenv_list_warm_pools) keeps sessions of one stored configuration booted and idle. Pass its id as warm_pool_id and the backend hands you one of them, renamed to your name, with no machine to boot (the response's warmState is "claimed", and a device pool's session is usually READY at once — device.pageUrl opens it in the browser); when none is available it creates a session from the pool's configuration instead (warmState "cold"), so the call always succeeds. The pool fixes the configuration: do NOT pass template_id, session_inputs, map_saved_to_session_inputs, enabled_feature_flag_names, stack_id, machine_type, cluster, device_spec, no_device or ai_prompt — they are rejected, not ignored. Only name, description, labels, auto_terminate_minutes and artifact (pools whose configuration boots a device) apply to the claimed session; owner, if given, must be the pool's ownerType. Check bitrise_devenv_list_warm_pools before creating a session from a template that a pool already covers.
 
 Who owns the session (owner): "user" (default) is a personal session of the authenticated user. "workspace" creates a session owned by the workspace itself — visible to and manageable by every member, listed with bitrise_devenv_list scope="workspace". A workspace-owned session carries no personal state: give every template session input as a plain value in session_inputs (saved_input_id references and map_saved_to_session_inputs are rejected), and ai_prompt is not available. When the server is authenticated with a Workspace API Token (bitwat_…, e.g. from CI) every session it creates is workspace-owned — omit owner or set "workspace"; "user" is rejected.
 
@@ -190,7 +190,7 @@ Use this as a shortcut instead of calling bitrise_devenv_list_saved_inputs and c
 Rules:
 - Entries in session_inputs always win; auto-mapping only fills keys not already supplied.
 - Required inputs that match neither session_inputs nor any saved input still fail with "missing required input: <key>" — the flag is not a bypass of required-input validation.
-- The response includes an autoMappedInputs array listing {sessionInputKey, saved_input_id} for every key that was auto-filled, so you can report back exactly what the flag resolved.`),
+- The response includes an autoMappedInputs array listing {sessionInputKey, savedInputId} for every key that was auto-filled, so you can report back exactly what the flag resolved.`),
 		),
 		mcp.WithArray("enabled_feature_flag_names",
 			mcp.Description("Names of feature flags to enable for this session"),

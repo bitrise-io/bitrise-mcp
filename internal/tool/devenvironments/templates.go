@@ -14,7 +14,7 @@ import (
 var ListTemplates = bitrise.Tool{
 	Definition: mcp.NewTool("bitrise_devenv_list_templates",
 		mcp.WithTitleAnnotation("List templates"),
-		mcp.WithDescription("List all available devenv templates. Each template defines the stack, startup/warmup scripts, template variables, session inputs (required and optional), feature flags, workspace links, and optionally a device_spec — the iOS simulator / Android emulator every session created from it boots unless the create request overrides it with its own device_spec or no_device. By default, secret template variable values are omitted from the response; set include_secrets=true to include them."),
+		mcp.WithDescription("List all available devenv templates. Each template defines the stack, startup/warmup scripts, template variables, session inputs (required and optional), feature flags, workspace links, and optionally a deviceSpec — the iOS simulator / Android emulator every session created from it boots unless the create request overrides it with its own device_spec or no_device. By default, secret template variable values are omitted from the response; set include_secrets=true to include them."),
 		mcp.WithBoolean("include_secrets",
 			mcp.Description("When true, secret template variable values are included in the response. Defaults to false (secret values are omitted)."),
 		),
@@ -42,7 +42,7 @@ var ListTemplates = bitrise.Tool{
 var GetTemplate = bitrise.Tool{
 	Definition: mcp.NewTool("bitrise_devenv_get_template",
 		mcp.WithTitleAnnotation("Get template"),
-		mcp.WithDescription("Get details of a specific template including startup/warmup scripts, stack, working directory, template variables, session inputs (with required/default_value/expose_as_env_var fields), feature flags, workspace links, and device_spec (the virtual device sessions created from it boot by default; absent when the template declares none — see bitrise_devenv_create for how a create request inherits, overrides or skips it). By default, secret template variable values are omitted from the response; set include_secrets=true to include them."),
+		mcp.WithDescription("Get details of a specific template including startup/warmup scripts, stack, working directory, template variables, session inputs (with required/defaultValue/exposeAsEnvVar fields), feature flags, workspace links, and deviceSpec (the virtual device sessions created from it boot by default; absent when the template declares none — see bitrise_devenv_create for how a create request inherits, overrides or skips it). By default, secret template variable values are omitted from the response; set include_secrets=true to include them."),
 		mcp.WithString("template_id",
 			mcp.Description("The unique identifier (UUID) of the template"),
 			mcp.Required(),
@@ -253,14 +253,10 @@ var UpdateTemplate = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
-		// String fields are forwarded when present, including an empty string:
-		// the backend's request fields carry presence, so "" clears a value
-		// (e.g. removes a stale warmup script) while an omitted field leaves it
-		// unchanged.
 		body := map[string]any{}
 		for _, key := range []string{"name", "description", "startup_script", "warmup_script", "stack_id", "machine_type", "working_directory"} {
-			if _, present := request.GetArguments()[key]; present {
-				body[key] = request.GetString(key, "")
+			if v := request.GetString(key, ""); v != "" {
+				body[key] = v
 			}
 		}
 		// Array fields: auto-set the corresponding update_* flag when the array is provided.
