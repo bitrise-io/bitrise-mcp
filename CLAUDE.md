@@ -13,7 +13,7 @@
 
 - The `bitrise_devenv_*` tools live in `internal/tool/devenvironments/` (grouped by domain, several tools per file) with their shared client in `internal/devenv/`; they were merged in from `bitrise-mcp-dev-environments` and keep that layout. They all belong to the `dev-environments` API group (read-only ones also to `dev-environments-read-only`, never to the shared `read-only`), assigned centrally in `devenvironments.NewBelt`.
 - `devenvironments.Belt.GateAndResolveWorkspace` runs as a tool middleware for these tools only: it rejects the local-only file-transfer tools on the HTTP transport and resolves the workspace (`workspace_id` argument → remembered value → `BITRISE_WORKSPACE_ID` env / `x-bitrise-workspace-id` header → auto-detect via the main API). The PAT is shared with the Bitrise API tools through `bitrise.ContextWithPAT`; the Dev Environments backend takes it as `Bearer <token>`, the main API as the raw token.
-- The Dev Environments backend URL is `BITRISE_DEVENV_API_BASE_URL`; `BITRISE_API_BASE_URL` stays the main Bitrise API (also used for workspace discovery).
+- The Dev Environments API URL is `BITRISE_DEVENV_API_BASE_URL` (default `https://api.bitrise.io/rde`, the public gateway; the internal codespaces host is not used); `BITRISE_API_BASE_URL` stays the main Bitrise API (also used for workspace discovery). The standalone server's `BITRISE_MAIN_API_BASE_URL` is rejected at startup so a carried-over configuration fails loudly instead of misrouting calls.
 
 ## Running locally
 

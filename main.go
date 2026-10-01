@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -76,9 +77,10 @@ type config struct {
 	// (default: https://api.bitrise.io/v0.1). Useful for pointing at a
 	// test or local API instance.
 	BitriseAPIBaseURL string `env:"BITRISE_API_BASE_URL"`
-	// DevenvAPIBaseURL is the base URL of the Dev Environments (RDE) backend
-	// used by the bitrise_devenv_* tools.
-	DevenvAPIBaseURL string `env:"BITRISE_DEVENV_API_BASE_URL" default:"https://codespaces-api.services.bitrise.io"`
+	// DevenvAPIBaseURL is the base URL of the Dev Environments (RDE) API used
+	// by the bitrise_devenv_* tools: the public API gateway's /rde prefix.
+	// Override it to point at a local backend (e.g. http://localhost:8081).
+	DevenvAPIBaseURL string `env:"BITRISE_DEVENV_API_BASE_URL" default:"https://api.bitrise.io/rde"`
 }
 
 // splitGroups parses a comma-separated API group list, ignoring surrounding
@@ -105,6 +107,14 @@ func run() error {
 		return fmt.Errorf("load configuration: %w", err)
 	}
 
+	// The standalone Dev Environments server used BITRISE_API_BASE_URL for its
+	// backend and BITRISE_MAIN_API_BASE_URL for the main API. Here
+	// BITRISE_API_BASE_URL is the main API, so a configuration carried over
+	// from that server would send every Bitrise API call to the wrong backend.
+	if os.Getenv("BITRISE_MAIN_API_BASE_URL") != "" {
+		return errors.New("BITRISE_MAIN_API_BASE_URL is not supported: set the main Bitrise API with BITRISE_API_BASE_URL (default https://api.bitrise.io/v0.1) and the Dev Environments API with BITRISE_DEVENV_API_BASE_URL (default https://api.bitrise.io/rde)")
+	}
+
 	if cfg.BitriseAPIBaseURL != "" {
 		bitrise.APIBaseURL = cfg.BitriseAPIBaseURL
 	}
@@ -113,6 +123,10 @@ func run() error {
 	logger, err := newStructuredLogger(cfg.LogLevel)
 	if err != nil {
 		return fmt.Errorf("initialize logger: %w", err)
+	}
+	if cfg.BitriseAPIBaseURL != "" && !strings.Contains(cfg.BitriseAPIBaseURL, "/v0.1") {
+		logger.Warnw("BITRISE_API_BASE_URL is the main Bitrise API and normally ends in /v0.1; to point the Dev Environments tools at another backend, set BITRISE_DEVENV_API_BASE_URL instead",
+			"BITRISE_API_BASE_URL", cfg.BitriseAPIBaseURL)
 	}
 
 	if cfg.DatadogTracingEnabled {
@@ -304,8 +318,9 @@ func runHTTPTransport(mcpServer *server.MCPServer, toolBelt *tool.Belt, logger *
 	})
 
 	httpServer := &http.Server{
-		Addr:    cfg.Addr,
-		Handler: mux,
+		Addr:              cfg.Addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	// Start the HTTP server in another goroutine.

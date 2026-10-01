@@ -30,7 +30,7 @@ MCP Server for Bitrise: mobile CI/CD (apps, builds, pipelines, artifacts), Relea
 | `BITRISE_WORKSPACE_ID` | No | Default workspace ID (slug) for the Dev Environments tools. If omitted, pass `workspace_id` on the call, or it is auto-detected when you belong to exactly one workspace (required with a Workspace API Token). |
 | `ENABLED_API_GROUPS` | No | Comma-separated API groups to expose. Default: every group, including `dev-environments`. See [Advanced configuration](/docs/tools.md#advanced-configuration). |
 | `BITRISE_API_BASE_URL` | No | Bitrise API base URL (default: `https://api.bitrise.io/v0.1`) |
-| `BITRISE_DEVENV_API_BASE_URL` | No | Dev Environments backend base URL (default: `https://codespaces-api.services.bitrise.io`) |
+| `BITRISE_DEVENV_API_BASE_URL` | No | Dev Environments API base URL (default: `https://api.bitrise.io/rde`). Override to point at a local backend, e.g. `http://localhost:8081` |
 | `LOG_LEVEL` | No | `debug`, `info` (default), `warn`, `error` |
 
 On the hosted server the same choices are made per request with the `x-bitrise-enabled-api-groups` and `x-bitrise-workspace-id` headers.
