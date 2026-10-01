@@ -25,7 +25,8 @@ var (
 	APIInsightsBaseURL             = "https://api.bitrise.io/insights/v1"                                  //nolint:gochecknoglobals
 )
 
-const userAgent = "bitrise-mcp/1.0"
+// UserAgent identifies this server on every outgoing Bitrise API request.
+const UserAgent = "bitrise-mcp/1.0"
 
 type CallAPIParams struct {
 	Method  string
@@ -97,7 +98,7 @@ func CallAPI(ctx context.Context, p CallAPIParams) (string, error) {
 		}
 		req.URL.RawQuery = q.Encode()
 	}
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	if apiKey != "" {
