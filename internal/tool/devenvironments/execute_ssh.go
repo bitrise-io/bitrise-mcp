@@ -34,6 +34,36 @@ type sshResult struct {
 	ExitCode int
 }
 
+// maxStreamBytes caps how much of each of stdout and stderr one execute call
+// keeps. The hosted server runs commands for every caller in one process, so
+// a command like `yes` must not grow its buffers until the pod is OOM-killed;
+// a megabyte is already far more than an MCP client puts in the model context.
+const maxStreamBytes = 1 << 20
+
+// cappedBuffer keeps the first limit bytes written to it and counts the rest.
+// It never fails a write, so the remote command keeps running to completion
+// and its exit status stays meaningful.
+type cappedBuffer struct {
+	buf     bytes.Buffer
+	limit   int
+	dropped int64
+}
+
+func (b *cappedBuffer) Write(p []byte) (int, error) {
+	keep := min(len(p), max(b.limit-b.buf.Len(), 0))
+	b.buf.Write(p[:keep])
+	b.dropped += int64(len(p) - keep)
+	return len(p), nil
+}
+
+// Bytes returns the kept output, followed by a marker when some was dropped.
+func (b *cappedBuffer) Bytes() []byte {
+	if b.dropped == 0 {
+		return b.buf.Bytes()
+	}
+	return fmt.Appendf(b.buf.Bytes(), "\n[output truncated: %d more bytes not shown]\n", b.dropped)
+}
+
 // sshClient wraps an ssh.Client with a run method that executes commands in a
 // forced-interactive login bash shell over a fresh session. If a local SSH
 // agent was available at dial time, each session gets agent forwarding so the
@@ -235,9 +265,10 @@ func (c *sshClient) run(ctx context.Context, userCmd string) (sshResult, error) 
 		_ = agent.RequestAgentForwarding(session)
 	}
 
-	var stdout, stderr bytes.Buffer
-	session.Stdout = &stdout
-	session.Stderr = &stderr
+	stdout := &cappedBuffer{limit: maxStreamBytes}
+	stderr := &cappedBuffer{limit: maxStreamBytes}
+	session.Stdout = stdout
+	session.Stderr = stderr
 
 	done := make(chan struct{})
 	go func() {

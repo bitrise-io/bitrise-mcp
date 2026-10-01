@@ -2,7 +2,6 @@ package devenvironments
 
 import (
 	"archive/tar"
-	"bytes"
 	"compress/gzip"
 	"context"
 	"encoding/json"
@@ -45,7 +44,8 @@ Example: Download build output from the VM:
 		mcp.WithString("local_destination", mcp.Description("Local directory path where files will be extracted"), mcp.Required()),
 		mcp.WithBoolean("only_contents", mcp.Description("If true and source is a directory, extract only its contents (not the directory itself)")),
 		mcp.WithReadOnlyHintAnnotation(false),
-		mcp.WithDestructiveHintAnnotation(false),
+		// Extraction overwrites existing files under local_destination.
+		mcp.WithDestructiveHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		sessionID, err := requireUUID(request, "session_id")
@@ -83,14 +83,19 @@ Example: Download build output from the VM:
 			return mcp.NewToolResultError(fmt.Sprintf("parse download response: %v", err)), nil
 		}
 
-		// Step 2: Download the tar.gz from GCS
-		archiveData, err := downloadArchive(ctx, resp.SignedURL)
+		// Step 2: Download the tar.gz from GCS into a temporary file, so the
+		// whole archive arrives before any local file is touched
+		archive, err := downloadArchive(ctx, resp.SignedURL)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("download archive: %v", err)), nil
 		}
+		defer func() {
+			_ = archive.Close()
+			_ = os.Remove(archive.Name())
+		}()
 
 		// Step 3: Extract locally
-		if err := extractTarGz(archiveData, localDest); err != nil {
+		if err := extractTarGz(archive, localDest); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("extract archive: %v", err)), nil
 		}
 
@@ -98,7 +103,9 @@ Example: Download build output from the VM:
 	},
 }
 
-func downloadArchive(ctx context.Context, signedURL string) ([]byte, error) {
+// downloadArchive spools the archive at signedURL into a temporary file and
+// returns it rewound; the caller closes and removes it.
+func downloadArchive(ctx context.Context, signedURL string) (*os.File, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, signedURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
@@ -116,24 +123,28 @@ func downloadArchive(ctx context.Context, signedURL string) ([]byte, error) {
 		return nil, fmt.Errorf("download failed (status %d): %s", resp.StatusCode, string(body))
 	}
 
-	data, err := io.ReadAll(io.LimitReader(resp.Body, maxArchiveBytes+1))
+	tmp, err := os.CreateTemp("", "bitrise-devenv-download-*.tar.gz")
 	if err != nil {
+		return nil, fmt.Errorf("create temporary archive: %w", err)
+	}
+	if _, err := io.Copy(tmp, resp.Body); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmp.Name())
 		return nil, fmt.Errorf("read archive: %w", err)
 	}
-	if int64(len(data)) > maxArchiveBytes {
-		return nil, fmt.Errorf("archive larger than %d bytes; download a smaller folder", maxArchiveBytes)
+	if _, err := tmp.Seek(0, io.SeekStart); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmp.Name())
+		return nil, fmt.Errorf("rewind archive: %w", err)
 	}
-	return data, nil
+	return tmp, nil
 }
 
 // The archive comes from the session VM, which runs whatever the user's
 // repository and scripts run there, so it is not trusted: entries must stay
-// under the destination, may not carry setuid/setgid bits, and the archive
-// and the extracted bytes are capped.
-const (
-	maxArchiveBytes   int64 = 2 << 30
-	maxExtractedBytes int64 = 10 << 30
-)
+// under the destination, may not carry setuid/setgid bits, and the extracted
+// bytes are capped.
+const maxExtractedBytes int64 = 10 << 30
 
 // withinDir reports whether path, with every symlink in it resolved, lies
 // under realDir (itself already symlink-free). It guards against a
@@ -164,7 +175,7 @@ func safeExtractTarget(destDir, name string) (string, error) {
 	return target, nil
 }
 
-func extractTarGz(data []byte, destDir string) error {
+func extractTarGz(archive io.Reader, destDir string) error {
 	if err := os.MkdirAll(destDir, 0o755); err != nil {
 		return fmt.Errorf("create destination: %w", err)
 	}
@@ -178,7 +189,7 @@ func extractTarGz(data []byte, destDir string) error {
 	}
 	var extracted int64
 
-	gr, err := gzip.NewReader(bytes.NewReader(data))
+	gr, err := gzip.NewReader(archive)
 	if err != nil {
 		return fmt.Errorf("open gzip: %w", err)
 	}

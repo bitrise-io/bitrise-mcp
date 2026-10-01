@@ -57,3 +57,24 @@ type fakeNetErr struct{ timeout bool }
 func (e fakeNetErr) Error() string   { return "fake net error" }
 func (e fakeNetErr) Timeout() bool   { return e.timeout }
 func (e fakeNetErr) Temporary() bool { return e.timeout }
+
+// Output beyond the cap is counted, not kept, and every write still reports
+// its full length so the SSH session keeps draining the remote command.
+func TestCappedBuffer(t *testing.T) {
+	b := &cappedBuffer{limit: 5}
+	for _, chunk := range []string{"abc", "defg", "hij"} {
+		n, err := b.Write([]byte(chunk))
+		if err != nil || n != len(chunk) {
+			t.Fatalf("Write(%q) = %d, %v; want %d, nil", chunk, n, err, len(chunk))
+		}
+	}
+	if got, want := string(b.Bytes()), "abcde\n[output truncated: 5 more bytes not shown]\n"; got != want {
+		t.Errorf("Bytes() = %q, want %q", got, want)
+	}
+
+	small := &cappedBuffer{limit: 5}
+	_, _ = small.Write([]byte("ok"))
+	if got := string(small.Bytes()); got != "ok" {
+		t.Errorf("Bytes() under the cap = %q, want %q", got, "ok")
+	}
+}

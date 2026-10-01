@@ -79,6 +79,10 @@ Output is returned as a JSON object with three fields:
 - stdout:    captured stdout as a string
 - stderr:    captured stderr as a string
 
+Each of stdout and stderr keeps its first 1 MiB; anything beyond that is dropped and
+replaced by an "[output truncated: N more bytes not shown]" line (the command still runs
+to completion). Redirect large output to a file and read the part you need.
+
 When the MCP server runs locally (stdio) and the host has an SSH agent
 (SSH_AUTH_SOCK), that agent is forwarded into the session, so remote commands
 that authenticate over SSH ("git push", "git clone git@github.com:...") can use

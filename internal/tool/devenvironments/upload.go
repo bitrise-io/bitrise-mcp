@@ -139,7 +139,15 @@ func createTarGz(sourcePath string) (string, error) {
 			return err
 		}
 
-		header, err := tar.FileInfoHeader(info, "")
+		// FileInfoHeader does not read a symlink's target; without it the
+		// entry arrives on the VM as a link to "".
+		var link string
+		if info.Mode()&os.ModeSymlink != 0 {
+			if link, err = os.Readlink(path); err != nil {
+				return fmt.Errorf("read symlink: %w", err)
+			}
+		}
+		header, err := tar.FileInfoHeader(info, link)
 		if err != nil {
 			return fmt.Errorf("file info header: %w", err)
 		}
