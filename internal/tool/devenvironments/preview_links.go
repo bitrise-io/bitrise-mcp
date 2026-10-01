@@ -44,7 +44,7 @@ Returns url (the shareable link — this is what you hand over), token (the same
 
 Device preview is enabled per workspace and per platform. PermissionDenied means the workspace does not have it yet — tell the user to ask Bitrise support, do not retry.`),
 		mcp.WithObject("device_spec",
-			deviceSpecSchema(`The virtual device each open boots. `+deviceSpecFieldsDoc+` platform is required. Stick to platform alone unless the user asked for a specific device or OS — the deployment's defaults are known-good, and a device_model or os_version the stack lacks is silently substituted. Omit it when warm_pool_id is set: the pool's configuration names the device.`, "platform")...,
+			deviceSpecSchema(`The virtual device each open boots. `+deviceSpecFieldsDoc+` platform is required. Stick to platform alone unless the user asked for a specific device or OS — the deployment's defaults are known-good, and a device_model or os_version the stack lacks is silently substituted — with one exception: device_model "iPhone Duo" (the foldable) needs an Xcode 27.1+ stack; with no stack_id it runs on the deployment's Duo default stack, and on a named stack whose Xcode is older the request is rejected with a 400 that names a stack that works. Omit it when warm_pool_id is set: the pool's configuration names the device.`, "platform")...,
 		),
 		mcp.WithString("warm_pool_id",
 			mcp.Description("Serve the link's opens from this workspace-owned warm pool (UUID, from bitrise_devenv_list_warm_pools) whose configuration boots a device. When set, omit device_spec, stack_id and machine_type — the pool fixes them (stack_id / machine_type are rejected alongside it; device_spec only if it differs from the pool's). Sessions the link spawns are owned by the workspace."),

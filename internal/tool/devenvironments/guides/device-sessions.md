@@ -68,7 +68,19 @@ Rules:
   boot. An unrecognised `device_model` is **substituted, not rejected**: the
   device boots the platform default (`iPhone 15` / `pixel_7`),
   `device.device_notes` says so, and on the VM those two commands print the
-  ids that would have worked. `system_image` is the Android **API-level** knob
+  ids that would have worked. **One exception: `"iPhone Duo"`** (the
+  foldable) needs an Xcode 27.1+ stack with the iOS 27.1 runtime. With no
+  `stack_id` it runs on the deployment's **Duo default stack**
+  (`osx-xcode-27.1.x-edge`), not the general iOS default, so it works out of
+  the box; naming an older stack is **rejected with a 400** that names a stack
+  that works, because the substitute would not fold (the session form and the
+  template form flag the pair before submit). Should a VM still land on an older Xcode, it
+  boots `iPhone 15` and `device.device_notes` says why. On a Duo the browser
+  view follows whichever panel is active (cover or inner) and offers
+  Folded / Half open / Open in any hold, Tent / Table in the landscape hold
+  (0/130/180/80/100°; Tent or Table from a portrait hold turns the device first, and a pose that iOS would leave on the wrong display — Table or Half open from the cover, Tent from the inner display — folds through Open or Folded first behind a "Folding to …" veil, so Tent always shows the cover and Table / Half open the inner display; a stream that stays black after a fold is switched to the lit panel automatically); over SSH,
+  `~/serve-sim/node_modules/.bin/serve-sim fold <0-180> -d <udid>` drives the
+  hinge. `system_image` is the Android **API-level** knob
   (`"system-images;android-34;google_apis;x86_64"`; empty = the stack's
   default). **The platform cannot list a stack's installed images or iOS
   runtimes before boot**, and an explicitly requested `system_image` /
