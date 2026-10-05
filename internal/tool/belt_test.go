@@ -45,6 +45,47 @@ func TestEveryToolHasAnOutputSchema(t *testing.T) {
 	}
 }
 
+// openWorld lists the tools whose effect reaches beyond the authenticated
+// Bitrise account, following the connector directory definition of
+// openWorldHint (OpenAI's app review FAQ): true when a tool accesses the
+// public internet or open-ended external entities (sends messages to external
+// recipients, publishes content, writes to another service), false when it is
+// limited to the bounded Bitrise workspace, even though Bitrise is externally
+// hosted. Every other tool only reads or writes the user's own Bitrise data.
+var openWorld = map[string]string{
+	"register_webhook":                             "registers a webhook at the app's git provider",
+	"register_ssh_key":                             "can register the key at the app's git provider",
+	"invite_member_to_workspace":                   "emails an invitation to an arbitrary address",
+	"create_outgoing_webhook":                      "makes Bitrise send build events to an arbitrary URL",
+	"update_outgoing_webhook":                      "makes Bitrise send build events to an arbitrary URL",
+	"set_installable_artifact_public_install_page": "publishes an install page on the public internet",
+	"codepush_generate_update_upload_url":          "creates an update that end-user devices download once uploaded",
+	"codepush_promote_deployment":                  "releases a package to the end-user devices of the target deployment",
+	"codepush_rollback_deployment":                 "changes the package served to end-user devices",
+	"codepush_patch_update":                        "changes whether and to how many end-user devices an update is served",
+	"codepush_delete_update":                       "withdraws an update served to end-user devices",
+}
+
+// TestOpenWorldHintIsDeliberate keeps openWorldHint an explicit decision per
+// tool: it must be set, and it is true exactly for the tools listed in
+// openWorld.
+func TestOpenWorldHintIsDeliberate(t *testing.T) {
+	registered := map[string]bool{}
+	for _, tl := range NewBelt().Tools() {
+		name := tl.Definition.Name
+		registered[name] = true
+		hint := tl.Definition.Annotations.OpenWorldHint
+		if !assert.NotNilf(t, hint, "%s: openWorldHint must be set explicitly", name) {
+			continue
+		}
+		_, open := openWorld[name]
+		assert.Equalf(t, open, *hint, "%s: openWorldHint is %v but the tool is%s listed in openWorld (belt_test.go)", name, *hint, map[bool]string{true: "", false: " not"}[open])
+	}
+	for name := range openWorld {
+		assert.Truef(t, registered[name], "openWorld lists %s, which is not a registered tool", name)
+	}
+}
+
 // TestGeneratedSchemasMatchTools guards against stale generated files: every
 // schemas/<name>.json belongs to a registered tool.
 func TestGeneratedSchemasMatchTools(t *testing.T) {
