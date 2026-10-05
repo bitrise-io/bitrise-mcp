@@ -19,7 +19,7 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
 - `register_webhook` and `register_ssh_key` write to the app's git provider.
 - `invite_member_to_workspace` emails an invitation to an arbitrary address.
 - `create_outgoing_webhook` and `update_outgoing_webhook` make Bitrise send build events to an arbitrary URL.
-- `set_installable_artifact_public_install_page` publishes an install page on the public internet.
+- `update_artifact`, `generate_installable_artifact_upload_url` (with `with_public_page`) and `set_installable_artifact_public_install_page` publish an install page on the public internet.
 - `codepush_generate_update_upload_url`, `codepush_promote_deployment`, `codepush_rollback_deployment`, `codepush_patch_update` and `codepush_delete_update` change what end-user devices download.
 
 ## Tools

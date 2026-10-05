@@ -32,7 +32,7 @@ var Update = bitrise.Tool{
 		mcp.WithTitleAnnotation("Update Artifact"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
-		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

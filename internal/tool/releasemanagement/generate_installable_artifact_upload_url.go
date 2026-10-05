@@ -42,7 +42,7 @@ var GenerateInstallableArtifactUploadURL = bitrise.Tool{
 		mcp.WithTitleAnnotation("Generate Installable Artifact Upload URL"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
-		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

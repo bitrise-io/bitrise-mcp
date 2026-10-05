@@ -58,6 +58,8 @@ var openWorld = map[string]string{
 	"invite_member_to_workspace":                   "emails an invitation to an arbitrary address",
 	"create_outgoing_webhook":                      "makes Bitrise send build events to an arbitrary URL",
 	"update_outgoing_webhook":                      "makes Bitrise send build events to an arbitrary URL",
+	"update_artifact":                              "can enable the artifact's public install page",
+	"generate_installable_artifact_upload_url":     "can enable the artifact's public install page (with_public_page)",
 	"set_installable_artifact_public_install_page": "publishes an install page on the public internet",
 	"codepush_generate_update_upload_url":          "creates an update that end-user devices download once uploaded",
 	"codepush_promote_deployment":                  "releases a package to the end-user devices of the target deployment",
