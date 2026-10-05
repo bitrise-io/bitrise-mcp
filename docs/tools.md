@@ -12,6 +12,16 @@ By default, all API groups are enabled. You can specify which groups to enable u
 
 Every tool advertises an `outputSchema` (a JSON Schema of its result) and returns the result as `structuredContent` alongside the text content, so MCP clients and directories that rely on it (for example the OpenAI connector directory) can interpret results. Schemas of tools that pass an API response through are generated from the APIs' published OpenAPI documents (`internal/tool/outputschema/`); results that are plain text (a `bitrise.yml`, a guide, a status message) are returned as `{"content": "<text>"}`. Optional fields may be `null`.
 
+## Tool annotations
+
+Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) and a `title`. `openWorldHint` follows the connector directory definition: it is `false` for tools whose effect stays within the authenticated Bitrise account or workspace, even though Bitrise is externally hosted, and `true` only for tools that reach beyond it:
+
+- `register_webhook` and `register_ssh_key` write to the app's git provider.
+- `invite_member_to_workspace` emails an invitation to an arbitrary address.
+- `create_outgoing_webhook` and `update_outgoing_webhook` make Bitrise send build events to an arbitrary URL.
+- `update_artifact`, `generate_installable_artifact_upload_url` (with `with_public_page`) and `set_installable_artifact_public_install_page` publish an install page on the public internet.
+- `codepush_generate_update_upload_url`, `codepush_promote_deployment`, `codepush_rollback_deployment`, `codepush_patch_update` and `codepush_delete_update` change what end-user devices download.
+
 ## Tools
 
 ### Apps
