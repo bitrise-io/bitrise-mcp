@@ -1,0 +1,25 @@
+{
+  "name": "bitrise",
+  "version": "1.0.0",
+  "description": "Set up and manage mobile CI/CD on Bitrise from Cursor: build, test, and distribute iOS, Android, Flutter, and React Native apps.",
+  "author": {
+    "name": "Bitrise",
+    "email": "mcp-support@bitrise.io"
+  },
+  "homepage": "https://docs.bitrise.io/en/bitrise-platform/ai/bitrise-mcp",
+  "repository": "https://github.com/bitrise-io/bitrise-mcp",
+  "license": "MIT",
+  "keywords": [
+    "bitrise",
+    "ci",
+    "cd",
+    "mobile",
+    "ios",
+    "android",
+    "flutter",
+    "react-native",
+    "devops",
+    "release-management"
+  ],
+  "mcpServers": "mcp.json"
+}
