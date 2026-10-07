@@ -9,6 +9,7 @@
   "homepage": "https://docs.bitrise.io/en/bitrise-platform/ai/bitrise-mcp",
   "repository": "https://github.com/bitrise-io/bitrise-mcp",
   "license": "MIT",
+  "logo": "assets/logo.svg",
   "keywords": [
     "bitrise",
     "ci",
