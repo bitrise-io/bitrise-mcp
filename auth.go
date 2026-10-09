@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,10 @@ import (
 	"sync"
 	"time"
 )
+
+// errInvalidToken marks a bearer token that was presented but rejected, as
+// opposed to the exchange failing for reasons unrelated to the token.
+var errInvalidToken = errors.New("invalid token")
 
 // extractPAT exchanges via OIDC (RFC 8693) when the token looks like a JWT;
 // otherwise passes it through as a raw PAT. Returns ("", nil) with no auth header.
@@ -27,6 +32,17 @@ func extractPAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
 	return token, nil
 }
 
+type resolvedPATKey struct{}
+
+// resolvePAT reuses the PAT requireAuthMiddleware already resolved for this
+// request, so a JWT expiring mid-request can't fail the second resolution.
+func resolvePAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
+	if pat, ok := r.Context().Value(resolvedPATKey{}).(string); ok {
+		return pat, nil
+	}
+	return extractPAT(r, exchanger)
+}
+
 type cacheEntry struct {
 	pat       string
 	expiresAt time.Time
@@ -39,6 +55,10 @@ type jwtExchanger struct {
 }
 
 func (e *jwtExchanger) exchange(ctx context.Context, jwt string) (string, error) {
+	if exp, ok := jwtExpiry(jwt); ok && !time.Now().Before(exp) {
+		return "", fmt.Errorf("%w: expired %s ago", errInvalidToken, time.Since(exp).Round(time.Second))
+	}
+
 	key := cacheKey(jwt)
 	if v, ok := e.cache.Load(key); ok {
 		entry := v.(cacheEntry) //nolint:forcetypeassert
@@ -84,6 +104,9 @@ func (e *jwtExchanger) callExchangeEndpoint(ctx context.Context, jwt string) (st
 	if err != nil {
 		return "", fmt.Errorf("read exchange response: %w", err)
 	}
+	if resp.StatusCode == http.StatusBadRequest {
+		return "", fmt.Errorf("%w: exchange returned %d: %s", errInvalidToken, resp.StatusCode, respBody)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("exchange returned %d: %s", resp.StatusCode, respBody)
 	}
@@ -105,11 +128,12 @@ func isJWT(token string) bool {
 	return strings.HasPrefix(token, "eyJ") && strings.Count(token, ".") == 2
 }
 
-// jwtTTL reads exp without signature verification; capped at 1h, falls back to 5m.
-func jwtTTL(jwt string) time.Duration {
+// jwtExpiry reads exp without signature verification. It is only trusted to
+// reject early: the token endpoint still verifies every token it accepts.
+func jwtExpiry(jwt string) (time.Time, bool) {
 	parts := strings.Split(jwt, ".")
 	if len(parts) != 3 {
-		return 5 * time.Minute
+		return time.Time{}, false
 	}
 	payload := parts[1]
 	if p := len(payload) % 4; p != 0 {
@@ -117,15 +141,24 @@ func jwtTTL(jwt string) time.Duration {
 	}
 	data, err := base64.URLEncoding.DecodeString(payload)
 	if err != nil {
-		return 5 * time.Minute
+		return time.Time{}, false
 	}
 	var claims struct {
-		Exp int64 `json:"exp"`
+		Exp *int64 `json:"exp"`
 	}
-	if err := json.Unmarshal(data, &claims); err != nil || claims.Exp == 0 {
+	if err := json.Unmarshal(data, &claims); err != nil || claims.Exp == nil {
+		return time.Time{}, false
+	}
+	return time.Unix(*claims.Exp, 0), true
+}
+
+// jwtTTL is the time until exp, capped at 1h; falls back to 5m without a readable exp.
+func jwtTTL(jwt string) time.Duration {
+	exp, ok := jwtExpiry(jwt)
+	if !ok {
 		return 5 * time.Minute
 	}
-	ttl := time.Until(time.Unix(claims.Exp, 0))
+	ttl := time.Until(exp)
 	if ttl <= 0 {
 		return 0
 	}
