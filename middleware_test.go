@@ -126,6 +126,25 @@ func TestRequireAuthMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, rec.Code)
 	})
 
+	t.Run("POST with an expired JWT is challenged with invalid_token", func(t *testing.T) {
+		next, called := newNext()
+		exchanger := &jwtExchanger{tokenEndpoint: "http://127.0.0.1:0/unreachable"}
+		mw := requireAuthMiddleware(next, exchanger, metadataURL, logger)
+
+		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		req.Header.Set("Authorization", "Bearer "+makeTestJWT(time.Now().Add(-time.Hour).Unix()))
+		rec := httptest.NewRecorder()
+		mw.ServeHTTP(rec, req)
+
+		assert.False(t, *called)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Equal(t,
+			`Bearer resource_metadata="`+metadataURL+`", error="invalid_token", error_description="the access token is expired or invalid"`,
+			rec.Header().Get("WWW-Authenticate"),
+		)
+		assert.JSONEq(t, `{"error":"invalid_token","error_description":"the access token is expired or invalid"}`, rec.Body.String())
+	})
+
 	t.Run("non-POST requests are not challenged", func(t *testing.T) {
 		next, called := newNext()
 		mw := requireAuthMiddleware(next, nil, metadataURL, logger)

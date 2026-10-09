@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -45,7 +46,7 @@ func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, metadataU
 			logger.Warnw("JWT→PAT exchange failed", "error", err)
 		}
 		if pat == "" {
-			writeUnauthorized(w, metadataURL)
+			writeUnauthorized(w, metadataURL, errors.Is(err, errInvalidToken))
 			return
 		}
 
@@ -53,9 +54,18 @@ func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, metadataU
 	})
 }
 
-func writeUnauthorized(w http.ResponseWriter, metadataURL string) {
-	w.Header().Set("WWW-Authenticate", fmt.Sprintf("Bearer resource_metadata=%q", metadataURL))
+// writeUnauthorized adds RFC 6750 error="invalid_token" when a presented token
+// was rejected, which tells the client to refresh or re-authorize rather than
+// retry with the same token.
+func writeUnauthorized(w http.ResponseWriter, metadataURL string, invalidToken bool) {
+	challenge := fmt.Sprintf("Bearer resource_metadata=%q", metadataURL)
+	body := `{"error":"unauthorized","error_description":"authentication required"}`
+	if invalidToken {
+		challenge += `, error="invalid_token", error_description="the access token is expired or invalid"`
+		body = `{"error":"invalid_token","error_description":"the access token is expired or invalid"}`
+	}
+	w.Header().Set("WWW-Authenticate", challenge)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
-	_, _ = w.Write([]byte(`{"error":"unauthorized","error_description":"authentication required"}`))
+	_, _ = w.Write([]byte(body))
 }
