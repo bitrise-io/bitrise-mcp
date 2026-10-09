@@ -145,6 +145,35 @@ func TestRequireAuthMiddleware(t *testing.T) {
 		assert.JSONEq(t, `{"error":"invalid_token","error_description":"the access token is expired or invalid"}`, rec.Body.String())
 	})
 
+	t.Run("PAT resolved by the middleware is reused downstream", func(t *testing.T) {
+		calls := 0
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			calls++
+			body, _ := json.Marshal(map[string]string{"access_token": "exchanged-pat"})
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write(body)
+		}))
+		defer srv.Close()
+
+		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
+		var downstreamPAT string
+		next := http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+			// Simulates the JWT expiring between the middleware and the MCP context func.
+			r.Header.Set("Authorization", "Bearer "+makeTestJWT(time.Now().Add(-time.Second).Unix()))
+			pat, err := resolvePAT(r, exchanger)
+			assert.NoError(t, err)
+			downstreamPAT = pat
+		})
+		mw := requireAuthMiddleware(next, exchanger, metadataURL, logger)
+
+		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		req.Header.Set("Authorization", "Bearer "+makeTestJWT(time.Now().Add(10*time.Minute).Unix()))
+		mw.ServeHTTP(httptest.NewRecorder(), req)
+
+		assert.Equal(t, "exchanged-pat", downstreamPAT)
+		assert.Equal(t, 1, calls)
+	})
+
 	t.Run("non-POST requests are not challenged", func(t *testing.T) {
 		next, called := newNext()
 		mw := requireAuthMiddleware(next, nil, metadataURL, logger)

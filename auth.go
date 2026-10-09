@@ -32,6 +32,17 @@ func extractPAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
 	return token, nil
 }
 
+type resolvedPATKey struct{}
+
+// resolvePAT reuses the PAT requireAuthMiddleware already resolved for this
+// request, so a JWT expiring mid-request can't fail the second resolution.
+func resolvePAT(r *http.Request, exchanger *jwtExchanger) (string, error) {
+	if pat, ok := r.Context().Value(resolvedPATKey{}).(string); ok {
+		return pat, nil
+	}
+	return extractPAT(r, exchanger)
+}
+
 type cacheEntry struct {
 	pat       string
 	expiresAt time.Time

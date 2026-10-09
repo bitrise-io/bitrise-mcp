@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -50,7 +51,7 @@ func requireAuthMiddleware(next http.Handler, exchanger *jwtExchanger, metadataU
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), resolvedPATKey{}, pat)))
 	})
 }
 
