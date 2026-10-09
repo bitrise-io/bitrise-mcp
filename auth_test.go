@@ -151,18 +151,24 @@ func TestJwtExchangerExchange(t *testing.T) {
 	})
 
 	t.Run("expired JWT is rejected without calling the endpoint", func(t *testing.T) {
-		calls := 0
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			calls++
-		}))
-		defer srv.Close()
+		for name, exp := range map[string]int64{
+			"past exp":  time.Now().Add(-time.Minute).Unix(),
+			"epoch exp": 0,
+		} {
+			t.Run(name, func(t *testing.T) {
+				calls := 0
+				srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					calls++
+				}))
+				defer srv.Close()
 
-		exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
-		jwt := makeTestJWT(time.Now().Add(-time.Minute).Unix())
-		_, err := exchanger.exchange(t.Context(), jwt)
-		assert.ErrorIs(t, err, errInvalidToken)
-		assert.Contains(t, err.Error(), "expired")
-		assert.Equal(t, 0, calls)
+				exchanger := &jwtExchanger{tokenEndpoint: srv.URL}
+				_, err := exchanger.exchange(t.Context(), makeTestJWT(exp))
+				assert.ErrorIs(t, err, errInvalidToken)
+				assert.Contains(t, err.Error(), "expired")
+				assert.Equal(t, 0, calls)
+			})
+		}
 	})
 
 	t.Run("response missing access_token returns error", func(t *testing.T) {

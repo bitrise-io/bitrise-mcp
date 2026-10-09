@@ -133,12 +133,12 @@ func jwtExpiry(jwt string) (time.Time, bool) {
 		return time.Time{}, false
 	}
 	var claims struct {
-		Exp int64 `json:"exp"`
+		Exp *int64 `json:"exp"`
 	}
-	if err := json.Unmarshal(data, &claims); err != nil || claims.Exp == 0 {
+	if err := json.Unmarshal(data, &claims); err != nil || claims.Exp == nil {
 		return time.Time{}, false
 	}
-	return time.Unix(claims.Exp, 0), true
+	return time.Unix(*claims.Exp, 0), true
 }
 
 // jwtTTL is the time until exp, capped at 1h; falls back to 5m without a readable exp.
