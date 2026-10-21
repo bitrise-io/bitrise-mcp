@@ -156,7 +156,7 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
       - `app_slug`: Identifier of the Bitrise app
 
 19. `get_build_steps`
-    - Get step statuses of a specific build of a given app
+    - Get the steps of a specific build of a given app with their status and timing, including the failure reason of failed or aborted steps and why skipped steps were skipped
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
