@@ -1,0 +1,163 @@
+{
+  "description": "Test results of a build: test suites, nested test suites and their test cases. Not in the published API document; mirrors a live response.",
+  "properties": {
+    "test_suites": {
+      "items": {
+        "properties": {
+          "attachments": {
+            "items": {
+              "properties": {
+                "url": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "duration_in_ms": {
+            "type": "integer"
+          },
+          "error_count": {
+            "type": "integer"
+          },
+          "failure_count": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "properties": {
+            "items": {
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "skipped_count": {
+            "type": "integer"
+          },
+          "test_cases": {
+            "items": {
+              "properties": {
+                "attachments": {
+                  "items": {
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "class_name": {
+                  "type": "string"
+                },
+                "duration_in_ms": {
+                  "type": "integer"
+                },
+                "flaky": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "properties": {
+                  "items": {
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "runs": {
+                  "items": {
+                    "properties": {
+                      "attachments": {
+                        "items": {
+                          "properties": {
+                            "url": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "duration_in_ms": {
+                        "type": "integer"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "enum": [
+                          "passed",
+                          "failed",
+                          "skipped",
+                          "error"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "skipped",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                "test_suites": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "test_count": {
+            "type": "integer"
+          },
+          "test_suites": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object"
+}
