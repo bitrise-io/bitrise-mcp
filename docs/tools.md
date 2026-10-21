@@ -161,6 +161,13 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
 
+20. `get_build_test_results`
+    - Get the test results of a finished build: test suites and test cases with their status, duration and failure message. Requires a plan that includes test reports.
+    - Arguments:
+      - `app_slug`: Identifier of the Bitrise app
+      - `build_slug`: Identifier of the build
+      - `failed_only` (optional): Only return failed and errored test cases, and the test suites containing them (default: false)
+
 ### Artifacts
 
 20. `list_artifacts`
@@ -697,6 +704,7 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | | |
 | list_build_workflows | | ✅ | | | | | | | | ✅ | | | | |
 | get_build_steps | | ✅ | | | | | | | | ✅ | | | | |
+| get_build_test_results | | ✅ | | | | | | | | ✅ | | | | |
 | list_artifacts | | | | | ✅ | | | | | ✅ | | | | |
 | get_artifact | | | | | ✅ | | | | | ✅ | | | | |
 | delete_artifact | | | | | ✅ | | | | | | | | | |
