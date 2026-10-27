@@ -99,6 +99,8 @@ var mappings = []mapping{
 		Note: "pull_request_id is omitted when 0; original_build_params is included only with verbose=true."},
 	{Tool: "abort_build", Spec: "ci", Method: "post", Path: "/apps/{app-slug}/builds/{build-slug}/abort"},
 	{Tool: "get_build_bitrise_yml", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/bitrise.yml"},
+	{Tool: "get_build_test_results", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/test-results",
+		Note: "With failed_only=true, test_cases only holds failed and errored cases and suites without any are dropped; the suite counts still cover every case."},
 	{Tool: "list_build_workflows", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/build-workflows"},
 	{Tool: "list_artifacts", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/artifacts"},
 	{Tool: "get_artifact", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug}"},

@@ -1,0 +1,264 @@
+{
+  "description": "Response of GET /apps/{app-slug}/builds/{build-slug}/test-results (Bitrise API, HTTP 200). With failed_only=true, test_cases only holds failed and errored cases and suites without any are dropped; the suite counts still cover every case.",
+  "properties": {
+    "test_suites": {
+      "items": {
+        "properties": {
+          "attachments": {
+            "items": {
+              "properties": {
+                "url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "duration_in_ms": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "error_count": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "failure_count": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "properties": {
+            "items": {
+              "properties": {
+                "key": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "skipped_count": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "test_cases": {
+            "items": {
+              "properties": {
+                "attachments": {
+                  "items": {
+                    "properties": {
+                      "url": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                },
+                "class_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "duration_in_ms": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "flaky": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "message": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "properties": {
+                  "items": {
+                    "properties": {
+                      "key": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "value": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                },
+                "runs": {
+                  "items": {
+                    "properties": {
+                      "attachments": {
+                        "items": {
+                          "properties": {
+                            "url": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": [
+                          "array",
+                          "null"
+                        ]
+                      },
+                      "duration_in_ms": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ]
+                      },
+                      "message": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "name": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "enum": [
+                          "passed",
+                          "failed",
+                          "skipped",
+                          "error",
+                          null
+                        ],
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "skipped",
+                    "error",
+                    null
+                  ],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "test_suites": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "test_count": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "test_suites": {
+            "items": {
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}
