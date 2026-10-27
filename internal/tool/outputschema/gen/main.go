@@ -99,6 +99,8 @@ var mappings = []mapping{
 		Note: "pull_request_id is omitted when 0; original_build_params is included only with verbose=true."},
 	{Tool: "abort_build", Spec: "ci", Method: "post", Path: "/apps/{app-slug}/builds/{build-slug}/abort"},
 	{Tool: "get_build_bitrise_yml", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/bitrise.yml"},
+	{Tool: "get_build_test_results", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/test-results",
+		Note: "With failed_only=true, test_cases only holds failed and errored cases and suites without any are dropped; the suite counts still cover every case."},
 	{Tool: "list_build_workflows", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/build-workflows"},
 	{Tool: "list_artifacts", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/artifacts"},
 	{Tool: "get_artifact", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug}"},
@@ -275,90 +277,6 @@ var manuals = map[string]map[string]any{
 										},
 									},
 								},
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-	// GET /apps/{app-slug}/builds/{build-slug}/test-results is served by the
-	// Monolith and not yet in the published API document; this mirrors its
-	// response.
-	"get_build_test_results": {
-		"type":        "object",
-		"description": "Test results of a build: test suites, nested test suites and their test cases. Not in the published API document; mirrors a live response.",
-		"properties": map[string]any{
-			"test_suites": map[string]any{
-				"type":  "array",
-				"items": testSuiteSchema,
-			},
-		},
-	},
-}
-
-var testRunStatusSchema = map[string]any{"type": "string", "enum": []any{"passed", "failed", "skipped", "error"}}
-
-var testAttachmentsSchema = map[string]any{
-	"type": "array",
-	"items": map[string]any{
-		"type":       "object",
-		"properties": map[string]any{"url": map[string]any{"type": "string"}},
-	},
-}
-
-var testPropertiesSchema = map[string]any{
-	"type": "array",
-	"items": map[string]any{
-		"type": "object",
-		"properties": map[string]any{
-			"key":   map[string]any{"type": "string"},
-			"value": map[string]any{"type": "string"},
-		},
-	},
-}
-
-var testSuiteSchema = map[string]any{
-	"type": "object",
-	"properties": map[string]any{
-		"name":           map[string]any{"type": "string"},
-		"test_count":     map[string]any{"type": "integer"},
-		"failure_count":  map[string]any{"type": "integer"},
-		"error_count":    map[string]any{"type": "integer"},
-		"skipped_count":  map[string]any{"type": "integer"},
-		"duration_in_ms": map[string]any{"type": "integer"},
-		"properties":     testPropertiesSchema,
-		"attachments":    testAttachmentsSchema,
-		"test_suites": map[string]any{
-			"type":        "array",
-			"description": "Nested test suites, in the same shape as their parent.",
-			"items":       map[string]any{"type": "object"},
-		},
-		"test_cases": map[string]any{
-			"type": "array",
-			"items": map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"name":           map[string]any{"type": "string"},
-					"class_name":     map[string]any{"type": "string"},
-					"status":         testRunStatusSchema,
-					"message":        map[string]any{"type": "string", "description": "Failure or error message."},
-					"duration_in_ms": map[string]any{"type": "integer"},
-					"flaky":          map[string]any{"type": "boolean"},
-					"test_suites":    map[string]any{"type": "array", "description": "Names of the test suites the test case originally belonged to.", "items": map[string]any{"type": "string"}},
-					"properties":     testPropertiesSchema,
-					"attachments":    testAttachmentsSchema,
-					"runs": map[string]any{
-						"type":        "array",
-						"description": "Individual runs of the test case when it was retried.",
-						"items": map[string]any{
-							"type": "object",
-							"properties": map[string]any{
-								"name":           map[string]any{"type": "string"},
-								"status":         testRunStatusSchema,
-								"message":        map[string]any{"type": "string"},
-								"duration_in_ms": map[string]any{"type": "integer"},
-								"attachments":    testAttachmentsSchema,
 							},
 						},
 					},

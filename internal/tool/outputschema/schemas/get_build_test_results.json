@@ -1,5 +1,5 @@
 {
-  "description": "Test results of a build: test suites, nested test suites and their test cases. Not in the published API document; mirrors a live response.",
+  "description": "Response of GET /apps/{app-slug}/builds/{build-slug}/test-results (Bitrise API, HTTP 200). With failed_only=true, test_cases only holds failed and errored cases and suites without any are dropped; the suite counts still cover every case.",
   "properties": {
     "test_suites": {
       "items": {
@@ -8,41 +8,71 @@
             "items": {
               "properties": {
                 "url": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "type": "object"
             },
-            "type": "array"
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "duration_in_ms": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "error_count": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "failure_count": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "properties": {
             "items": {
               "properties": {
                 "key": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "value": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "type": "object"
             },
-            "type": "array"
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "skipped_count": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "test_cases": {
             "items": {
@@ -51,41 +81,71 @@
                   "items": {
                     "properties": {
                       "url": {
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       }
                     },
                     "type": "object"
                   },
-                  "type": "array"
+                  "type": [
+                    "array",
+                    "null"
+                  ]
                 },
                 "class_name": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "duration_in_ms": {
-                  "type": "integer"
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
                 },
                 "flaky": {
-                  "type": "boolean"
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
                 },
                 "message": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "name": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "properties": {
                   "items": {
                     "properties": {
                       "key": {
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       "value": {
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       }
                     },
                     "type": "object"
                   },
-                  "type": "array"
+                  "type": [
+                    "array",
+                    "null"
+                  ]
                 },
                 "runs": {
                   "items": {
@@ -94,69 +154,110 @@
                         "items": {
                           "properties": {
                             "url": {
-                              "type": "string"
+                              "type": [
+                                "string",
+                                "null"
+                              ]
                             }
                           },
                           "type": "object"
                         },
-                        "type": "array"
+                        "type": [
+                          "array",
+                          "null"
+                        ]
                       },
                       "duration_in_ms": {
-                        "type": "integer"
+                        "type": [
+                          "integer",
+                          "null"
+                        ]
                       },
                       "message": {
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       "name": {
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       "status": {
                         "enum": [
                           "passed",
                           "failed",
                           "skipped",
-                          "error"
+                          "error",
+                          null
                         ],
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       }
                     },
                     "type": "object"
                   },
-                  "type": "array"
+                  "type": [
+                    "array",
+                    "null"
+                  ]
                 },
                 "status": {
                   "enum": [
                     "passed",
                     "failed",
                     "skipped",
-                    "error"
+                    "error",
+                    null
                   ],
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "test_suites": {
                   "items": {
                     "type": "string"
                   },
-                  "type": "array"
+                  "type": [
+                    "array",
+                    "null"
+                  ]
                 }
               },
               "type": "object"
             },
-            "type": "array"
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "test_count": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "test_suites": {
             "items": {
               "type": "object"
             },
-            "type": "array"
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "type": "object"
       },
-      "type": "array"
+      "type": [
+        "array",
+        "null"
+      ]
     }
   },
   "type": "object"
