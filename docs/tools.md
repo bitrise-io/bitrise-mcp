@@ -21,6 +21,10 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
 - `create_outgoing_webhook` and `update_outgoing_webhook` make Bitrise send build events to an arbitrary URL.
 - `update_artifact`, `generate_installable_artifact_upload_url` (with `with_public_page`) and `set_installable_artifact_public_install_page` publish an install page on the public internet.
 - `codepush_generate_update_upload_url`, `codepush_promote_deployment`, `codepush_rollback_deployment`, `codepush_patch_update` and `codepush_delete_update` change what end-user devices download.
+- `create_app_version` and `update_app_version` make Bitrise send release notifications to an arbitrary Slack or Teams webhook URL; `update_app_version` can also start a store upload.
+- `upload_release_candidate`, `submit_release_candidate_for_beta_review`, `start_beta_testing`, `stop_beta_testing` and the `create`/`update`/`delete_what_to_test_description` tools write to TestFlight or the Google Play Console and reach testers.
+- `create_app_store_version`, `update_app_store_draft_version`, `update_app_store_release_settings`, `submit_for_app_store_review` and `cancel_app_store_review` write to App Store Connect, and a submitted version can go live once approved.
+- `release_to_app_store`, the `pause`/`continue`/`complete_app_store_phased_release` tools, `update_google_play_release_notes`, `release_to_google_play`, and `create`/`resume_google_play_staged_rollout_schedule` publish to the stores or change what end-user devices receive.
 
 ## Tools
 
@@ -633,7 +637,7 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
 
 Store release tools take an app version (what the Release Management UI calls a release) of a connected app through the store: selecting and uploading the release candidate, beta testing, approvals, store review and the production rollout. They call the Store Releases API (`https://api.bitrise.io/release-management/v2/store-releases/v1`), except the three App Store version tools at the end, which call the Apps API. `app_version_id` is the `id` of an app version as returned by `list_app_versions`.
 
-Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` on the other platform. Most store operations need a release candidate to be chosen first (HTTP 400 otherwise) and a Standard license on the connected app (HTTP 412 otherwise). `release_to_app_store`, `complete_app_store_phased_release`, `release_to_google_play` and the staged rollout schedule tools publish to end users and cannot be undone, so an agent should confirm with the user before calling them. The delete, stop, cancel and status-closing tools are irreversible too, and every one of them is marked with `destructiveHint: true`.
+Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` on the other platform. Most store operations need a release candidate to be chosen first (HTTP 400 otherwise) and a Standard license on the connected app (HTTP 412 otherwise). `release_to_app_store`, `complete_app_store_phased_release`, `release_to_google_play` and the staged rollout schedule tools publish to end users and cannot be undone, so an agent should confirm with the user before calling them. The delete, stop, cancel and status-closing tools are irreversible too, and every one of them is marked with `destructiveHint: true`. The tools that write to App Store Connect or Google Play, publish to end users, or set notification webhook URLs are marked with `openWorldHint: true` (see Tool annotations); the reads, approval tasks, deleting an app version, and pausing or deleting a staged rollout schedule only touch Bitrise data.
 
 82. `list_app_versions`
    - Lists the app versions of a connected app, newest first, with their stages, release candidate selection and status.

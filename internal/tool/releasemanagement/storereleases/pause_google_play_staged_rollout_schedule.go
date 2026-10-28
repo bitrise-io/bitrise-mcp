@@ -21,7 +21,7 @@ var PauseGooglePlayStagedRolloutSchedule = bitrise.Tool{
 		mcp.WithTitleAnnotation("Pause Google Play Staged Rollout Schedule"),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(true),
-		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(false),
 		mcp.WithIdempotentHintAnnotation(false),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

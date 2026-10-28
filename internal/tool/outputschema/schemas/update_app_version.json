@@ -1,0 +1,348 @@
+{
+  "description": "Response of PATCH /app-versions/{id} (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "app_store_release_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_source": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "automatic_store_upload": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "automations": {
+      "items": {
+        "properties": {
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "event_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "pipeline_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workflow_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "connected_app_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "default_release_method": {
+      "description": "Only null appears in the published examples."
+    },
+    "demo": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outgoing_webhooks": {
+      "items": {
+        "properties": {
+          "all_events": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "webhook_configuration_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "platform": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_branch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_candidate_build_slug": {
+      "description": "Only null appears in the published examples."
+    },
+    "release_candidate_id": {
+      "description": "Only null appears in the published examples."
+    },
+    "release_candidate_locked": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "released_at": {
+      "description": "Only null appears in the published examples."
+    },
+    "slack_notification_integration_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "slack_webhook_url": {
+      "description": "Only null appears in the published examples."
+    },
+    "stages": {
+      "items": {
+        "properties": {
+          "completed_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "disabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tasks": {
+            "items": {
+              "properties": {
+                "assigned_user": {},
+                "completed": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "completed_at": {},
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "creator_user": {
+                  "properties": {
+                    "avatar_url": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "email": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "slug": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "username": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "due_date": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "view_only": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "store_app_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "store_app_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "teams_webhook_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "workflow": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}
