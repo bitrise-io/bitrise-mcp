@@ -4,6 +4,8 @@ You can limit the number of tools exposed to the MCP client. This is useful if y
 
 Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, insights`.
 
+`user` is also accepted and enables the same tool as `account` (`me`). It is the name that tool was tagged with before, kept so existing configurations keep working; use `account` in new ones.
+
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
 By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
@@ -681,7 +683,7 @@ Common arguments of every Insights tool:
 
 ## API Groups
 
-The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
+The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to (`me` also belongs to `user`, the older name of `account`):
 
 | Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | insights |
 |------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|---|

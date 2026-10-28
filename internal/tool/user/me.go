@@ -9,7 +9,8 @@ import (
 )
 
 var Me = bitrise.Tool{
-	APIGroups: []string{"user", "read-only"},
+	// "user" stays for existing configurations that name it; "account" is the documented group.
+	APIGroups: []string{"account", "user", "read-only"},
 	Definition: mcp.NewTool("me",
 		mcp.WithDescription("Get user info for the currently authenticated user account"),
 		mcp.WithTitleAnnotation("Get Current User"),
