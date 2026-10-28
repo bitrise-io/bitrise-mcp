@@ -41,7 +41,8 @@ var CreateAppVersion = bitrise.Tool{
 	Definition: mcp.NewTool("create_app_version",
 		mcp.WithDescription("Creates a store release app version (a release in the Release Management UI) under a connected app. "+
 			"Nothing is uploaded or published by this call: it opens the release with its release candidate stage in progress. "+
-			"Values given here take precedence over the ones coming from 'presets_id'."),
+			"Values given here take precedence over the ones coming from 'presets_id', except that an empty 'slack_webhook_url' or 'teams_webhook_url' does not remove the preset's notification target. "+
+			"To drop it, clear the field afterwards with 'update_app_version' by sending an empty string."),
 		mcp.WithString("connected_app_id",
 			mcp.Description("The uuidV4 identifier of the connected app to create the app version under."),
 			mcp.Required(),

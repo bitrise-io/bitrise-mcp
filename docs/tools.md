@@ -652,7 +652,7 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `app_version_id`: The uuidV4 identifier of the app version.
 
 84. `create_app_version`
-   - Creates an app version under a connected app. Nothing is uploaded or published; the release opens with its release candidate stage in progress. Values given here override the ones from `presets_id`.
+   - Creates an app version under a connected app. Nothing is uploaded or published; the release opens with its release candidate stage in progress. Values given here override the ones from `presets_id`. An empty `slack_webhook_url` or `teams_webhook_url` does not remove a preset's notification target; clear it afterwards with `update_app_version`.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `name`: The name of the app version; for iOS apps the App Store Connect version in X.Y.Z format.
