@@ -84,4 +84,22 @@ Local stdio mode authenticates with a Personal Access Token:
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+VS Code allows at most 128 tools in a chat request, and its built-in tools count toward that limit. With every API group enabled, the Bitrise server alone exposes more than 128 tools, so chat requests can fail with "Cannot have more than 128 tools per request". Enable only the API groups you need with the `x-bitrise-enabled-api-groups` header. This example keeps the CI tools:
+
+```json
+{
+  "servers": {
+    "bitrise": {
+      "type": "http",
+      "url": "https://mcp.bitrise.io",
+      "headers": {
+        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights"
+      }
+    }
+  }
+}
+```
+
+For the local server, put the same comma-separated list in the `ENABLED_API_GROUPS` environment variable instead. You can also turn off individual tools in the tool picker of the Chat view.
+
+See [API groups](/docs/tools.md#advanced-configuration) for every group and combinations that stay under common tool limits.

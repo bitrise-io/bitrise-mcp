@@ -8,6 +8,17 @@ We recommend using the `release-management` API group separately to avoid any co
 
 By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
 
+Some MCP clients cap the number of tools. VS Code allows 128 per chat request, its built-in tools included, and Windsurf allows 100 across all MCP servers. With every group enabled this server exposes more than both, so on those clients enable a smaller set. These combinations stay under 100 tools:
+
+| Use case | Value of `x-bitrise-enabled-api-groups` or `ENABLED_API_GROUPS` | Tools |
+|---|---|---|
+| CI | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights` | 54 |
+| CI and CodePush | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights,release-management-code-push` | 68 |
+| Release Management | `release-management` | 75 |
+| CI and store releases | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights,release-management-store-releases` | 97 |
+
+Leave `read-only` out of a smaller set, because it adds the read tools of every group.
+
 ## Output schemas
 
 Every tool advertises an `outputSchema` (a JSON Schema of its result) and returns the result as `structuredContent` alongside the text content, so MCP clients and directories that rely on it (for example the OpenAI connector directory) can interpret results. Schemas of tools that pass an API response through are generated from the APIs' published OpenAPI documents (`internal/tool/outputschema/`); results that are plain text (a `bitrise.yml`, a guide, a status message) are returned as `{"content": "<text>"}`. Optional fields may be `null`.
