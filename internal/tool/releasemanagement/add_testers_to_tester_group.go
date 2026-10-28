@@ -10,7 +10,7 @@ import (
 )
 
 var AddTestersToTesterGroup = bitrise.Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management-build-distribution", "release-management"},
 	Definition: mcp.NewTool("add_testers_to_tester_group",
 		mcp.WithDescription("Adds testers to a tester group of a connected app. Testers are added one by one and the request fails only when none could be added, so read the slug-keyed 'errors' hash in the response before reporting success. "+
 			"Adding an internal tester grants the App Tester role on the app; removing them later does not revoke it."),

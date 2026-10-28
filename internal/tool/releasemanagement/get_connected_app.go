@@ -10,7 +10,7 @@ import (
 )
 
 var GetConnectedApp = bitrise.Tool{
-	APIGroups: []string{"release-management", "read-only"},
+	APIGroups: []string{"release-management-app", "release-management", "read-only"},
 	Definition: mcp.NewTool("get_connected_app",
 		mcp.WithDescription("Gives back a Release Management connected app for the authenticated account."),
 		mcp.WithString("id",

@@ -11,7 +11,7 @@ import (
 )
 
 var GetPotentialTesters = bitrise.Tool{
-	APIGroups: []string{"release-management", "read-only"},
+	APIGroups: []string{"release-management-build-distribution", "release-management", "read-only"},
 	Definition: mcp.NewTool("get_potential_testers",
 		mcp.WithDescription("Lists the people who can be added to a tester group, with the slug each of them is added by. Pass 'workspace_slug' to list workspace members before a connected app or a tester group exists, or 'connected_app_id' with 'id' for the candidates of an existing group. "+
 			"Service accounts are never listed. 'already_member' means 'already in that tester group', never 'already a tester on the app', and is always false on the workspace scope."),

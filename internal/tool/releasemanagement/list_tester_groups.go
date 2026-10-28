@@ -10,7 +10,7 @@ import (
 )
 
 var ListTesterGroups = bitrise.Tool{
-	APIGroups: []string{"release-management", "read-only"},
+	APIGroups: []string{"release-management-build-distribution", "release-management", "read-only"},
 	Definition: mcp.NewTool("list_tester_groups",
 		mcp.WithDescription("Gives back a list of tester groups related to a specific Release Management connected app."),
 		mcp.WithString("connected_app_id",
