@@ -10,7 +10,7 @@ import (
 )
 
 var ListInstallableArtifacts = bitrise.Tool{
-	APIGroups: []string{"release-management", "read-only"},
+	APIGroups: []string{"release-management-app", "release-management", "read-only"},
 	Definition: mcp.NewTool("list_installable_artifacts",
 		mcp.WithDescription("List Release Management installable artifacts of a connected app available for the authenticated account."),
 		mcp.WithString("connected_app_id",

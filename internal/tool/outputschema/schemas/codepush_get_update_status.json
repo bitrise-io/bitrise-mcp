@@ -1,6 +1,45 @@
 {
   "description": "Response of GET /updates/{id}/status (Release Management API - CodePush, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
   "properties": {
+    "delta_generation_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deltas": {
+      "additionalProperties": {
+        "properties": {
+          "binary_patch": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "file_level_diff": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "update_versions": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "description": "Deltas generated for the update, keyed by package hash.",
+      "type": [
+        "object",
+        "null"
+      ]
+    },
     "status": {
       "type": [
         "string",

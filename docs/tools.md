@@ -2,9 +2,18 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-code-push, release-management-store-releases, insights`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-app, release-management-build-distribution, release-management-code-push, release-management-store-releases, insights`.
+
+`user` is also accepted and enables the same tool as `account` (`me`). It is the name that tool was tagged with before, kept so existing configurations keep working; use `account` in new ones.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
+
+The `release-management` group enables every Release Management tool. To load only part of them, enable one or more of these groups instead:
+
+- `release-management-app`: connected apps and installable artifacts
+- `release-management-build-distribution`: build distribution versions and test builds, tester groups and testers
+- `release-management-code-push`: CodePush deployments and updates
+- `release-management-store-releases`: app versions and their way to the stores, from release candidate and beta testing through approvals and store review to the rollout
 
 By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
 
@@ -969,137 +978,137 @@ Common arguments of every Insights tool:
 
 ## API Groups
 
-The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to:
+The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to (`me` also belongs to `user`, the older name of `account`):
 
-| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-code-push | release-management-store-releases | insights |
-|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------------|-----------------------------------|---|
-| list_apps | ✅ | | | | | | | | | ✅ | | | | | |
-| register_app | ✅ | | | | | | | | | | | | | | |
-| finish_bitrise_app | ✅ | | | | | | | | | | | | | | |
-| get_app | ✅ | | | | | | | | | ✅ | | | | | |
-| delete_app | ✅ | | | | | | | | | | | | | | |
-| update_app | ✅ | | | | | | | | | | | | | | |
-| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | | | |
-| update_bitrise_yml | ✅ | | | | | | | | | | | | | | |
-| list_branches | ✅ | | | | | | | | | ✅ | | | | | |
-| register_ssh_key | ✅ | | | | | | | | | | | | | | |
-| register_webhook | ✅ | | | | | | | | | | | | | | |
-| list_builds | | ✅ | | | | | | | | ✅ | | | | | |
-| trigger_bitrise_build | | ✅ | | | | | | | | | | | | | |
-| get_build | | ✅ | | | | | | | | ✅ | | | | | |
-| abort_build | | ✅ | | | | | | | | | | | | | |
-| get_build_log | | ✅ | | | | | | | | ✅ | | | | | |
-| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | | | |
-| list_build_workflows | | ✅ | | | | | | | | ✅ | | | | | |
-| get_build_steps | | ✅ | | | | | | | | ✅ | | | | | |
-| get_build_test_results | | ✅ | | | | | | | | ✅ | | | | | |
-| list_artifacts | | | | | ✅ | | | | | ✅ | | | | | |
-| get_artifact | | | | | ✅ | | | | | ✅ | | | | | |
-| delete_artifact | | | | | ✅ | | | | | | | | | | |
-| update_artifact | | | | | ✅ | | | | | | | | | | |
-| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | | | |
-| delete_outgoing_webhook | | | | ✅ | | | | | | | | | | | |
-| update_outgoing_webhook | | | | ✅ | | | | | | | | | | | |
-| create_outgoing_webhook | | | | ✅ | | | | | | | | | | | |
-| list_cache_items | | | | | | | ✅ | | | ✅ | | | | | |
-| delete_all_cache_items | | | | | | | ✅ | | | | | | | | |
-| delete_cache_item | | | | | | | ✅ | | | | | | | | |
-| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | | | |
-| list_pipelines | | | | | | | | ✅ | | ✅ | | | | | |
-| get_pipeline | | | | | | | | ✅ | | ✅ | | | | | |
-| abort_pipeline | | | | | | | | ✅ | | | | | | | |
-| rebuild_pipeline | | | | | | | | ✅ | | | | | | | |
-| list_group_roles | | | | | | ✅ | | | | ✅ | | | | | |
-| replace_group_roles | | | | | | ✅ | | | | | | | | | |
-| list_workspaces | | | ✅ | | | | | | | ✅ | | | | | |
-| get_workspace | | | ✅ | | | | | | | ✅ | | | | | |
-| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | | | |
-| create_workspace_group | | | ✅ | | | | | | | | | | | | |
-| get_workspace_members | | | ✅ | | | | | | | ✅ | | | | | |
-| invite_member_to_workspace | | | ✅ | | | | | | | | | | | | |
-| add_member_to_group | | | ✅ | | | | | | | | | | | | |
-| me | | | | | | | | | ✅ | ✅ | | | | | |
-| create_connected_app | | | | | | | | | | | ✅ | | | | |
-| list_connected_apps | | | | | | | | | | ✅ | ✅ | | | | |
-| get_connected_app | | | | | | | | | | ✅ | ✅ | | | | |
-| update_connected_app | | | | | | | | | | | ✅ | | | | |
-| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | | | |
-| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | | | |
-| get_installable_artifact_upload_and_proc_status | | | | | | | | | | ✅ | ✅ | | | | |
-| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | | | |
-| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | | | |
-| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | | | |
-| create_tester_group | | | | | | | | | | | ✅ | | | | |
-| notify_tester_group | | | | | | | | | | | ✅ | | | | |
-| add_testers_to_tester_group | | | | | | | | | | | ✅ | | | | |
-| update_tester_group | | | | | | | | | | | ✅ | | | | |
-| list_tester_groups | | | | | | | | | | ✅ | ✅ | | | | |
-| get_tester_group | | | | | | | | | | ✅ | ✅ | | | | |
-| get_potential_testers | | | | | | | | | | ✅ | ✅ | | | | |
-| get_testers | | | | | | | | | | ✅ | ✅ | | | | |
-| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | | | |
-| step_search | | | | | | | | | | ✅ | | ✅ | | | |
-| step_inputs | | | | | | | | | | ✅ | | ✅ | | | |
-| list_available_stacks | | | | | | | | | | ✅ | | ✅ | | | |
-| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | ✅ | | |
-| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | ✅ | | |
-| codepush_create_deployment | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_update_deployment | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_delete_deployment | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_promote_deployment | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_rollback_deployment | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | ✅ | | |
-| codepush_get_update | | | | | | | | | | ✅ | ✅ | | ✅ | | |
-| codepush_patch_update | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_delete_update | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | ✅ | | |
-| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | ✅ | | |
-| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | ✅ | | |
-| list_app_versions |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| get_app_version |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| create_app_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| update_app_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| delete_app_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_release_candidate |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| upload_release_candidate |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_release_candidate_upload_status |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| submit_release_candidate_for_beta_review |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| list_beta_testing_groups |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| start_beta_testing |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| stop_beta_testing |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| list_what_to_test_descriptions |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| create_what_to_test_description |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| update_what_to_test_description |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| delete_what_to_test_description |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| list_approval_tasks |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| get_approval_task |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| create_approval_task |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| update_approval_task |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| delete_approval_task |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| submit_for_app_store_review |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_app_store_review_status |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| cancel_app_store_review |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| release_to_app_store |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| pause_app_store_phased_release |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| continue_app_store_phased_release |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| complete_app_store_phased_release |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_app_store_release_status |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| get_app_store_release_settings |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| update_app_store_release_settings |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| update_google_play_release_notes |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_google_play_release |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| release_to_google_play |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| create_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| pause_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| resume_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| delete_google_play_staged_rollout_schedule |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| list_release_events |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| create_app_store_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| get_app_store_draft_version |  |  |  |  |  |  |  |  |  | ✅ | ✅ |  |  | ✅ |  |
-| update_app_store_draft_version |  |  |  |  |  |  |  |  |  |  | ✅ |  |  | ✅ |  |
-| insights_get_build_totals | | | | | | | | | | ✅ | | | | | ✅ |
-| insights_get_build_series | | | | | | | | | | ✅ | | | | | ✅ |
-| insights_get_test_totals | | | | | | | | | | ✅ | | | | | ✅ |
-| insights_get_test_series | | | | | | | | | | ✅ | | | | | ✅ |
-| insights_list_flaky_tests | | | | | | | | | | ✅ | | | | | ✅ |
+| Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-app | release-management-build-distribution | release-management-code-push | release-management-store-releases | insights |
+|------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|---------------|------------------------|---------------------------------------|------------------------------|-----------------------------------|----------|
+| list_apps | ✅ | | | | | | | | | ✅ | | | | | | | |
+| register_app | ✅ | | | | | | | | | | | | | | | | |
+| finish_bitrise_app | ✅ | | | | | | | | | | | | | | | | |
+| get_app | ✅ | | | | | | | | | ✅ | | | | | | | |
+| delete_app | ✅ | | | | | | | | | | | | | | | | |
+| update_app | ✅ | | | | | | | | | | | | | | | | |
+| get_bitrise_yml | ✅ | | | | | | | | | ✅ | | | | | | | |
+| update_bitrise_yml | ✅ | | | | | | | | | | | | | | | | |
+| list_branches | ✅ | | | | | | | | | ✅ | | | | | | | |
+| register_ssh_key | ✅ | | | | | | | | | | | | | | | | |
+| register_webhook | ✅ | | | | | | | | | | | | | | | | |
+| list_builds | | ✅ | | | | | | | | ✅ | | | | | | | |
+| trigger_bitrise_build | | ✅ | | | | | | | | | | | | | | | |
+| get_build | | ✅ | | | | | | | | ✅ | | | | | | | |
+| abort_build | | ✅ | | | | | | | | | | | | | | | |
+| get_build_log | | ✅ | | | | | | | | ✅ | | | | | | | |
+| get_build_bitrise_yml | | ✅ | | | | | | | | ✅ | | | | | | | |
+| list_build_workflows | | ✅ | | | | | | | | ✅ | | | | | | | |
+| get_build_steps | | ✅ | | | | | | | | ✅ | | | | | | | |
+| get_build_test_results | | ✅ | | | | | | | | ✅ | | | | | | | |
+| list_artifacts | | | | | ✅ | | | | | ✅ | | | | | | | |
+| get_artifact | | | | | ✅ | | | | | ✅ | | | | | | | |
+| delete_artifact | | | | | ✅ | | | | | | | | | | | | |
+| update_artifact | | | | | ✅ | | | | | | | | | | | | |
+| list_outgoing_webhooks | | | | ✅ | | | | | | ✅ | | | | | | | |
+| delete_outgoing_webhook | | | | ✅ | | | | | | | | | | | | | |
+| update_outgoing_webhook | | | | ✅ | | | | | | | | | | | | | |
+| create_outgoing_webhook | | | | ✅ | | | | | | | | | | | | | |
+| list_cache_items | | | | | | | ✅ | | | ✅ | | | | | | | |
+| delete_all_cache_items | | | | | | | ✅ | | | | | | | | | | |
+| delete_cache_item | | | | | | | ✅ | | | | | | | | | | |
+| get_cache_item_download_url | | | | | | | ✅ | | | ✅ | | | | | | | |
+| list_pipelines | | | | | | | | ✅ | | ✅ | | | | | | | |
+| get_pipeline | | | | | | | | ✅ | | ✅ | | | | | | | |
+| abort_pipeline | | | | | | | | ✅ | | | | | | | | | |
+| rebuild_pipeline | | | | | | | | ✅ | | | | | | | | | |
+| list_group_roles | | | | | | ✅ | | | | ✅ | | | | | | | |
+| replace_group_roles | | | | | | ✅ | | | | | | | | | | | |
+| list_workspaces | | | ✅ | | | | | | | ✅ | | | | | | | |
+| get_workspace | | | ✅ | | | | | | | ✅ | | | | | | | |
+| get_workspace_groups | | | ✅ | | | | | | | ✅ | | | | | | | |
+| create_workspace_group | | | ✅ | | | | | | | | | | | | | | |
+| get_workspace_members | | | ✅ | | | | | | | ✅ | | | | | | | |
+| invite_member_to_workspace | | | ✅ | | | | | | | | | | | | | | |
+| add_member_to_group | | | ✅ | | | | | | | | | | | | | | |
+| me | | | | | | | | | ✅ | ✅ | | | | | | | |
+| create_connected_app | | | | | | | | | | | ✅ | | ✅ | | | | |
+| list_connected_apps | | | | | | | | | | ✅ | ✅ | | ✅ | | | | |
+| get_connected_app | | | | | | | | | | ✅ | ✅ | | ✅ | | | | |
+| update_connected_app | | | | | | | | | | | ✅ | | ✅ | | | | |
+| list_installable_artifacts | | | | | | | | | | ✅ | ✅ | | ✅ | | | | |
+| generate_installable_artifact_upload_url | | | | | | | | | | | ✅ | | ✅ | | | | |
+| get_installable_artifact_upload_and_proc_status | | | | | | | | | | ✅ | ✅ | | ✅ | | | | |
+| set_installable_artifact_public_install_page | | | | | | | | | | | ✅ | | ✅ | | | | |
+| list_build_distribution_versions | | | | | | | | | | ✅ | ✅ | | | ✅ | | | |
+| list_build_distribution_version_test_builds | | | | | | | | | | ✅ | ✅ | | | ✅ | | | |
+| create_tester_group | | | | | | | | | | | ✅ | | | ✅ | | | |
+| notify_tester_group | | | | | | | | | | | ✅ | | | ✅ | | | |
+| add_testers_to_tester_group | | | | | | | | | | | ✅ | | | ✅ | | | |
+| update_tester_group | | | | | | | | | | | ✅ | | | ✅ | | | |
+| list_tester_groups | | | | | | | | | | ✅ | ✅ | | | ✅ | | | |
+| get_tester_group | | | | | | | | | | ✅ | ✅ | | | ✅ | | | |
+| get_potential_testers | | | | | | | | | | ✅ | ✅ | | | ✅ | | | |
+| get_testers | | | | | | | | | | ✅ | ✅ | | | ✅ | | | |
+| validate_bitrise_yml | | | | | | | | | | ✅ | | ✅ | | | | | |
+| step_search | | | | | | | | | | ✅ | | ✅ | | | | | |
+| step_inputs | | | | | | | | | | ✅ | | ✅ | | | | | |
+| list_available_stacks | | | | | | | | | | ✅ | | ✅ | | | | | |
+| codepush_list_deployments | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
+| codepush_get_deployment | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
+| codepush_create_deployment | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_update_deployment | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_delete_deployment | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_promote_deployment | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_rollback_deployment | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_list_updates | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
+| codepush_get_update | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
+| codepush_patch_update | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_delete_update | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
+| codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | | | ✅ | | |
+| codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
+| list_app_versions | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| get_app_version | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| create_app_version | | | | | | | | | | | ✅ | | | | | ✅ | |
+| update_app_version | | | | | | | | | | | ✅ | | | | | ✅ | |
+| delete_app_version | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_release_candidate | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| upload_release_candidate | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_release_candidate_upload_status | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| submit_release_candidate_for_beta_review | | | | | | | | | | | ✅ | | | | | ✅ | |
+| list_beta_testing_groups | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| start_beta_testing | | | | | | | | | | | ✅ | | | | | ✅ | |
+| stop_beta_testing | | | | | | | | | | | ✅ | | | | | ✅ | |
+| list_what_to_test_descriptions | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| create_what_to_test_description | | | | | | | | | | | ✅ | | | | | ✅ | |
+| update_what_to_test_description | | | | | | | | | | | ✅ | | | | | ✅ | |
+| delete_what_to_test_description | | | | | | | | | | | ✅ | | | | | ✅ | |
+| list_approval_tasks | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| get_approval_task | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| create_approval_task | | | | | | | | | | | ✅ | | | | | ✅ | |
+| update_approval_task | | | | | | | | | | | ✅ | | | | | ✅ | |
+| delete_approval_task | | | | | | | | | | | ✅ | | | | | ✅ | |
+| submit_for_app_store_review | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_app_store_review_status | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| cancel_app_store_review | | | | | | | | | | | ✅ | | | | | ✅ | |
+| release_to_app_store | | | | | | | | | | | ✅ | | | | | ✅ | |
+| pause_app_store_phased_release | | | | | | | | | | | ✅ | | | | | ✅ | |
+| continue_app_store_phased_release | | | | | | | | | | | ✅ | | | | | ✅ | |
+| complete_app_store_phased_release | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_app_store_release_status | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| get_app_store_release_settings | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| update_app_store_release_settings | | | | | | | | | | | ✅ | | | | | ✅ | |
+| update_google_play_release_notes | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_google_play_release | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| release_to_google_play | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_google_play_staged_rollout_schedule | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| create_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
+| pause_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
+| resume_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
+| delete_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
+| list_release_events | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| create_app_store_version | | | | | | | | | | | ✅ | | | | | ✅ | |
+| get_app_store_draft_version | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
+| update_app_store_draft_version | | | | | | | | | | | ✅ | | | | | ✅ | |
+| insights_get_build_totals | | | | | | | | | | ✅ | | | | | | | ✅ |
+| insights_get_build_series | | | | | | | | | | ✅ | | | | | | | ✅ |
+| insights_get_test_totals | | | | | | | | | | ✅ | | | | | | | ✅ |
+| insights_get_test_series | | | | | | | | | | ✅ | | | | | | | ✅ |
+| insights_list_flaky_tests | | | | | | | | | | ✅ | | | | | | | ✅ |

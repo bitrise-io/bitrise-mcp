@@ -179,7 +179,19 @@ var mappings = []mapping{
 	{Tool: "codepush_get_update", Spec: "rm-cp", Method: "get", Path: "/updates/{id}"},
 	{Tool: "codepush_patch_update", Spec: "rm-cp", Method: "patch", Path: "/updates/{id}"},
 	{Tool: "codepush_delete_update", Spec: "rm-cp", Method: "delete", Path: "/updates/{id}"},
-	{Tool: "codepush_get_update_status", Spec: "rm-cp", Method: "get", Path: "/updates/{id}/status"},
+	{Tool: "codepush_get_update_status", Spec: "rm-cp", Method: "get", Path: "/updates/{id}/status",
+		Override: map[string]map[string]any{"deltas": {
+			"type":        []any{"object", "null"},
+			"description": "Deltas generated for the update, keyed by package hash.",
+			"additionalProperties": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"binary_patch":    map[string]any{"type": []any{"boolean", "null"}},
+					"file_level_diff": map[string]any{"type": []any{"boolean", "null"}},
+					"update_versions": map[string]any{"type": []any{"array", "null"}, "items": map[string]any{"type": "string"}},
+				},
+			},
+		}}},
 	{Tool: "codepush_generate_update_upload_url", Spec: "rm-cp", Method: "get", Path: "/updates/{id}/upload-url"},
 	{Tool: "codepush_get_metrics", Spec: "rm-cp", Method: "get", Path: "/metrics"},
 

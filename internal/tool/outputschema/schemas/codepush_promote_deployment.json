@@ -99,6 +99,18 @@
         "null"
       ]
     },
+    "original_deployment_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "original_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "rollout": {
       "description": "Rollout percentage.",
       "type": [
@@ -109,6 +121,18 @@
     "signed": {
       "type": [
         "boolean",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status_reason": {
+      "type": [
+        "string",
         "null"
       ]
     },

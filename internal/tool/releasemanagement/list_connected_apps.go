@@ -10,7 +10,7 @@ import (
 )
 
 var ListConnectedApps = bitrise.Tool{
-	APIGroups: []string{"release-management", "read-only"},
+	APIGroups: []string{"release-management-app", "release-management", "read-only"},
 	Definition: mcp.NewTool("list_connected_apps",
 		mcp.WithDescription("List Release Management connected apps available for the authenticated account within a workspace."),
 		mcp.WithString("workspace_slug",

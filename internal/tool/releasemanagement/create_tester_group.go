@@ -9,7 +9,7 @@ import (
 )
 
 var CreateTesterGroup = bitrise.Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management-build-distribution", "release-management"},
 	Definition: mcp.NewTool("create_tester_group",
 		mcp.WithDescription("Creates a tester group for a Release Management connected app, optionally with its members: 'user_slugs' for internal groups, 'emails' for external ones. Tester groups are used to distribute installable artifacts to testers, who are notified by email either automatically or manually. "+
 			"Adding an internal tester grants the App Tester role on the app; removing them later does not revoke it. A group is notified once per build, so members added afterwards get no email for that build. "+

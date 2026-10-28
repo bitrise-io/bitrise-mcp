@@ -9,7 +9,7 @@ import (
 )
 
 var CreateConnectedApp = bitrise.Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management-app", "release-management"},
 	Definition: mcp.NewTool("create_connected_app",
 		mcp.WithDescription("Add a new Release Management connected app to Bitrise. "+
 			"Adding an internal tester grants the App Tester role on the app; removing them later does not revoke it."),
