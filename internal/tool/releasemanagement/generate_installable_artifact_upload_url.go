@@ -10,7 +10,7 @@ import (
 )
 
 var GenerateInstallableArtifactUploadURL = bitrise.Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management-build-distribution", "release-management"},
 	Definition: mcp.NewTool("generate_installable_artifact_upload_url",
 		mcp.WithDescription("Generates a signed upload url valid for 1 hour for an installable artifact to be uploaded to Bitrise Release Management. The response will contain an url that can be used to upload an artifact to Bitrise Release Management using a simple curl request with the file data that should be uploaded. The necessary headers and http method will also be in the response. This artifact will need to be processed after upload to be usable. The status of processing can be checked by making another request to a different url giving back the processed status of an installable artifact."),
 		mcp.WithString("connected_app_id",

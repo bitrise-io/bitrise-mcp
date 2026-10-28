@@ -414,7 +414,7 @@ The Bitrise MCP server provides 67 tools organized into the following categories
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management`.
+Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management, release-management-build-distribution`.
 
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 

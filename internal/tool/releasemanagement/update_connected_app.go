@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateConnectedApp = bitrise.Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management-build-distribution", "release-management"},
 	Definition: mcp.NewTool("update_connected_app",
 		mcp.WithDescription("Updates a connected app."),
 		mcp.WithString("connected_app_id",

@@ -10,7 +10,7 @@ import (
 )
 
 var ListBuildDistributionVersionTestBuilds = bitrise.Tool{
-	APIGroups: []string{"release-management", "read-only"},
+	APIGroups: []string{"release-management-build-distribution", "release-management", "read-only"},
 	Definition: mcp.NewTool("list_build_distribution_version_test_builds",
 		mcp.WithDescription("Gives back a list of test builds for the given build distribution version."),
 		mcp.WithString("connected_app_id",

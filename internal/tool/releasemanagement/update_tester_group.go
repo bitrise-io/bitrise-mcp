@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateTesterGroup = bitrise.Tool{
-	APIGroups: []string{"release-management"},
+	APIGroups: []string{"release-management-build-distribution", "release-management"},
 	Definition: mcp.NewTool("update_tester_group",
 		mcp.WithDescription("Updates the given tester group. The name and the auto notification setting can be updated optionally."),
 		mcp.WithString("connected_app_id",
