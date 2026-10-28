@@ -94,6 +94,18 @@
         "null"
       ]
     },
+    "original_deployment_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "original_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "rollout": {
       "type": [
         "integer",
@@ -103,6 +115,18 @@
     "signed": {
       "type": [
         "boolean",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status_reason": {
+      "type": [
+        "string",
         "null"
       ]
     },

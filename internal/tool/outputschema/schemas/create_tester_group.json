@@ -25,6 +25,32 @@
               "null"
             ]
           },
+          "details": {
+            "properties": {
+              "group": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "tester": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
           "message": {
             "type": [
               "string",
