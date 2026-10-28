@@ -133,7 +133,7 @@ The Bitrise MCP server provides 67 tools organized into the following categories
 18. **list_build_workflows** - List the workflows of an app
     - `app_slug`: Identifier of the Bitrise app
 
-19. **get_build_steps** - Get step statuses of a specific build of a given app
+19. **get_build_steps** - Get the steps of a specific build of a given app with their status, including the failure reason of failed steps
     - `app_slug`: Identifier of the Bitrise app
     - `build_slug`: Identifier of the build
 

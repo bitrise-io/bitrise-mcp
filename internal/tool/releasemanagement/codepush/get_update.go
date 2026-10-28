@@ -20,7 +20,7 @@ var GetUpdate = bitrise.Tool{
 		mcp.WithTitleAnnotation("Get CodePush Update"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
-		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(false),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

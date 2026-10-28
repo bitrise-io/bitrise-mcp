@@ -1,0 +1,30 @@
+{
+  "description": "Response of POST /apps/{app-slug}/finish (Bitrise API, HTTP 200).",
+  "properties": {
+    "branch_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "build_trigger_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_webhook_auto_reg_supported": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

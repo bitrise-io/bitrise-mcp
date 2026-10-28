@@ -55,6 +55,7 @@ var ListFlakyTests = bitrise.Tool{
 				),
 			},
 			readOnlyAnnotations("List Insights Flaky Tests"),
+			[]mcp.ToolOption{mcp.WithOutputSchema[insights.FlakyTestsResponse]()},
 		)...,
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

@@ -82,7 +82,7 @@ func readOnlyAnnotations(title string) []mcp.ToolOption {
 		mcp.WithTitleAnnotation(title),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
-		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(false),
 		mcp.WithIdempotentHintAnnotation(true),
 	}
 }

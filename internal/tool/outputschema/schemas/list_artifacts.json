@@ -1,0 +1,86 @@
+{
+  "description": "Response of GET /apps/{app-slug}/builds/{build-slug}/artifacts (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "items": {
+        "properties": {
+          "artifact_meta": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "artifact_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "file_size_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "intermediate_file_info": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "is_public_page_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "paging": {
+      "description": "pagination",
+      "properties": {
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_item_limit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_item_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

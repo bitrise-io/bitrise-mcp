@@ -35,7 +35,7 @@ var ListTesterGroups = bitrise.Tool{
 		mcp.WithTitleAnnotation("List Tester Groups"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
-		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(false),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

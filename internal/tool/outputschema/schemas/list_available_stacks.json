@@ -1,0 +1,76 @@
+{
+  "additionalProperties": {
+    "properties": {
+      "description": {
+        "description": "Description of the stack",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "id": {
+        "description": "Unique identifier for the stack",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "os": {
+        "description": "Operating system of the stack",
+        "enum": [
+          "linux",
+          "macos",
+          null
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "os_version": {
+        "description": "OS version number",
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "removal-date": {
+        "description": "The date on which the stack will no longer be available.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "stack-report": {
+        "description": "URL to the stack report with pre-installed tools information",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "status": {
+        "description": "Current status of the stack.",
+        "enum": [
+          "stable",
+          "edge",
+          "frozen",
+          null
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "title": {
+        "description": "Human-readable title of the stack",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "type": "object"
+  },
+  "description": "Response of GET /available-stacks (Bitrise API, HTTP 200). A map of stack IDs to stack information",
+  "type": "object"
+}

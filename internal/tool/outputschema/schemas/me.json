@@ -1,0 +1,68 @@
+{
+  "description": "Response of GET /me (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "properties": {
+        "avatar_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_id": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "has_used_organization_trial": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "payment_processor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unconfirmed_email": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

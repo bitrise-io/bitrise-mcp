@@ -1,0 +1,29 @@
+{
+  "description": "Response of GET / (Release Management API - Build Distributions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "items": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

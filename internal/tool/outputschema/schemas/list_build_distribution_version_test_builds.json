@@ -1,0 +1,164 @@
+{
+  "description": "Response of GET /test-builds (Release Management API - Build Distributions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "items": {
+      "items": {
+        "properties": {
+          "app_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "build_number": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "build_slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "download_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "filename": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "filename_ext": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "formatted_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_install_page_url": {},
+          "signature": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "storage_provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "store_app_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workflow": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "pagination": {
+      "properties": {
+        "current_page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "has_next_page": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "items_per_page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "total_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

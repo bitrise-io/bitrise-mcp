@@ -13,7 +13,7 @@ import (
 var GetSteps = bitrise.Tool{
 	APIGroups: []string{"builds", "read-only"},
 	Definition: mcp.NewTool("get_build_steps",
-		mcp.WithDescription("Get step statuses of a specific build of a given app."),
+		mcp.WithDescription("Get the steps of a specific build of a given app with their status and timing. For failed or aborted steps it includes the failure reason (errors), and for skipped steps why they were skipped (status_reason)."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
@@ -28,7 +28,7 @@ var GetSteps = bitrise.Tool{
 		mcp.WithTitleAnnotation("Get Build Steps"),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithDestructiveHintAnnotation(false),
-		mcp.WithOpenWorldHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(false),
 		mcp.WithIdempotentHintAnnotation(true),
 	),
 	Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

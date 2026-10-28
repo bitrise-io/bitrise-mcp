@@ -1,0 +1,19 @@
+{
+  "description": "Response of POST /tester-groups/{id}/add-testers (Release Management API - Build Distributions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "errors": {
+      "additionalProperties": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "description": "Testers that could not be added, keyed by the submitted tester slug or email, with the reason as the value.",
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

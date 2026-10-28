@@ -1,0 +1,32 @@
+{
+  "description": "Response of GET /updates/{id}/upload-url (Release Management API - CodePush, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "headers": {
+      "properties": {
+        "Content-Type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "method": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

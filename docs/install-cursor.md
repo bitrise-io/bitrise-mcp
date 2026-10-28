@@ -10,7 +10,14 @@
 
 Recent Cursor versions support MCP OAuth — on first tool use Cursor opens your browser to sign in to Bitrise; no token to paste.
 
-### Install steps
+### Option A: Install from the Cursor Marketplace (one click)
+
+This repository ships a Cursor plugin manifest (`.cursor-plugin/plugin.json` + `mcp.json`), so the remote server can be installed from the [Cursor Marketplace](https://cursor.com/marketplace) without editing any configuration file:
+
+1. In Cursor, open **Settings → Plugins** (or browse the Marketplace) and install **Bitrise**
+2. On first tool invocation, complete the browser-based sign-in flow
+
+### Option B: Manual install steps
 
 1. Open your global MCP configuration file at `~/.cursor/mcp.json` (or use a project-local `.cursor/mcp.json`) and add the configuration below
 2. Save the file

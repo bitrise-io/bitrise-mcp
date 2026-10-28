@@ -1,0 +1,67 @@
+{
+  "description": "Response of GET /organizations/{org-slug} (Bitrise API, HTTP 200).",
+  "properties": {
+    "data": {
+      "properties": {
+        "avatar_icon_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "concurrency_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "owners": {
+          "items": {
+            "properties": {
+              "email": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "slug": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

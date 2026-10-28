@@ -1,0 +1,175 @@
+{
+  "description": "Response of GET /installable-artifacts (Release Management API, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "filters": {
+      "properties": {
+        "after_date": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "before_date": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "has_next_page": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "items": {
+      "items": {
+        "properties": {
+          "app_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "build_number": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "build_slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "download_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "filename": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "filename_ext": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "formatted_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_install_page_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "signature": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "storage_provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "store_app_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workflow": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

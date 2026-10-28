@@ -1,0 +1,12 @@
+{
+  "description": "Response of PATCH /installable-artifacts/{id}/public-install-page (Release Management API, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "public_install_page_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

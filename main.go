@@ -195,7 +195,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 	httpServerOpts := []server.StreamableHTTPOption{
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			pat, err := extractPAT(r, exchanger)
+			pat, err := resolvePAT(r, exchanger)
 			if err != nil {
 				logger.Warnw("JWT→PAT exchange failed", "error", err)
 			} else if pat != "" {

@@ -1,0 +1,7 @@
+{
+  "additionalProperties": {
+    "type": "string"
+  },
+  "description": "Response of POST /apps/{app-slug}/bitrise.yml (Bitrise API, HTTP 200).",
+  "type": "object"
+}
