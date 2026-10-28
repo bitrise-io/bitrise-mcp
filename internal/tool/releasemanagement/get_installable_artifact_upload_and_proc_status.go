@@ -10,7 +10,7 @@ import (
 )
 
 var GetInstallableArtifactUploadAndProcessingStatus = bitrise.Tool{
-	APIGroups: []string{"release-management-build-distribution", "release-management", "read-only"},
+	APIGroups: []string{"release-management-app", "release-management", "read-only"},
 	Definition: mcp.NewTool("get_installable_artifact_upload_and_proc_status",
 		mcp.WithDescription("Gets the processing and upload status of an installable artifact. An artifact will need to be processed after upload to be usable. This endpoint helps understanding when an uploaded installable artifacts becomes usable for later purposes."),
 		mcp.WithString("connected_app_id",
