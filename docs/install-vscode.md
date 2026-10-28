@@ -93,7 +93,7 @@ VS Code allows at most 128 tools in a chat request, and its built-in tools count
       "type": "http",
       "url": "https://mcp.bitrise.io",
       "headers": {
-        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights"
+        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
       }
     }
   }

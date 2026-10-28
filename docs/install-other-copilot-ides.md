@@ -268,7 +268,7 @@ GitHub Copilot limits the number of tools in a chat request. In VS Code the limi
 
 ```json
 "headers": {
-  "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights"
+  "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
 }
 ```
 

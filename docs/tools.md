@@ -21,10 +21,11 @@ Some MCP clients cap the number of tools. VS Code allows 128 per chat request, i
 
 | Use case | Value of `x-bitrise-enabled-api-groups` or `ENABLED_API_GROUPS` | Tools |
 |---|---|---|
-| CI | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights` | 54 |
-| CI and CodePush | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights,release-management-code-push` | 68 |
+| CI | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights` | 55 |
+| CI and CodePush | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-code-push` | 69 |
+| Release Management without store releases | `release-management-app,release-management-build-distribution,release-management-code-push` | 32 |
 | Release Management | `release-management` | 75 |
-| CI and store releases | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights,release-management-store-releases` | 97 |
+| CI and store releases | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-store-releases` | 98 |
 
 Leave `read-only` out of a smaller set, because it adds the read tools of every group.
 

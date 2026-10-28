@@ -91,7 +91,7 @@ Cascade allows at most 100 tools across all MCP servers. With every API group en
     "bitrise": {
       "serverUrl": "https://mcp.bitrise.io",
       "headers": {
-        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights"
+        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
       }
     }
   }

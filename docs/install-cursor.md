@@ -108,7 +108,7 @@ Cursor has no fixed limit on the number of tools, but Cursor users have reported
     "bitrise": {
       "url": "https://mcp.bitrise.io",
       "headers": {
-        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,configuration,insights"
+        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
       }
     }
   }
