@@ -1,0 +1,33 @@
+{
+  "description": "Response of PATCH /apple-app-store/app-versions/draft (Release Management API, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "app_store_state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "earliest_release_date": {
+      "description": "Only null appears in the published examples."
+    },
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "version_string": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

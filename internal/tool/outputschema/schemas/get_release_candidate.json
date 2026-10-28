@@ -1,0 +1,30 @@
+{
+  "description": "Response of GET /app-versions/{id}/release-candidate (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "artifact_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "build_slug": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "build_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

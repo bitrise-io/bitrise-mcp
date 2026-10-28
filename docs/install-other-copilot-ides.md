@@ -264,7 +264,17 @@ After setup:
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+GitHub Copilot limits the number of tools in a chat request. In VS Code the limit is 128, built-in tools included, and with every API group enabled the Bitrise server alone exposes more than 128 tools. If your IDE reports too many tools, enable only the API groups you need. For the remote server, add the `x-bitrise-enabled-api-groups` header next to `url` in the configurations above, for example:
+
+```json
+"headers": {
+  "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
+}
+```
+
+For the local server, put the same comma-separated list in the `ENABLED_API_GROUPS` environment variable instead.
+
+See [API groups](/docs/tools.md#advanced-configuration) for every group and combinations that stay under common tool limits.
 
 ## Troubleshooting
 

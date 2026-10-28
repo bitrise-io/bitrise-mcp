@@ -39,6 +39,7 @@ var specURLs = map[string]string{
 	"rm-apps": "https://api.bitrise.io/release-management/api-docs/release_management/v2/swagger.json",
 	"rm-bd":   "https://api.bitrise.io/release-management/api-docs/release_management/v2/build_distributions/swagger.json",
 	"rm-cp":   "https://api.bitrise.io/release-management/api-docs/release_management/v2/code_push/swagger.json",
+	"rm-sr":   "https://api.bitrise.io/release-management/api-docs/release_management/v2/app_versions/swagger.json",
 }
 
 // mapping ties a tool to the API operation whose response it returns.
@@ -146,6 +147,8 @@ var mappings = []mapping{
 	{Tool: "generate_installable_artifact_upload_url", Spec: "rm-apps", Method: "get", Path: "/installable-artifacts/{id}/upload-url"},
 	{Tool: "get_installable_artifact_upload_and_proc_status", Spec: "rm-apps", Method: "get", Path: "/installable-artifacts/{id}/status"},
 	{Tool: "set_installable_artifact_public_install_page", Spec: "rm-apps", Method: "patch", Path: "/installable-artifacts/{id}/public-install-page"},
+	{Tool: "get_app_store_draft_version", Spec: "rm-apps", Method: "get", Path: "/apple-app-store/app-versions/draft"},
+	{Tool: "update_app_store_draft_version", Spec: "rm-apps", Method: "patch", Path: "/apple-app-store/app-versions/draft"},
 
 	// Release Management v2 — build distributions.
 	{Tool: "list_build_distribution_versions", Spec: "rm-bd", Method: "get", Path: "/"},
@@ -191,6 +194,52 @@ var mappings = []mapping{
 		}}},
 	{Tool: "codepush_generate_update_upload_url", Spec: "rm-cp", Method: "get", Path: "/updates/{id}/upload-url"},
 	{Tool: "codepush_get_metrics", Spec: "rm-cp", Method: "get", Path: "/metrics"},
+
+	// Release Management v2 — store releases (app versions).
+	{Tool: "list_app_versions", Spec: "rm-sr", Method: "get", Path: "/app-versions"},
+	{Tool: "get_app_version", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}"},
+	{Tool: "create_app_version", Spec: "rm-sr", Method: "post", Path: "/app-versions"},
+	{Tool: "update_app_version", Spec: "rm-sr", Method: "patch", Path: "/app-versions/{id}"},
+	{Tool: "delete_app_version", Spec: "rm-sr", Method: "delete", Path: "/app-versions/{id}"},
+	{Tool: "get_release_candidate", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/release-candidate"},
+	{Tool: "upload_release_candidate", Spec: "rm-sr", Method: "put", Path: "/app-versions/{id}/release-candidate/upload"},
+	{Tool: "get_release_candidate_upload_status", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/release-candidate/upload/status"},
+	{Tool: "submit_release_candidate_for_beta_review", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/release-candidate/submit-for-beta-review"},
+	{Tool: "list_beta_testing_groups", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/beta-distribution/testing-groups", Override: googlePlayTrackVersionCode},
+	{Tool: "start_beta_testing", Spec: "rm-sr", Method: "patch", Path: "/app-versions/{id}/beta-distribution/testing-groups/{group_id}"},
+	{Tool: "stop_beta_testing", Spec: "rm-sr", Method: "delete", Path: "/app-versions/{id}/beta-distribution/testing-groups/{group_id}"},
+	{Tool: "list_what_to_test_descriptions", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/beta-distribution/what-to-test"},
+	{Tool: "create_what_to_test_description", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/beta-distribution/what-to-test"},
+	{Tool: "update_what_to_test_description", Spec: "rm-sr", Method: "patch", Path: "/app-versions/{id}/beta-distribution/what-to-test/{what_to_test_id}"},
+	{Tool: "delete_what_to_test_description", Spec: "rm-sr", Method: "delete", Path: "/app-versions/{id}/beta-distribution/what-to-test/{what_to_test_id}"},
+	{Tool: "list_approval_tasks", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/approvals"},
+	{Tool: "get_approval_task", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/approvals/{task_id}"},
+	{Tool: "create_approval_task", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/approvals"},
+	{Tool: "update_approval_task", Spec: "rm-sr", Method: "patch", Path: "/app-versions/{id}/approvals/{task_id}"},
+	{Tool: "delete_approval_task", Spec: "rm-sr", Method: "delete", Path: "/app-versions/{id}/approvals/{task_id}"},
+	{Tool: "submit_for_app_store_review", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/apple-app-store/review/submit"},
+	{Tool: "get_app_store_review_status", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/apple-app-store/review/status"},
+	{Tool: "cancel_app_store_review", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/apple-app-store/review/cancel"},
+	{Tool: "release_to_app_store", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/apple-app-store/release"},
+	{Tool: "pause_app_store_phased_release", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/apple-app-store/release/pause"},
+	{Tool: "continue_app_store_phased_release", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/apple-app-store/release/continue"},
+	{Tool: "complete_app_store_phased_release", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/apple-app-store/release/complete"},
+	{Tool: "get_app_store_release_status", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/apple-app-store/release/status"},
+	{Tool: "get_app_store_release_settings", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/apple-app-store/release/settings"},
+	{Tool: "update_app_store_release_settings", Spec: "rm-sr", Method: "patch", Path: "/app-versions/{id}/apple-app-store/release/settings"},
+	{Tool: "update_google_play_release_notes", Spec: "rm-sr", Method: "put", Path: "/app-versions/{id}/google-play-store/localized-release-notes"},
+	{Tool: "get_google_play_release", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/google-play-store/release"},
+	{Tool: "release_to_google_play", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/google-play-store/release"},
+	{Tool: "get_google_play_staged_rollout_schedule", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/google-play-store/staged-rollout-schedule",
+		Note: "The API returns a bare null when the app version has no schedule, which the tool returns as {\"content\": \"null\"}.",
+		Add: map[string]map[string]any{"": {
+			"content": map[string]any{"type": "string", "description": "\"null\" when no schedule exists; the other properties are then absent."},
+		}}},
+	{Tool: "create_google_play_staged_rollout_schedule", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/google-play-store/staged-rollout-schedule"},
+	{Tool: "pause_google_play_staged_rollout_schedule", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/google-play-store/staged-rollout-schedule/pause"},
+	{Tool: "resume_google_play_staged_rollout_schedule", Spec: "rm-sr", Method: "post", Path: "/app-versions/{id}/google-play-store/staged-rollout-schedule/resume"},
+	{Tool: "delete_google_play_staged_rollout_schedule", Spec: "rm-sr", Method: "delete", Path: "/app-versions/{id}/google-play-store/staged-rollout-schedule"},
+	{Tool: "list_release_events", Spec: "rm-sr", Method: "get", Path: "/app-versions/{id}/release-events"},
 }
 
 // codePushUpdateFieldTypes corrects the CodePush update fields whose published
@@ -201,6 +250,15 @@ var codePushUpdateFieldTypes = map[string]map[string]any{
 	"disabled":  {"type": []any{"boolean", "null"}},
 	"mandatory": {"type": []any{"boolean", "null"}},
 	"rollout":   {"type": []any{"integer", "null"}, "description": "Rollout percentage."},
+}
+
+// googlePlayTrackVersionCode corrects the Google Play testing track
+// version_code, which the published example shows as an integer but the API
+// returns as a string ("53", or "" for an empty track).
+var googlePlayTrackVersionCode = map[string]map[string]any{
+	"internal_tracks[].version_code": {"type": []any{"string", "integer", "null"}},
+	"closed_tracks[].version_code":   {"type": []any{"string", "integer", "null"}},
+	"open_tracks[].version_code":     {"type": []any{"string", "integer", "null"}},
 }
 
 // textEnvelope is the schema of a tool whose result is plain text: the tool
@@ -217,6 +275,24 @@ func textEnvelope(description string) map[string]any {
 
 // manuals are schemas that cannot be derived from a published API document.
 var manuals = map[string]map[string]any{
+	// POST /apple-app-store/app-versions renders the version record the App
+	// Store Connect client returns, but the published document only carries a
+	// null example (the store is mocked when it is generated); this mirrors the
+	// record the client returns.
+	"create_app_store_version": {
+		"type":        "object",
+		"description": "Response of POST /apple-app-store/app-versions (Release Management API, HTTP 200): the App Store Connect version record that was created. The published API document only shows a null example; this mirrors the record the App Store Connect client returns.",
+		"properties": map[string]any{
+			"id":                               map[string]any{"type": []any{"string", "null"}, "description": "App Store Connect identifier of the version."},
+			"platform":                         map[string]any{"type": []any{"string", "null"}},
+			"app_store_state":                  map[string]any{"type": []any{"string", "null"}, "description": "App Store Connect state of the version, e.g. PREPARE_FOR_SUBMISSION."},
+			"version_string":                   map[string]any{"type": []any{"string", "null"}},
+			"created_date":                     map[string]any{"type": []any{"string", "null"}},
+			"release_type":                     map[string]any{"type": []any{"string", "null"}, "description": "MANUAL, AFTER_APPROVAL or SCHEDULED."},
+			"earliest_release_date":            map[string]any{"type": []any{"string", "null"}},
+			"app_store_version_phased_release": map[string]any{"type": []any{"object", "null"}, "description": "Phased release settings of the version, when set."},
+		},
+	},
 	// GET /apps/{app-slug}/builds/{build-slug}/log/summary is not in the
 	// published API document; this mirrors a live response, without the fields
 	// the tool strips (app_id, build_id, agent_info; and unless verbose:

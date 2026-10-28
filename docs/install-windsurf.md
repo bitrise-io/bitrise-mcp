@@ -83,7 +83,24 @@ After installation:
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+Cascade allows at most 100 tools across all MCP servers. With every API group enabled, the Bitrise server alone exposes more than 100 tools. Enable only the API groups you need with the `x-bitrise-enabled-api-groups` header. This example keeps the CI tools:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "serverUrl": "https://mcp.bitrise.io",
+      "headers": {
+        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
+      }
+    }
+  }
+}
+```
+
+For the local server, put the same comma-separated list in the `ENABLED_API_GROUPS` environment variable instead. You can also list individual tools you don't need under `disabledTools`.
+
+See [API groups](/docs/tools.md#advanced-configuration) for every group and combinations that stay under common tool limits.
 
 ## Troubleshooting
 

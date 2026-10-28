@@ -1,0 +1,142 @@
+{
+  "description": "Response of GET /app-versions (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "items": {
+      "items": {
+        "properties": {
+          "app_store_release_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "artifact_source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "automatic_store_upload": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "automations": {
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "connected_app_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default_release_method": {},
+          "demo": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "outgoing_webhooks": {
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "platform": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_candidate_build_slug": {},
+          "release_candidate_id": {},
+          "release_candidate_locked": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "released_at": {},
+          "slack_notification_integration_id": {},
+          "slack_webhook_url": {},
+          "stages": {
+            "items": {},
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "store_app_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "store_app_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "teams_webhook_url": {},
+          "workflow": {}
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}
