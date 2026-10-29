@@ -71,17 +71,15 @@ func TestListAPIGroupsReportsWhatEnablingAGroupAdds(t *testing.T) {
 
 	apps := groups["apps"]
 	assert.True(t, apps.Enabled)
-	assert.Contains(t, apps.Tools, "register_app")
 	assert.Empty(t, apps.UnavailableTools)
 
 	builds := groups["builds"]
 	assert.False(t, builds.Enabled)
-	assert.Contains(t, builds.Tools, "list_builds")
 	assert.Contains(t, builds.UnavailableTools, "trigger_bitrise_build")
 	assert.NotContains(t, builds.UnavailableTools, "list_builds", "list_builds is available through read-only")
 
 	for _, g := range out.Groups {
-		assert.NotContains(t, g.Tools, "list_api_groups")
+		assert.NotContains(t, g.UnavailableTools, "list_api_groups")
 	}
 }
 

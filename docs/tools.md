@@ -692,7 +692,7 @@ Common arguments of every Insights tool:
 ### Tool discovery
 
 1. `list_api_groups`
-   - Lists the API groups, whether each is enabled for this connection, and the tools each group provides. It is available whatever groups are enabled and belongs to none of them. `unavailable_tools` shows the tools that enabling a group would add; the user enables groups in their MCP client configuration.
+   - Lists the API groups, whether each is enabled for this connection, and the tools each disabled group would add as `unavailable_tools`. It is available whatever groups are enabled and belongs to none of them. The user enables groups in their MCP client configuration.
    - Arguments: none
 
 ## API Groups

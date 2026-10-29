@@ -49,15 +49,14 @@ type apiGroup struct {
 	Name             string   `json:"name"`
 	Description      string   `json:"description"`
 	Enabled          bool     `json:"enabled"`
-	Tools            []string `json:"tools" jsonschema:"Every tool in the group."`
-	UnavailableTools []string `json:"unavailable_tools,omitempty" jsonschema:"Tools of the group that no enabled group provides; enabling this group adds them."`
+	UnavailableTools []string `json:"unavailable_tools,omitempty" jsonschema:"Tools of the group that no enabled group provides; enabling this group adds them. Omitted when there are none."`
 }
 
 func listAPIGroups(b *Belt) bitrise.Tool {
 	return bitrise.Tool{
 		AlwaysEnabled: true,
 		Definition: mcp.NewTool("list_api_groups",
-			mcp.WithDescription("Lists the API groups of the Bitrise MCP server, whether each is enabled for this connection, and the tools each group provides. "+
+			mcp.WithDescription("Lists the API groups of the Bitrise MCP server, whether each is enabled for this connection, and the tools each disabled group would add. "+
 				"Call it when a task needs a capability that none of the available tools provide: unavailable_tools shows which disabled group would add the missing tool. "+
 				"The user has to enable a group in their MCP client configuration; it cannot be enabled from a tool call."),
 			mcp.WithOutputSchema[apiGroupsResult](),
@@ -95,15 +94,10 @@ func (b *Belt) apiGroups(enabled []string) apiGroupsResult {
 	for _, name := range b.groupNames() {
 		group := apiGroup{Name: name, Description: apiGroupDescriptions[name], Enabled: slices.Contains(enabled, name)}
 		for toolName, t := range b.tools {
-			if !slices.Contains(t.APIGroups, name) {
-				continue
-			}
-			group.Tools = append(group.Tools, toolName)
-			if !b.ToolEnabled(toolName, enabled) {
+			if slices.Contains(t.APIGroups, name) && !b.ToolEnabled(toolName, enabled) {
 				group.UnavailableTools = append(group.UnavailableTools, toolName)
 			}
 		}
-		slices.Sort(group.Tools)
 		slices.Sort(group.UnavailableTools)
 		result.Groups = append(result.Groups, group)
 	}
