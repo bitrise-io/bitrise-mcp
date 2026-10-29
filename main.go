@@ -113,6 +113,7 @@ func run() error {
 			return filtered
 		}),
 		server.WithRecovery(),
+		server.WithInstructions(tool.Instructions),
 		server.WithToolCapabilities(false),
 		server.WithLogging(),
 	)
@@ -164,6 +165,7 @@ func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
 
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			ctx = bitrise.ContextWithEnabledGroups(ctx, strings.Split(cfg.EnabledAPIGroups, ","))
 			return fn(bitrise.ContextWithPAT(ctx, cfg.BitriseToken), request)
 		}
 	})(mcpServer)
@@ -201,13 +203,13 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			} else if pat != "" {
 				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
-			// server.WithToolFilter can use it to limit the tools listed.
+			// server.WithToolFilter limits the tools listed to these groups, and
+			// list_api_groups reports them.
 			enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
-			if enabledGroups != "" {
-				a := strings.Split(enabledGroups, ",")
-				ctx = bitrise.ContextWithEnabledGroups(ctx, a)
+			if enabledGroups == "" {
+				enabledGroups = cfg.EnabledAPIGroups
 			}
-			return ctx
+			return bitrise.ContextWithEnabledGroups(ctx, strings.Split(enabledGroups, ","))
 		}),
 		server.WithDisableStreaming(true),
 	}

@@ -6,6 +6,8 @@ Tools are grouped by their "API group", and you can pass the groups you want to 
 
 `user` is also accepted and enables the same tool as `account` (`me`). It is the name that tool was tagged with before, kept so existing configurations keep working; use `account` in new ones.
 
+Whatever groups are enabled, the `list_api_groups` tool stays available. It lists every group, whether it is enabled for the connection, and which tools each disabled group would add. The server instructions tell agents to call it when no available tool covers a task, so the agent can tell the user which group to enable.
+
 We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
 
 The `release-management` group enables every Release Management tool. To load only part of them, enable one or more of these groups instead:
@@ -686,6 +688,12 @@ Common arguments of every Insights tool:
      - `order` (optional): desc (default) or asc
      - `page` (optional): 1-based page (default: 1)
      - `per_page` (optional): Test cases per page, 1-100 (default: 20)
+
+### Tool discovery
+
+1. `list_api_groups`
+   - Lists the API groups, whether each is enabled for this connection, and the tools each group provides. It is available whatever groups are enabled and belongs to none of them. `unavailable_tools` shows the tools that enabling a group would add; the user enables groups in their MCP client configuration.
+   - Arguments: none
 
 ## API Groups
 
