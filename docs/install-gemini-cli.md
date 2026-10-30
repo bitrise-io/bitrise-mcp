@@ -124,7 +124,7 @@ To verify that the Bitrise MCP server has been configured, start Gemini CLI in y
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
 
 You can find more MCP configuration options for Gemini CLI here: [MCP Configuration Structure](https://google-gemini.github.io/gemini-cli/docs/tools/mcp-server.html#configuration-structure). For example, bypassing tool confirmations or excluding specific tools.
 

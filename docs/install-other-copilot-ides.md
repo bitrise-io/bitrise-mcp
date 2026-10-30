@@ -264,7 +264,7 @@ After setup:
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
 
 ## Troubleshooting
 

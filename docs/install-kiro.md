@@ -71,9 +71,9 @@ On first tool use, Kiro will open your browser for the Bitrise sign-in flow.
 
 ## Advanced Configuration
 
-You can limit the tools exposed by configuring API groups. This is useful for optimizing token usage or focusing on specific functionality.
+You can limit the tools exposed by configuring toolsets. This is useful for optimizing token usage or focusing on specific functionality.
 
-Available API groups:
+Available toolsets:
 - `apps` - App management
 - `builds` - Build operations
 - `artifacts` - Artifact management

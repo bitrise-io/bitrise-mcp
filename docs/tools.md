@@ -2,21 +2,28 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-app, release-management-build-distribution, release-management-code-push, insights`.
+Tools are grouped into toolsets, and you can pass the toolsets you want to expose. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-app, release-management-build-distribution, release-management-code-push, insights`, or `all` for every toolset.
 
 `user` is also accepted and enables the same tool as `account` (`me`). It is the name that tool was tagged with before, kept so existing configurations keep working; use `account` in new ones.
 
-Whatever groups are enabled, the `list_api_groups` tool stays available. It lists every group, whether it is enabled for the connection, and which tools each disabled group would add. The server instructions tell agents to call it when no available tool covers a task, so the agent can tell the user which group to enable.
+Whatever toolsets are enabled, the `list_toolsets` tool stays available. It lists every toolset, whether it is enabled for the connection, and which tools each disabled toolset would add. The server instructions tell agents to call it when no available tool covers a task, so the agent can tell the user which toolset to enable.
 
-We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
+We recommend using the `release-management` toolset separately to avoid any confusion with the `apps` toolset.
 
-The `release-management` group enables every Release Management tool. To load only part of them, enable one or more of these groups instead:
+The `release-management` toolset enables every Release Management tool. To load only part of them, enable one or more of these toolsets instead:
 
 - `release-management-app`: connected apps and installable artifacts
 - `release-management-build-distribution`: build distribution versions and test builds, tester groups and testers
 - `release-management-code-push`: CodePush deployments and updates
 
-By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
+By default, all toolsets are enabled. To choose them, pass a comma-separated list of toolset names, or `all`:
+
+- Remote (Streamable HTTP) server: the `toolset` query parameter of the server URL, for example `https://mcp.bitrise.io/?toolset=apps,builds`, or the `x-bitrise-enabled-toolsets` HTTP header. The query parameter wins when both are set.
+- Local (stdio) server: the `ENABLED_TOOLSETS` environment variable.
+
+The earlier names, the `x-bitrise-enabled-api-groups` header and the `ENABLED_API_GROUPS` environment variable, still work when the new ones aren't set.
+
+`all` suits Claude, which loads tools dynamically, so a large toolset doesn't fill its context. It doesn't suit GitHub Copilot, which has no dynamic tool loading; VS Code allows 128 tools per chat request, its built-in tools included.
 
 ## Output schemas
 
@@ -691,13 +698,13 @@ Common arguments of every Insights tool:
 
 ### Tool discovery
 
-1. `list_api_groups`
-   - Lists the API groups, whether each is enabled for this connection, and the tools each disabled group would add as `unavailable_tools`. It is available whatever groups are enabled and belongs to none of them. The user enables groups in their MCP client configuration.
+1. `list_toolsets`
+   - Lists the toolsets, whether each is enabled for this connection, and the tools each disabled toolset would add as `unavailable_tools`. It is available whatever toolsets are enabled and belongs to none of them. The user enables toolsets in their MCP client configuration.
    - Arguments: none
 
-## API Groups
+## Toolsets
 
-The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to (`me` also belongs to `user`, the older name of `account`):
+The Bitrise MCP server organizes tools into toolsets that can be enabled or disabled (see [Advanced configuration](#advanced-configuration)). The table below shows which toolsets each tool belongs to (`me` also belongs to `user`, the older name of `account`):
 
 | Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-app | release-management-build-distribution | release-management-code-push | insights |
 |------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|--------------|------------------------|---------------------------------------|------------------------------|---|

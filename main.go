@@ -1,13 +1,13 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -36,8 +36,12 @@ type config struct {
 	// the stdio transport. Only valid for the stdio transport, otherwise it is
 	// ignored.
 	BitriseToken string `env:"BITRISE_TOKEN"`
-	// EnabledAPIGroups is a comma-separated list of API groups that are enabled.
-	EnabledAPIGroups string `env:"ENABLED_API_GROUPS" default:"apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,user,read-only,release-management,release-management-app,release-management-build-distribution,release-management-code-push,configuration,insights"`
+	// EnabledToolsets is a comma-separated list of the toolsets that are
+	// enabled, or all. See toolsets for the fallbacks when it is empty.
+	EnabledToolsets string `env:"ENABLED_TOOLSETS"`
+	// EnabledAPIGroups is the earlier name of EnabledToolsets, kept so
+	// existing configurations keep working.
+	EnabledAPIGroups string `env:"ENABLED_API_GROUPS"`
 	// LogLevel is the log level for the application.
 	LogLevel string `env:"LOG_LEVEL" default:"info"`
 	// DatadogTracingEnabled enables DataDog APM tracing when set to true.
@@ -60,6 +64,29 @@ type config struct {
 	// (default: https://api.bitrise.io/v0.1). Useful for pointing at a
 	// test or local API instance.
 	BitriseAPIBaseURL string `env:"BITRISE_API_BASE_URL"`
+}
+
+// defaultToolsets are the toolsets enabled when neither the request nor the
+// configuration names any.
+const defaultToolsets = "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,user,read-only,release-management,release-management-app,release-management-build-distribution,release-management-code-push,configuration,insights"
+
+// toolsets returns the configured toolset list: ENABLED_TOOLSETS, then the
+// earlier ENABLED_API_GROUPS, then defaultToolsets.
+func (c config) toolsets() string {
+	return cmp.Or(c.EnabledToolsets, c.EnabledAPIGroups, defaultToolsets)
+}
+
+// requestToolsets returns the toolset list a remote client asked for: the
+// toolset query parameter of the server URL, then the
+// x-bitrise-enabled-toolsets header, then the earlier
+// x-bitrise-enabled-api-groups header, then fallback.
+func requestToolsets(r *http.Request, fallback string) string {
+	return cmp.Or(
+		r.URL.Query().Get("toolset"),
+		r.Header.Get("x-bitrise-enabled-toolsets"),
+		r.Header.Get("x-bitrise-enabled-api-groups"),
+		fallback,
+	)
 }
 
 func main() {
@@ -95,14 +122,15 @@ func run() error {
 	}
 
 	toolBelt := tool.NewBelt()
+	configuredToolsets := toolBelt.EnabledToolsets(cfg.toolsets())
 	mcpServer := server.NewMCPServer(
 		"bitrise",
 		BuildVersion,
 		server.WithToolFilter(func(ctx context.Context, tools []mcp.Tool) []mcp.Tool {
 			enabledGroups, err := bitrise.EnabledGroupsFromCtx(ctx) // http transport only
 			if err != nil {
-				// stdio transport/no tool filtering in http transport
-				enabledGroups = strings.Split(cfg.EnabledAPIGroups, ",")
+				// stdio transport
+				enabledGroups = configuredToolsets
 			}
 			var filtered []mcp.Tool
 			for _, tool := range tools {
@@ -152,20 +180,20 @@ func run() error {
 
 	if cfg.Addr == "" {
 		logger.Info("no address specified, starting stdio transport")
-		return runStdioTransport(cfg, mcpServer)
+		return runStdioTransport(cfg, mcpServer, configuredToolsets)
 	}
 	logger.Info("starting http transport")
-	return runHTTPTransport(mcpServer, logger, cfg)
+	return runHTTPTransport(mcpServer, toolBelt, logger, cfg)
 }
 
-func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
+func runStdioTransport(cfg config, mcpServer *server.MCPServer, enabledToolsets []string) error {
 	if cfg.BitriseToken == "" {
 		return fmt.Errorf("BITRISE_TOKEN must be provided in stdio transport mode")
 	}
 
 	server.WithToolHandlerMiddleware(func(fn server.ToolHandlerFunc) server.ToolHandlerFunc {
 		return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			ctx = bitrise.ContextWithEnabledGroups(ctx, strings.Split(cfg.EnabledAPIGroups, ","))
+			ctx = bitrise.ContextWithEnabledGroups(ctx, enabledToolsets)
 			return fn(bitrise.ContextWithPAT(ctx, cfg.BitriseToken), request)
 		}
 	})(mcpServer)
@@ -175,7 +203,7 @@ func runStdioTransport(cfg config, mcpServer *server.MCPServer) error {
 	return nil
 }
 
-func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cfg config) error {
+func runHTTPTransport(mcpServer *server.MCPServer, toolBelt *tool.Belt, logger *zap.SugaredLogger, cfg config) error {
 	if cfg.BitriseToken != "" {
 		return fmt.Errorf("BITRISE_TOKEN cannot be provided in http transport mode")
 	}
@@ -203,13 +231,9 @@ func runHTTPTransport(mcpServer *server.MCPServer, logger *zap.SugaredLogger, cf
 			} else if pat != "" {
 				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
-			// server.WithToolFilter limits the tools listed to these groups, and
-			// list_api_groups reports them.
-			enabledGroups := r.Header.Get("x-bitrise-enabled-api-groups")
-			if enabledGroups == "" {
-				enabledGroups = cfg.EnabledAPIGroups
-			}
-			return bitrise.ContextWithEnabledGroups(ctx, strings.Split(enabledGroups, ","))
+			// server.WithToolFilter limits the tools listed to these toolsets,
+			// and list_toolsets reports them.
+			return bitrise.ContextWithEnabledGroups(ctx, toolBelt.EnabledToolsets(requestToolsets(r, cfg.toolsets())))
 		}),
 		server.WithDisableStreaming(true),
 	}
