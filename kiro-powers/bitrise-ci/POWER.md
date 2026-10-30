@@ -414,11 +414,11 @@ The Bitrise MCP server provides 67 tools organized into the following categories
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management, release-management-app, release-management-build-distribution`.
+Tools are grouped into toolsets, and you can pass the toolsets you want to expose. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management, release-management-app, release-management-build-distribution`, or `all` for every toolset.
 
-We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
+We recommend using the `release-management` toolset separately to avoid any confusion with the `apps` toolset.
 
-By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
+By default, all toolsets are enabled. You can specify which toolsets to enable with a comma-separated list of toolset names: the `ENABLED_TOOLSETS` environment variable for local (stdio) servers, or the `toolset` query parameter of the server URL (for example `https://mcp.bitrise.io/?toolset=apps,builds`) or the `x-bitrise-enabled-toolsets` HTTP header for remote (Streamable HTTP) servers. The earlier `ENABLED_API_GROUPS` environment variable and `x-bitrise-enabled-api-groups` header still work.
 
 ## Resources
 

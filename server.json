@@ -16,8 +16,8 @@
           "isSecret": true
         },
         {
-          "name": "x-bitrise-enabled-api-groups",
-          "description": "Comma-separated list of API groups to enable (e.g., 'apps,builds,workspaces'). Leave empty to enable all groups.",
+          "name": "x-bitrise-enabled-toolsets",
+          "description": "Comma-separated list of toolsets to enable (e.g., 'apps,builds,workspaces'), or 'all'. Leave empty for the default toolsets.",
           "isRequired": false,
           "isSecret": false
         }

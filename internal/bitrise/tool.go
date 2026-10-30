@@ -7,7 +7,12 @@ import (
 )
 
 type Tool struct {
-	APIGroups  []string
-	Definition mcp.Tool
-	Handler    func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
+	// APIGroups are the toolsets the tool belongs to. Toolsets were called
+	// API groups before.
+	APIGroups []string
+	// AlwaysEnabled keeps the tool listed and callable whatever toolsets
+	// are enabled.
+	AlwaysEnabled bool
+	Definition    mcp.Tool
+	Handler       func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
 }

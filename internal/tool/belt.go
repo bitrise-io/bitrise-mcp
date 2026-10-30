@@ -140,25 +140,30 @@ func NewBelt() *Belt {
 		insights.GetTestSeries,
 		insights.ListFlakyTests,
 	}
-	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList))}
+	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList)+1)}
 	for _, tool := range toolList {
-		if _, dup := belt.tools[tool.Definition.Name]; dup {
-			panic("duplicate tool name: " + tool.Definition.Name)
-		}
-		// Every tool advertises the schema of its result (declared in code or
-		// generated from the API document) and, to honour it, returns the
-		// result as structuredContent too. Tools without a schema (image
-		// results) are served as they are.
-		if outputschema.Apply(&tool.Definition) {
-			tool.Handler = outputschema.WithStructuredContent(tool.Handler)
-		}
-		// Clients prefer the spec-level title over annotations.title.
-		if tool.Definition.Title == "" {
-			tool.Definition.Title = tool.Definition.Annotations.Title
-		}
-		belt.tools[tool.Definition.Name] = tool
+		belt.add(tool)
 	}
+	belt.add(listToolsets(belt))
 	return belt
+}
+
+func (b *Belt) add(tool bitrise.Tool) {
+	if _, dup := b.tools[tool.Definition.Name]; dup {
+		panic("duplicate tool name: " + tool.Definition.Name)
+	}
+	// Every tool advertises the schema of its result (declared in code or
+	// generated from the API document) and, to honour it, returns the
+	// result as structuredContent too. Tools without a schema (image
+	// results) are served as they are.
+	if outputschema.Apply(&tool.Definition) {
+		tool.Handler = outputschema.WithStructuredContent(tool.Handler)
+	}
+	// Clients prefer the spec-level title over annotations.title.
+	if tool.Definition.Title == "" {
+		tool.Definition.Title = tool.Definition.Annotations.Title
+	}
+	b.tools[tool.Definition.Name] = tool
 }
 
 func (b *Belt) RegisterAll(server *server.MCPServer) {
@@ -180,6 +185,9 @@ func (b *Belt) ToolEnabled(name string, enabledGroups []string) bool {
 	tool, ok := b.tools[name]
 	if !ok {
 		return false
+	}
+	if tool.AlwaysEnabled {
+		return true
 	}
 	for _, enabledGroup := range enabledGroups {
 		if slices.Contains(tool.APIGroups, enabledGroup) {

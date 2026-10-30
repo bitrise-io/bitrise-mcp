@@ -181,7 +181,9 @@ The local server uses stdio with a Personal Access Token:
 
 ### Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
+
+We suggest enabling every toolset in Claude by using `https://mcp.bitrise.io/?toolset=all` as the server URL. Claude loads tools dynamically, so the larger toolset doesn't fill its context, and you don't have to reconfigure the server when a task needs a tool from another toolset.
 
 ## Troubleshooting
 
