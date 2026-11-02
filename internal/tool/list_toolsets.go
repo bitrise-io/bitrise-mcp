@@ -12,8 +12,11 @@ import (
 // AllToolsets enables every toolset when it appears in a toolset list.
 const AllToolsets = "all"
 
-// Instructions are sent to clients in the initialize response, so the model
-// knows that disabled toolsets exist and how to find them.
+// Instructions tell the model that disabled toolsets exist and how to find them.
+// The server returns them in the initialize response. MCP 2026-07-28 replaces
+// initialize with server/discover, which carries them too but which clients
+// don't have to call. A client may never show them to the model, so the
+// list_toolsets description says when to call it as well.
 const Instructions = "Bitrise MCP tools are organized into toolsets, and the user's MCP client configuration decides which toolsets are enabled. " +
 	"If a task needs a capability that none of the available tools provide, call list_toolsets: it lists every toolset, whether it is enabled, and the tools it would add. " +
 	"Tools of a disabled toolset cannot be called. To get them, the user has to enable the toolset, with the toolset query parameter of the server URL or the x-bitrise-enabled-toolsets header for the remote server, or the ENABLED_TOOLSETS environment variable for a local one, and reconnect the client."
