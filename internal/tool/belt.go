@@ -144,7 +144,7 @@ func NewBelt() *Belt {
 	for _, tool := range toolList {
 		belt.add(tool)
 	}
-	belt.add(listToolsets(belt))
+	belt.add(listToolset(belt))
 	return belt
 }
 

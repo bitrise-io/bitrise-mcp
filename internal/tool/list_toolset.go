@@ -16,14 +16,14 @@ const AllToolsets = "all"
 // The server returns them in the initialize response. MCP 2026-07-28 replaces
 // initialize with server/discover, which carries them too but which clients
 // don't have to call. A client may never show them to the model, so the
-// list_toolsets description says when to call it as well.
+// list_toolset description says when to call it as well.
 const Instructions = "Bitrise MCP tools are organized into toolsets, and the user's MCP client configuration decides which toolsets are enabled. " +
-	"If a task needs a capability that none of the available tools provide, call list_toolsets: it lists every toolset, whether it is enabled, and the tools it would add. " +
-	"Tools of a disabled toolset cannot be called. To get them, the user has to enable the toolset, with the toolset query parameter of the server URL or the x-bitrise-enabled-toolsets header for the remote server, or the ENABLED_TOOLSETS environment variable for a local one, and reconnect the client."
+	"If a task needs a capability that none of the available tools provide, call list_toolset: it lists every toolset, whether it is enabled, and the tools it would add. " +
+	"Tools of a disabled toolset cannot be called. To get them, the user has to enable the toolset, with the toolset query parameter of the server URL or the x-bitrise-enabled-toolset header for the remote server, or the ENABLED_TOOLSET environment variable for a local one, and reconnect the client."
 
 const howToEnableToolsets = "Tools of a disabled toolset are unavailable until the user enables the toolset in their MCP client configuration: " +
-	"set the toolset query parameter of the server URL (for example https://mcp.bitrise.io/?toolset=apps,builds) or the x-bitrise-enabled-toolsets HTTP header (remote server), " +
-	"or the ENABLED_TOOLSETS environment variable (local server), to a comma-separated list of toolsets or to all, then reconnect the client. " +
+	"set the toolset query parameter of the server URL (for example https://mcp.bitrise.io/?toolset=apps,builds) or the x-bitrise-enabled-toolset HTTP header (remote server), " +
+	"or the ENABLED_TOOLSET environment variable (local server), to a comma-separated list of toolsets or to all, then reconnect the client. " +
 	"Enabling a toolset adds its unavailable_tools."
 
 var toolsetDescriptions = map[string]string{
@@ -60,10 +60,10 @@ type toolset struct {
 	UnavailableTools []string `json:"unavailable_tools,omitempty" jsonschema:"Tools of the toolset that no enabled toolset provides; enabling this toolset adds them. Omitted when there are none."`
 }
 
-func listToolsets(b *Belt) bitrise.Tool {
+func listToolset(b *Belt) bitrise.Tool {
 	return bitrise.Tool{
 		AlwaysEnabled: true,
-		Definition: mcp.NewTool("list_toolsets",
+		Definition: mcp.NewTool("list_toolset",
 			mcp.WithDescription("Lists the toolsets of the Bitrise MCP server, whether each is enabled for this connection, and the tools each disabled toolset would add. "+
 				"Call it when a task needs a capability that none of the available tools provide: unavailable_tools shows which disabled toolset would add the missing tool. "+
 				"The user has to enable a toolset in their MCP client configuration; it cannot be enabled from a tool call."),

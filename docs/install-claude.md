@@ -60,12 +60,12 @@ Prerequisites: [Go](https://go.dev/) (>=1.25) installed and a Bitrise PAT.
 
 1. Run:
    ```bash
-   claude mcp add bitrise -e ENABLED_TOOLSETS=all -e BITRISE_TOKEN=YOUR_BITRISE_PAT -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
+   claude mcp add bitrise -e ENABLED_TOOLSET=all -e BITRISE_TOKEN=YOUR_BITRISE_PAT -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
    ```
 
    With an environment variable:
    ```bash
-   claude mcp add bitrise -e ENABLED_TOOLSETS=all -e BITRISE_TOKEN=$(grep BITRISE_PAT .env | cut -d '=' -f2) -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
+   claude mcp add bitrise -e ENABLED_TOOLSET=all -e BITRISE_TOKEN=$(grep BITRISE_PAT .env | cut -d '=' -f2) -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
    ```
 2. Restart Claude Code.
 3. Run `claude mcp list` to see if the Bitrise server is configured.
@@ -157,7 +157,7 @@ The local server uses stdio with a Personal Access Token:
       ],
       "env": {
         "BITRISE_TOKEN": "YOUR_BITRISE_PAT",
-        "ENABLED_TOOLSETS": "all",
+        "ENABLED_TOOLSET": "all",
         "PATH": "PATH to bin directory of go:PATH to directory of git",
         "GOPATH": "your GOPATH",
         "GOCACHE": "your GOCACHE"
@@ -184,7 +184,7 @@ The local server uses stdio with a Personal Access Token:
 
 See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
 
-The setup steps above enable every toolset, with `?toolset=all` in the server URL or `ENABLED_TOOLSETS=all` for the local server. We suggest this for Claude: it loads tools dynamically, so the larger toolset doesn't fill its context, and you don't have to reconfigure the server when a task needs a tool from another toolset. Leave it out to get the default toolset.
+The setup steps above enable every toolset, with `?toolset=all` in the server URL or `ENABLED_TOOLSET=all` for the local server. We suggest this for Claude: it loads tools dynamically, so the larger toolset doesn't fill its context, and you don't have to reconfigure the server when a task needs a tool from another toolset. Leave it out to get the default toolset.
 
 ## Troubleshooting
 

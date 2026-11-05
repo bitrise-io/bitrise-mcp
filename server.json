@@ -16,7 +16,7 @@
           "isSecret": true
         },
         {
-          "name": "x-bitrise-enabled-toolsets",
+          "name": "x-bitrise-enabled-toolset",
           "description": "Comma-separated list of toolsets to enable (e.g., 'apps,builds,workspaces'), or 'all'. Leave empty for the default toolsets.",
           "isRequired": false,
           "isSecret": false

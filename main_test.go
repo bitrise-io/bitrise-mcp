@@ -13,7 +13,7 @@ import (
 // TestDefaultToolsetsMatchToolGroups keeps defaultToolsets in step with the
 // toolsets tools are tagged with: every toolset a tool uses is enabled by
 // default, and every default toolset enables at least one tool, so naming it
-// in ENABLED_TOOLSETS, the toolset query parameter or a header never returns
+// in ENABLED_TOOLSET, the toolset query parameter or a header never returns
 // an empty tool list.
 func TestDefaultToolsetsMatchToolGroups(t *testing.T) {
 	defaults := strings.Split(defaultToolsets, ",")
@@ -33,7 +33,7 @@ func TestDefaultToolsetsMatchToolGroups(t *testing.T) {
 func TestConfigToolsets(t *testing.T) {
 	assert.Equal(t, defaultToolsets, config{}.toolsets())
 	assert.Equal(t, "apps", config{EnabledAPIGroups: "apps"}.toolsets(), "ENABLED_API_GROUPS is the fallback")
-	assert.Equal(t, "builds", config{EnabledToolsets: "builds", EnabledAPIGroups: "apps"}.toolsets(), "ENABLED_TOOLSETS wins")
+	assert.Equal(t, "builds", config{EnabledToolsets: "builds", EnabledAPIGroups: "apps"}.toolsets(), "ENABLED_TOOLSET wins")
 }
 
 func TestRequestToolsets(t *testing.T) {
@@ -45,7 +45,7 @@ func TestRequestToolsets(t *testing.T) {
 		return r
 	}
 	oldHeader := "x-bitrise-enabled-api-groups"
-	newHeader := "x-bitrise-enabled-toolsets"
+	newHeader := "x-bitrise-enabled-toolset"
 
 	assert.Equal(t, "default", requestToolsets(request("/", nil), "default"))
 	assert.Equal(t, "apps", requestToolsets(request("/", map[string]string{oldHeader: "apps"}), "default"))

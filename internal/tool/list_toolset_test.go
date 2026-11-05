@@ -18,10 +18,10 @@ func TestEveryToolsetHasADescription(t *testing.T) {
 	}
 }
 
-func TestListToolsetsIsAlwaysEnabled(t *testing.T) {
+func TestListToolsetIsAlwaysEnabled(t *testing.T) {
 	belt := NewBelt()
 	for _, enabled := range [][]string{nil, {}, {"apps"}, {"no-such-toolset"}} {
-		assert.Truef(t, belt.ToolEnabled("list_toolsets", enabled), "list_toolsets must be enabled with toolsets %v", enabled)
+		assert.Truef(t, belt.ToolEnabled("list_toolset", enabled), "list_toolset must be enabled with toolsets %v", enabled)
 	}
 }
 
@@ -34,21 +34,21 @@ func TestEnabledToolsets(t *testing.T) {
 	assert.NotContains(t, belt.toolsetNames(), AllToolsets, "no tool may be tagged with the reserved all toolset")
 }
 
-func callListToolsets(t *testing.T, ctx context.Context) toolsetsResult {
+func callListToolset(t *testing.T, ctx context.Context) toolsetsResult {
 	t.Helper()
 	var listTool bitrise.Tool
 	for _, tl := range NewBelt().Tools() {
-		if tl.Definition.Name == "list_toolsets" {
+		if tl.Definition.Name == "list_toolset" {
 			listTool = tl
 		}
 	}
 	if listTool.Handler == nil {
-		t.Fatal("list_toolsets is not registered")
+		t.Fatal("list_toolset is not registered")
 	}
 	res, err := listTool.Handler(ctx, mcp.CallToolRequest{})
 	mustOK(t, err)
 	if res.IsError {
-		t.Fatalf("list_toolsets returned an error result: %v", res.Content)
+		t.Fatalf("list_toolset returned an error result: %v", res.Content)
 	}
 	raw, err := json.Marshal(res.StructuredContent)
 	mustOK(t, err)
@@ -61,18 +61,18 @@ func callListToolsets(t *testing.T, ctx context.Context) toolsetsResult {
 	mustOK(t, json.Unmarshal(wire, &def))
 	instance, err := jsonschema.UnmarshalJSON(bytes.NewReader(raw))
 	mustOK(t, err)
-	assert.NoError(t, compileSchema(t, "list_toolsets", def.OutputSchema).Validate(instance), "result does not match the output schema")
+	assert.NoError(t, compileSchema(t, "list_toolset", def.OutputSchema).Validate(instance), "result does not match the output schema")
 
 	var out toolsetsResult
 	mustOK(t, json.Unmarshal(raw, &out))
 	return out
 }
 
-func TestListToolsetsReportsWhatEnablingAToolsetAdds(t *testing.T) {
-	out := callListToolsets(t, bitrise.ContextWithEnabledGroups(context.Background(), []string{"apps", "read-only"}))
+func TestListToolsetReportsWhatEnablingAToolsetAdds(t *testing.T) {
+	out := callListToolset(t, bitrise.ContextWithEnabledGroups(context.Background(), []string{"apps", "read-only"}))
 
 	assert.Equal(t, []string{"apps", "read-only"}, out.EnabledToolsets)
-	assert.Contains(t, out.HowToEnable, "x-bitrise-enabled-toolsets")
+	assert.Contains(t, out.HowToEnable, "x-bitrise-enabled-toolset")
 	sets := map[string]toolset{}
 	for _, s := range out.Toolsets {
 		sets[s.Name] = s
@@ -88,28 +88,28 @@ func TestListToolsetsReportsWhatEnablingAToolsetAdds(t *testing.T) {
 	assert.NotContains(t, builds.UnavailableTools, "list_builds", "list_builds is available through read-only")
 
 	for _, s := range out.Toolsets {
-		assert.NotContains(t, s.UnavailableTools, "list_toolsets")
+		assert.NotContains(t, s.UnavailableTools, "list_toolset")
 	}
 }
 
-func TestListToolsetsWithAllEnabledReportsNothingUnavailable(t *testing.T) {
+func TestListToolsetWithAllEnabledReportsNothingUnavailable(t *testing.T) {
 	belt := NewBelt()
-	out := callListToolsets(t, bitrise.ContextWithEnabledGroups(context.Background(), belt.EnabledToolsets(AllToolsets)))
+	out := callListToolset(t, bitrise.ContextWithEnabledGroups(context.Background(), belt.EnabledToolsets(AllToolsets)))
 	for _, s := range out.Toolsets {
 		assert.Truef(t, s.Enabled, "%s should be enabled", s.Name)
 		assert.Emptyf(t, s.UnavailableTools, "%s should have no unavailable tools", s.Name)
 	}
 }
 
-func TestListToolsetsWithoutToolsetsInContextTreatsAllAsEnabled(t *testing.T) {
-	for _, s := range callListToolsets(t, context.Background()).Toolsets {
+func TestListToolsetWithoutToolsetsInContextTreatsAllAsEnabled(t *testing.T) {
+	for _, s := range callListToolset(t, context.Background()).Toolsets {
 		assert.Truef(t, s.Enabled, "%s should be enabled", s.Name)
 		assert.Emptyf(t, s.UnavailableTools, "%s should have no unavailable tools", s.Name)
 	}
 }
 
-func TestInstructionsPointToListToolsets(t *testing.T) {
-	for _, s := range []string{"list_toolsets", "toolset query parameter", "x-bitrise-enabled-toolsets", "ENABLED_TOOLSETS"} {
+func TestInstructionsPointToListToolset(t *testing.T) {
+	for _, s := range []string{"list_toolset", "toolset query parameter", "x-bitrise-enabled-toolset", "ENABLED_TOOLSET"} {
 		assert.Contains(t, Instructions, s)
 	}
 }

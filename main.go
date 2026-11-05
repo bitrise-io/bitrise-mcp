@@ -38,7 +38,7 @@ type config struct {
 	BitriseToken string `env:"BITRISE_TOKEN"`
 	// EnabledToolsets is a comma-separated list of the toolsets that are
 	// enabled, or all. See toolsets for the fallbacks when it is empty.
-	EnabledToolsets string `env:"ENABLED_TOOLSETS"`
+	EnabledToolsets string `env:"ENABLED_TOOLSET"`
 	// EnabledAPIGroups is the earlier name of EnabledToolsets, kept so
 	// existing configurations keep working.
 	EnabledAPIGroups string `env:"ENABLED_API_GROUPS"`
@@ -70,7 +70,7 @@ type config struct {
 // configuration names any.
 const defaultToolsets = "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,user,read-only,release-management,release-management-app,release-management-build-distribution,release-management-code-push,configuration,insights"
 
-// toolsets returns the configured toolset list: ENABLED_TOOLSETS, then the
+// toolsets returns the configured toolset list: ENABLED_TOOLSET, then the
 // earlier ENABLED_API_GROUPS, then defaultToolsets.
 func (c config) toolsets() string {
 	return cmp.Or(c.EnabledToolsets, c.EnabledAPIGroups, defaultToolsets)
@@ -78,12 +78,12 @@ func (c config) toolsets() string {
 
 // requestToolsets returns the toolset list a remote client asked for: the
 // toolset query parameter of the server URL, then the
-// x-bitrise-enabled-toolsets header, then the earlier
+// x-bitrise-enabled-toolset header, then the earlier
 // x-bitrise-enabled-api-groups header, then fallback.
 func requestToolsets(r *http.Request, fallback string) string {
 	return cmp.Or(
 		r.URL.Query().Get("toolset"),
-		r.Header.Get("x-bitrise-enabled-toolsets"),
+		r.Header.Get("x-bitrise-enabled-toolset"),
 		r.Header.Get("x-bitrise-enabled-api-groups"),
 		fallback,
 	)
@@ -232,7 +232,7 @@ func runHTTPTransport(mcpServer *server.MCPServer, toolBelt *tool.Belt, logger *
 				ctx = bitrise.ContextWithPAT(ctx, pat)
 			}
 			// server.WithToolFilter limits the tools listed to these toolsets,
-			// and list_toolsets reports them.
+			// and list_toolset reports them.
 			return bitrise.ContextWithEnabledGroups(ctx, toolBelt.EnabledToolsets(requestToolsets(r, cfg.toolsets())))
 		}),
 		server.WithDisableStreaming(true),
