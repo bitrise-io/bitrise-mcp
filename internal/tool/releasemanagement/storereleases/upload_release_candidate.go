@@ -10,7 +10,7 @@ import (
 )
 
 var UploadReleaseCandidate = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("upload_release_candidate",
 		mcp.WithDescription("Starts uploading the release candidate of an app version to the store: TestFlight for iOS apps, the Google Play Console for Android apps. "+
 			"The upload runs asynchronously in a Bitrise build; follow it with 'get_release_candidate_upload_status'. "+

@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateApprovalTask = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("update_approval_task",
 		mcp.WithDescription("Updates an approval task of an app version, including marking it completed or reopening it with 'completed'. Only the given arguments change. "+
 			"On an assigned task, only the assignee or a project admin may change 'completed', and only the creator or a project admin may change the other fields (403 otherwise)."),

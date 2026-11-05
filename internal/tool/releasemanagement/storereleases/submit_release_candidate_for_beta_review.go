@@ -10,7 +10,7 @@ import (
 )
 
 var SubmitReleaseCandidateForBetaReview = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("submit_release_candidate_for_beta_review",
 		mcp.WithDescription("Submits the uploaded release candidate of an iOS app version for TestFlight beta app review, which external testing groups require before they can receive the build. "+
 			"iOS only: Android app versions are rejected with 422 ERR_INVALID_PLATFORM."),

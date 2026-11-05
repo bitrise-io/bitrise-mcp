@@ -10,7 +10,7 @@ import (
 )
 
 var ListBetaTestingGroups = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("list_beta_testing_groups",
 		mcp.WithDescription("Lists the store beta testing targets of an app version. "+
 			"For iOS apps these are the TestFlight testing groups, each with an 'id' to pass to 'start_beta_testing'. "+

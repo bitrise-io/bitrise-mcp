@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateWhatToTestDescription = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("update_what_to_test_description",
 		mcp.WithDescription("Replaces the text of an existing TestFlight \"What to Test\" description of the uploaded release candidate of an iOS app version. "+
 			"Find the description ids with 'list_what_to_test_descriptions'. iOS only."),

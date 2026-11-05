@@ -100,24 +100,23 @@ The local Bitrise MCP server runs via Go and uses a Personal Access Token (stdio
 
 ## Advanced configuration
 
-Cursor has no fixed limit on the number of tools, but Cursor users have reported that a server with a very large tool list disappears from the agent without an error. If the Bitrise tools don't show up in the agent, enable only the API groups you need with the `x-bitrise-enabled-api-groups` header. The Marketplace install enables every group, so use the manual configuration to set the header. This example keeps the CI tools:
+The Marketplace install enables every toolset with `https://mcp.bitrise.io/?toolset=all`, and you can use the same URL in a manual configuration. Cursor users have reported that a server with a very large tool list disappears from the agent without an error. If the Bitrise tools don't show up in the agent, enable only the toolsets you need with the `toolset` query parameter. This example keeps the CI tools:
 
 ```json
 {
   "mcpServers": {
     "bitrise": {
-      "url": "https://mcp.bitrise.io",
-      "headers": {
-        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
-      }
+      "url": "https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
     }
   }
 }
 ```
 
-For the local server, put the same comma-separated list in the `ENABLED_API_GROUPS` environment variable instead.
+For the local server, put the same comma-separated list in the `ENABLED_TOOLSET` environment variable instead.
 
-See [API groups](/docs/tools.md#advanced-configuration) for every group and combinations that stay under common tool limits.
+If a task needs a tool from a toolset you haven't enabled, such as the store release tools, the agent can call `list_toolset` to find out which toolset to add.
+
+See [Toolsets](/docs/tools.md#advanced-configuration) for every toolset and combinations that stay under common tool limits.
 
 ## Troubleshooting
 

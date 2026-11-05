@@ -10,7 +10,7 @@ import (
 )
 
 var GetAppStoreReviewStatus = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_app_store_review_status",
 		mcp.WithDescription("Gives back the App Store review status of an iOS app version: 'release_management_review_status' as tracked by Release Management and 'app_store_review_status' as reported by App Store Connect (e.g. WAITING_FOR_REVIEW, IN_REVIEW, APPROVED, REJECTED). "+
 			"iOS only; fails with 422 ERR_REVIEW_NOT_REQUESTED when the version was never submitted."),

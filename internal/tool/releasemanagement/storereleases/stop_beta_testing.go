@@ -11,7 +11,7 @@ import (
 )
 
 var StopBetaTesting = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("stop_beta_testing",
 		mcp.WithDescription("Stops the TestFlight beta testing of the release candidate of an iOS app version on a testing group, removing the build from that group so its testers no longer receive it. "+
 			"The reverse of 'start_beta_testing'. iOS only: Google Play testing tracks cannot be stopped this way (422 ERR_INVALID_PLATFORM)."),

@@ -10,7 +10,7 @@ import (
 )
 
 var SubmitForAppStoreReview = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("submit_for_app_store_review",
 		mcp.WithDescription("Submits the uploaded release candidate of an iOS app version to App Store review, optionally setting the App Store metadata of the version per locale first. "+
 			"Confirm with the user before calling: if the App Store release type of the version is AFTER_APPROVAL (see 'get_app_store_release_settings'), Apple publishes the version to the App Store as soon as the review passes. "+

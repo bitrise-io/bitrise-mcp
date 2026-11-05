@@ -11,7 +11,7 @@ import (
 )
 
 var ListReleaseEvents = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("list_release_events",
 		mcp.WithDescription("Lists the recorded event history of an app version, newest first: who did what and when across the release stages. "+
 			"Paginate with a cursor: pass a response's 'next_before' back as 'before' to read the next page, and stop once it comes back null. 'total_count' and 'available_actors' are present on the first page only. "+

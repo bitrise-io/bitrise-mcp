@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteGooglePlayStagedRolloutSchedule = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("delete_google_play_staged_rollout_schedule",
 		mcp.WithDescription("Deletes the staged rollout schedule of an Android app version, so no further scheduled steps raise the Google Play production rollout. "+
 			"Steps that already ran stay in effect on the store. Fails with 412 when there is no schedule or it has already finished. Android only."),

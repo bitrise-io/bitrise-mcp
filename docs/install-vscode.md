@@ -84,22 +84,21 @@ Local stdio mode authenticates with a Personal Access Token:
 
 ## Advanced configuration
 
-VS Code allows at most 128 tools in a chat request, and its built-in tools count toward that limit. With every API group enabled, the Bitrise server alone exposes more than 128 tools, so chat requests can fail with "Cannot have more than 128 tools per request". Enable only the API groups you need with the `x-bitrise-enabled-api-groups` header. This example keeps the CI tools:
+VS Code allows at most 128 tools in a chat request, and its built-in tools count toward that limit. The default toolset exposes 88 Bitrise tools and `all` exposes 131, so together with the built-in tools and other MCP servers, chat requests can fail with "Cannot have more than 128 tools per request". GitHub Copilot doesn't load tools dynamically, so we suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
 
 ```json
 {
   "servers": {
     "bitrise": {
       "type": "http",
-      "url": "https://mcp.bitrise.io",
-      "headers": {
-        "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
-      }
+      "url": "https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
     }
   }
 }
 ```
 
-For the local server, put the same comma-separated list in the `ENABLED_API_GROUPS` environment variable instead. You can also turn off individual tools in the tool picker of the Chat view.
+For the local server, put the same comma-separated list in the `ENABLED_TOOLSET` environment variable instead. You can also turn off individual tools in the tool picker of the Chat view.
 
-See [API groups](/docs/tools.md#advanced-configuration) for every group and combinations that stay under common tool limits.
+If a task needs a tool from a toolset you haven't enabled, such as the store release tools, the agent can call `list_toolset` to find out which toolset to add.
+
+See [Toolsets](/docs/tools.md#advanced-configuration) for every toolset and combinations that stay under common tool limits.

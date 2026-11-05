@@ -264,17 +264,17 @@ After setup:
 
 ## Advanced configuration
 
-GitHub Copilot limits the number of tools in a chat request. In VS Code the limit is 128, built-in tools included, and with every API group enabled the Bitrise server alone exposes more than 128 tools. If your IDE reports too many tools, enable only the API groups you need. For the remote server, add the `x-bitrise-enabled-api-groups` header next to `url` in the configurations above, for example:
+GitHub Copilot limits the number of tools in a chat request and doesn't load tools dynamically. In VS Code the limit is 128, built-in tools included. The default toolset exposes 88 Bitrise tools and `all` exposes 131, so if your IDE reports too many tools, enable only the toolsets you need. For the remote server, add the `toolset` query parameter to the `url` in the configurations above. This example keeps the CI tools:
 
-```json
-"headers": {
-  "x-bitrise-enabled-api-groups": "apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
-}
+```
+https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights
 ```
 
-For the local server, put the same comma-separated list in the `ENABLED_API_GROUPS` environment variable instead.
+For the local server, put the same comma-separated list in the `ENABLED_TOOLSET` environment variable instead.
 
-See [API groups](/docs/tools.md#advanced-configuration) for every group and combinations that stay under common tool limits.
+If a task needs a tool from a toolset you haven't enabled, such as the store release tools, the agent can call `list_toolset` to find out which toolset to add.
+
+See [Toolsets](/docs/tools.md#advanced-configuration) for every toolset and combinations that stay under common tool limits.
 
 ## Troubleshooting
 

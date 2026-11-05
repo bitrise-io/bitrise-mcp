@@ -10,7 +10,7 @@ import (
 )
 
 var CreateWhatToTestDescription = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("create_what_to_test_description",
 		mcp.WithDescription("Adds a TestFlight \"What to Test\" description in a new locale to the uploaded release candidate of an iOS app version. "+
 			"Use 'update_what_to_test_description' for a locale that already has one. iOS only, and the release candidate must already be uploaded to the store."),

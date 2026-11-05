@@ -10,7 +10,7 @@ import (
 )
 
 var CreateApprovalTask = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("create_approval_task",
 		mcp.WithDescription("Adds an approval task to the approval stage of an app version. The release cannot move past the approval stage until every task is completed."),
 		mcp.WithString("app_version_id",

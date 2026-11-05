@@ -10,7 +10,7 @@ import (
 )
 
 var GetAppVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_app_version",
 		mcp.WithDescription("Gives back a store release app version with its stages, release candidate selection, notification settings, automations and current status. "+
 			"An app version is what the Release Management UI calls a release."),

@@ -10,7 +10,7 @@ import (
 )
 
 var GetReleaseCandidateUploadStatus = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_release_candidate_upload_status",
 		mcp.WithDescription("Gives back the store upload status of the release candidate of an app version: 'upload_state', the 'upload_build_url' of the Bitrise build doing the upload, the 'release_candidate_id' and 'release_candidate_build_slug', and for iOS apps the App Store Connect 'processing_state' of the uploaded build."),
 		mcp.WithString("app_version_id",

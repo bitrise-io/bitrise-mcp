@@ -37,7 +37,7 @@ var automationItemsSchema = map[string]any{
 }
 
 var CreateAppVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("create_app_version",
 		mcp.WithDescription("Creates a store release app version (a release in the Release Management UI) under a connected app. "+
 			"Nothing is uploaded or published by this call: it opens the release with its release candidate stage in progress. "+

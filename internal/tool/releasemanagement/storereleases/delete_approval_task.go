@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteApprovalTask = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("delete_approval_task",
 		mcp.WithDescription("Deletes an approval task of an app version. Removing the last open task completes the approval stage, which lets the release move on. "+
 			"An assigned task can only be deleted by its creator or a project admin (403 otherwise). This cannot be undone."),

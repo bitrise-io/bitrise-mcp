@@ -2,32 +2,42 @@
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped by their "API group", and you can pass the groups you want to expose as tools. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-app, release-management-build-distribution, release-management-code-push, release-management-store-releases, insights`.
+Tools are grouped into toolsets, and you can pass the toolsets you want to expose. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, read-only, release-management, configuration, release-management-app, release-management-build-distribution, release-management-code-push, release-management-store-releases, insights`, or `all` for every toolset.
 
 `user` is also accepted and enables the same tool as `account` (`me`). It is the name that tool was tagged with before, kept so existing configurations keep working; use `account` in new ones.
 
-We recommend using the `release-management` API group separately to avoid any confusion with the `apps` API group.
+Whatever toolsets are enabled, the `list_toolset` tool stays available. It lists every toolset, whether it is enabled for the connection, and which tools each disabled toolset would add. The server instructions tell agents to call it when no available tool covers a task, so the agent can tell the user which toolset to enable.
 
-The `release-management` group enables every Release Management tool. To load only part of them, enable one or more of these groups instead:
+We recommend using the `release-management` toolset separately to avoid any confusion with the `apps` toolset.
+
+The `release-management` toolset enables every Release Management tool except store releases. To load only part of them, enable one or more of these toolsets instead:
 
 - `release-management-app`: connected apps and installable artifacts
 - `release-management-build-distribution`: build distribution versions and test builds, tester groups and testers
 - `release-management-code-push`: CodePush deployments and updates
-- `release-management-store-releases`: app versions and their way to the stores, from release candidate and beta testing through approvals and store review to the rollout
 
-By default, all API groups are enabled. You can specify which groups to enable using the `ENABLED_API_GROUPS` environment variable for local (stdio) servers or the `x-bitrise-enabled-api-groups` HTTP header for remote (Streamable HTTP) servers with a comma-separated list of group names.
+The store release tools are in `release-management-store-releases` only: app versions and their way to the stores, from release candidate and beta testing through approvals and store review to the rollout. Neither `release-management`, `read-only` nor the default toolset includes them, so enable `release-management-store-releases` or `all` to use them.
 
-Some MCP clients cap the number of tools. VS Code allows 128 per chat request, its built-in tools included, and Windsurf allows 100 across all MCP servers. With every group enabled this server exposes more than both, so on those clients enable a smaller set. These combinations stay under 100 tools:
+By default, every toolset except `release-management-store-releases` is enabled. The default toolset is not a stable contract: we may remove tools from it without a major version bump, so if you rely on specific tools, name their toolsets. To choose them, pass a comma-separated list of toolset names, or `all`:
 
-| Use case | Value of `x-bitrise-enabled-api-groups` or `ENABLED_API_GROUPS` | Tools |
+- Remote (Streamable HTTP) server: the `toolset` query parameter of the server URL, for example `https://mcp.bitrise.io/?toolset=apps,builds`, or the `x-bitrise-enabled-toolset` HTTP header. The query parameter wins when both are set.
+- Local (stdio) server: the `ENABLED_TOOLSET` environment variable.
+
+The earlier names, the `x-bitrise-enabled-api-groups` header and the `ENABLED_API_GROUPS` environment variable, still work when the new ones aren't set.
+
+`all` suits Claude, which loads tools dynamically, so a large toolset doesn't fill its context. It doesn't suit GitHub Copilot, which has no dynamic tool loading; VS Code allows 128 tools per chat request, its built-in tools included.
+
+Some MCP clients cap the number of tools. VS Code allows 128 per chat request, its built-in tools included, and Windsurf allows 100 across all MCP servers. The default toolset exposes 88 tools and `all` exposes 131, so on those clients, especially next to other MCP servers, enable a smaller set. These combinations stay under 100 tools (the counts include `list_toolset`):
+
+| Use case | `toolset` value | Tools |
 |---|---|---|
-| CI | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights` | 55 |
-| CI and CodePush | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-code-push` | 69 |
-| Release Management without store releases | `release-management-app,release-management-build-distribution,release-management-code-push` | 32 |
-| Release Management | `release-management` | 75 |
-| CI and store releases | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-store-releases` | 98 |
+| CI | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights` | 56 |
+| CI and CodePush | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-code-push` | 70 |
+| Release Management without store releases | `release-management` | 33 |
+| Release Management | `release-management,release-management-store-releases` | 76 |
+| CI and store releases | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-store-releases` | 99 |
 
-Leave `read-only` out of a smaller set, because it adds the read tools of every group.
+Use the same value in the `x-bitrise-enabled-toolset` header or the `ENABLED_TOOLSET` environment variable. Leave `read-only` out of a smaller set, because it adds the read tools of the other toolsets.
 
 ## Output schemas
 
@@ -656,6 +666,8 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
 
 ### Store Releases
 
+These tools are in the `release-management-store-releases` toolset only, which is not enabled by default (see [Advanced configuration](#advanced-configuration)).
+
 Store release tools take an app version (what the Release Management UI calls a release) of a connected app through the store: selecting and uploading the release candidate, beta testing, approvals, store review and the production rollout. They call the Store Releases API (`https://api.bitrise.io/release-management/v2/store-releases/v1`), except the three App Store version tools at the end, which call the Apps API. `app_version_id` is the `id` of an app version as returned by `list_app_versions`.
 
 Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` on the other platform. Most store operations need a release candidate to be chosen first (HTTP 400 otherwise) and a Standard license on the connected app (HTTP 412 otherwise). `release_to_app_store`, `complete_app_store_phased_release`, `release_to_google_play` and the staged rollout schedule tools publish to end users and cannot be undone, so an agent should confirm with the user before calling them. The delete, stop, cancel and status-closing tools are irreversible too, and every one of them is marked with `destructiveHint: true`. The tools that write to App Store Connect or Google Play, publish to end users, or set notification webhook URLs are marked with `openWorldHint: true` (see Tool annotations); the reads, approval tasks, deleting an app version, and pausing or deleting a staged rollout schedule only touch Bitrise data.
@@ -977,9 +989,15 @@ Common arguments of every Insights tool:
      - `page` (optional): 1-based page (default: 1)
      - `per_page` (optional): Test cases per page, 1-100 (default: 20)
 
-## API Groups
+### Tool discovery
 
-The Bitrise MCP server organizes tools into API groups that can be enabled or disabled via command-line arguments. The table below shows which API groups each tool belongs to (`me` also belongs to `user`, the older name of `account`):
+1. `list_toolset`
+   - Lists the toolsets, whether each is enabled for this connection, and the tools each disabled toolset would add as `unavailable_tools`. It is available whatever toolsets are enabled and belongs to none of them. The user enables toolsets in their MCP client configuration.
+   - Arguments: none
+
+## Toolsets
+
+The Bitrise MCP server organizes tools into toolsets that can be enabled or disabled (see [Advanced configuration](#advanced-configuration)). The table below shows which toolsets each tool belongs to (`me` also belongs to `user`, the older name of `account`):
 
 | Tool | apps | builds | workspaces | outgoing-webhooks | artifacts | group-roles | cache-items | pipelines | account | read-only | release-management | configuration | release-management-app | release-management-build-distribution | release-management-code-push | release-management-store-releases | insights |
 |------|------|--------|------------|-------------------|-----------|-------------|-------------|-----------|---------|-----------|--------------------|---------------|------------------------|---------------------------------------|------------------------------|-----------------------------------|----------|
@@ -1065,49 +1083,49 @@ The Bitrise MCP server organizes tools into API groups that can be enabled or di
 | codepush_get_update_status | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
 | codepush_generate_update_upload_url | | | | | | | | | | | ✅ | | | | ✅ | | |
 | codepush_get_metrics | | | | | | | | | | ✅ | ✅ | | | | ✅ | | |
-| list_app_versions | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| get_app_version | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| create_app_version | | | | | | | | | | | ✅ | | | | | ✅ | |
-| update_app_version | | | | | | | | | | | ✅ | | | | | ✅ | |
-| delete_app_version | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_release_candidate | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| upload_release_candidate | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_release_candidate_upload_status | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| submit_release_candidate_for_beta_review | | | | | | | | | | | ✅ | | | | | ✅ | |
-| list_beta_testing_groups | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| start_beta_testing | | | | | | | | | | | ✅ | | | | | ✅ | |
-| stop_beta_testing | | | | | | | | | | | ✅ | | | | | ✅ | |
-| list_what_to_test_descriptions | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| create_what_to_test_description | | | | | | | | | | | ✅ | | | | | ✅ | |
-| update_what_to_test_description | | | | | | | | | | | ✅ | | | | | ✅ | |
-| delete_what_to_test_description | | | | | | | | | | | ✅ | | | | | ✅ | |
-| list_approval_tasks | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| get_approval_task | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| create_approval_task | | | | | | | | | | | ✅ | | | | | ✅ | |
-| update_approval_task | | | | | | | | | | | ✅ | | | | | ✅ | |
-| delete_approval_task | | | | | | | | | | | ✅ | | | | | ✅ | |
-| submit_for_app_store_review | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_app_store_review_status | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| cancel_app_store_review | | | | | | | | | | | ✅ | | | | | ✅ | |
-| release_to_app_store | | | | | | | | | | | ✅ | | | | | ✅ | |
-| pause_app_store_phased_release | | | | | | | | | | | ✅ | | | | | ✅ | |
-| continue_app_store_phased_release | | | | | | | | | | | ✅ | | | | | ✅ | |
-| complete_app_store_phased_release | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_app_store_release_status | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| get_app_store_release_settings | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| update_app_store_release_settings | | | | | | | | | | | ✅ | | | | | ✅ | |
-| update_google_play_release_notes | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_google_play_release | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| release_to_google_play | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_google_play_staged_rollout_schedule | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| create_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
-| pause_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
-| resume_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
-| delete_google_play_staged_rollout_schedule | | | | | | | | | | | ✅ | | | | | ✅ | |
-| list_release_events | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| create_app_store_version | | | | | | | | | | | ✅ | | | | | ✅ | |
-| get_app_store_draft_version | | | | | | | | | | ✅ | ✅ | | | | | ✅ | |
-| update_app_store_draft_version | | | | | | | | | | | ✅ | | | | | ✅ | |
+| list_app_versions | | | | | | | | | | | | | | | | ✅ | |
+| get_app_version | | | | | | | | | | | | | | | | ✅ | |
+| create_app_version | | | | | | | | | | | | | | | | ✅ | |
+| update_app_version | | | | | | | | | | | | | | | | ✅ | |
+| delete_app_version | | | | | | | | | | | | | | | | ✅ | |
+| get_release_candidate | | | | | | | | | | | | | | | | ✅ | |
+| upload_release_candidate | | | | | | | | | | | | | | | | ✅ | |
+| get_release_candidate_upload_status | | | | | | | | | | | | | | | | ✅ | |
+| submit_release_candidate_for_beta_review | | | | | | | | | | | | | | | | ✅ | |
+| list_beta_testing_groups | | | | | | | | | | | | | | | | ✅ | |
+| start_beta_testing | | | | | | | | | | | | | | | | ✅ | |
+| stop_beta_testing | | | | | | | | | | | | | | | | ✅ | |
+| list_what_to_test_descriptions | | | | | | | | | | | | | | | | ✅ | |
+| create_what_to_test_description | | | | | | | | | | | | | | | | ✅ | |
+| update_what_to_test_description | | | | | | | | | | | | | | | | ✅ | |
+| delete_what_to_test_description | | | | | | | | | | | | | | | | ✅ | |
+| list_approval_tasks | | | | | | | | | | | | | | | | ✅ | |
+| get_approval_task | | | | | | | | | | | | | | | | ✅ | |
+| create_approval_task | | | | | | | | | | | | | | | | ✅ | |
+| update_approval_task | | | | | | | | | | | | | | | | ✅ | |
+| delete_approval_task | | | | | | | | | | | | | | | | ✅ | |
+| submit_for_app_store_review | | | | | | | | | | | | | | | | ✅ | |
+| get_app_store_review_status | | | | | | | | | | | | | | | | ✅ | |
+| cancel_app_store_review | | | | | | | | | | | | | | | | ✅ | |
+| release_to_app_store | | | | | | | | | | | | | | | | ✅ | |
+| pause_app_store_phased_release | | | | | | | | | | | | | | | | ✅ | |
+| continue_app_store_phased_release | | | | | | | | | | | | | | | | ✅ | |
+| complete_app_store_phased_release | | | | | | | | | | | | | | | | ✅ | |
+| get_app_store_release_status | | | | | | | | | | | | | | | | ✅ | |
+| get_app_store_release_settings | | | | | | | | | | | | | | | | ✅ | |
+| update_app_store_release_settings | | | | | | | | | | | | | | | | ✅ | |
+| update_google_play_release_notes | | | | | | | | | | | | | | | | ✅ | |
+| get_google_play_release | | | | | | | | | | | | | | | | ✅ | |
+| release_to_google_play | | | | | | | | | | | | | | | | ✅ | |
+| get_google_play_staged_rollout_schedule | | | | | | | | | | | | | | | | ✅ | |
+| create_google_play_staged_rollout_schedule | | | | | | | | | | | | | | | | ✅ | |
+| pause_google_play_staged_rollout_schedule | | | | | | | | | | | | | | | | ✅ | |
+| resume_google_play_staged_rollout_schedule | | | | | | | | | | | | | | | | ✅ | |
+| delete_google_play_staged_rollout_schedule | | | | | | | | | | | | | | | | ✅ | |
+| list_release_events | | | | | | | | | | | | | | | | ✅ | |
+| create_app_store_version | | | | | | | | | | | | | | | | ✅ | |
+| get_app_store_draft_version | | | | | | | | | | | | | | | | ✅ | |
+| update_app_store_draft_version | | | | | | | | | | | | | | | | ✅ | |
 | insights_get_build_totals | | | | | | | | | | ✅ | | | | | | | ✅ |
 | insights_get_build_series | | | | | | | | | | ✅ | | | | | | | ✅ |
 | insights_get_test_totals | | | | | | | | | | ✅ | | | | | | | ✅ |

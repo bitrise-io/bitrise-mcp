@@ -9,7 +9,7 @@ import (
 )
 
 var CreateAppStoreVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("create_app_store_version",
 		mcp.WithDescription("Creates the App Store Connect version record for an iOS app version, which is needed before it can be submitted for App Store review. "+
 			"A Release Management app version with the same name as 'version_string' must already exist under the connected app (404 ERR_APP_VERSION_NOT_FOUND otherwise); its release type and, on a Standard license, its default release method and preset release notes are applied to the new record. "+

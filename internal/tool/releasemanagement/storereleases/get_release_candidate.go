@@ -10,7 +10,7 @@ import (
 )
 
 var GetReleaseCandidate = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_release_candidate",
 		mcp.WithDescription("Gives back the release candidate of an app version: the installable artifact selected to go to the store, with its 'artifact_slug', 'artifact_url' and the Bitrise CI build it came from ('build_slug', 'build_url')."),
 		mcp.WithString("app_version_id",

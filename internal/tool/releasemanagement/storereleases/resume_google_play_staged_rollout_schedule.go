@@ -10,7 +10,7 @@ import (
 )
 
 var ResumeGooglePlayStagedRolloutSchedule = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("resume_google_play_staged_rollout_schedule",
 		mcp.WithDescription("Resumes a paused staged rollout schedule of an Android app version with the remaining steps re-timed. Send the steps that are still to run, each identified by the 'id' from 'get_google_play_staged_rollout_schedule'. "+
 			"Resuming re-arms production rollouts, so confirm the new dates with the user before calling. Fails with 412 when the schedule is not paused or has finished. Android only."),

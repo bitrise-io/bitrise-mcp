@@ -10,7 +10,7 @@ import (
 )
 
 var GetApprovalTask = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_approval_task",
 		mcp.WithDescription("Gives back one approval task of an app version by its task id."),
 		mcp.WithString("app_version_id",

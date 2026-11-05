@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateAppVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("update_app_version",
 		mcp.WithDescription("Updates a store release app version (a release in the Release Management UI). Only the given arguments change; omitted ones are left as they are. "+
 			"To pin a specific installable artifact as the release candidate, send 'release_candidate_id' together with 'release_candidate_locked' set to true, otherwise the call is rejected with 409. "+

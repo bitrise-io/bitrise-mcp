@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteWhatToTestDescription = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("delete_what_to_test_description",
 		mcp.WithDescription("Removes a TestFlight \"What to Test\" description (one locale) from the uploaded release candidate of an iOS app version. "+
 			"Find the description ids with 'list_what_to_test_descriptions'. This cannot be undone. iOS only."),

@@ -10,7 +10,7 @@ import (
 )
 
 var PauseAppStorePhasedRelease = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("pause_app_store_phased_release",
 		mcp.WithDescription("Pauses the in-progress App Store phased release of an iOS app version, so the rollout stops growing until it is continued with 'continue_app_store_phased_release'. "+
 			"Users who already received the update keep it. iOS only."),

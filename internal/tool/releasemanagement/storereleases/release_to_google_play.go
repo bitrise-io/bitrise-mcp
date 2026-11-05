@@ -10,7 +10,7 @@ import (
 )
 
 var ReleaseToGooglePlay = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("release_to_google_play",
 		mcp.WithDescription("Releases the uploaded release candidate of an Android app version on the Google Play production track to the given fraction of users, or raises the fraction of a rollout already in progress. "+
 			"This publishes to production and cannot be undone (a rollout can only be halted in the Play Console), so always confirm with the user before calling. "+

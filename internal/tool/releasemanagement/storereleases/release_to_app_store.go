@@ -10,7 +10,7 @@ import (
 )
 
 var ReleaseToAppStore = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("release_to_app_store",
 		mcp.WithDescription("Releases an approved iOS app version to the App Store, making it available to end users. This publishes to production and cannot be undone, so always confirm with the user before calling. "+
 			"Applies to versions whose App Store release type is MANUAL and whose review has passed; if phased release is enabled in the release settings the rollout runs over 7 days and can be paused, continued or completed with the phased release tools. iOS only."),

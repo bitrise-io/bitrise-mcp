@@ -10,7 +10,7 @@ import (
 )
 
 var GetGooglePlayRelease = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_google_play_release",
 		mcp.WithDescription("Gives back the current Google Play production rollout of an Android app version as its 'user_fraction': a number between 0 and 1 where 1 is a full release, or null when the release candidate is not on the production track. "+
 			"Android only, and a release candidate must already be chosen (400 otherwise)."),

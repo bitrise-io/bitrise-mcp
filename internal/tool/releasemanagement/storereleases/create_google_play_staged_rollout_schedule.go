@@ -10,7 +10,7 @@ import (
 )
 
 var CreateGooglePlayStagedRolloutSchedule = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("create_google_play_staged_rollout_schedule",
 		mcp.WithDescription("Creates a staged rollout schedule for an Android app version: a list of dates at which Release Management raises the Google Play production rollout to the given percentage. "+
 			"Once a step runs it has published to production and cannot be undone, so confirm the schedule with the user before calling. The schedule can be paused and resumed later. "+

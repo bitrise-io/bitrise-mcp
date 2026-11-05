@@ -10,7 +10,7 @@ import (
 )
 
 var UpdateGooglePlayReleaseNotes = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("update_google_play_release_notes",
 		mcp.WithDescription("Sets the Google Play release notes of the uploaded release candidate of an Android app version, per language. "+
 			"Android only, and a release candidate must already be chosen (400 otherwise)."),

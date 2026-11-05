@@ -10,7 +10,7 @@ import (
 )
 
 var ListAppVersions = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("list_app_versions",
 		mcp.WithDescription("Lists the store release app versions of a Release Management connected app, newest first. "+
 			"An app version is what the Release Management UI calls a release: it walks a release candidate through the store upload, beta testing, approval, store review and release stages. "+

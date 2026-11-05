@@ -10,7 +10,7 @@ import (
 )
 
 var CancelAppStoreReview = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("cancel_app_store_review",
 		mcp.WithDescription("Cancels the in-flight App Store review submission of an iOS app version in App Store Connect and marks it cancelled in Release Management. "+
 			"The version loses its place in Apple's review queue and has to be resubmitted with 'submit_for_app_store_review', so always confirm with the user before calling. "+

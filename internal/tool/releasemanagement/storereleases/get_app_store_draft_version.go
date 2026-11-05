@@ -9,7 +9,7 @@ import (
 )
 
 var GetAppStoreDraftVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_app_store_draft_version",
 		mcp.WithDescription("Gives back the App Store Connect draft version of an iOS connected app: the latest version that is not released yet and so can be submitted for App Store review. "+
 			"Returns its 'version_string', 'app_store_state', 'release_type', phased release state and the matching Release Management 'app_version_id' (null when no app version of that name exists). "+

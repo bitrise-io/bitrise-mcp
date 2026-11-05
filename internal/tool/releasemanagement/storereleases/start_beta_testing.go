@@ -11,7 +11,7 @@ import (
 )
 
 var StartBetaTesting = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("start_beta_testing",
 		mcp.WithDescription("Distributes the uploaded release candidate of an app version to a store beta testing target: a TestFlight testing group for iOS apps, or a Google Play testing track for Android apps. "+
 			"The release candidate must already be uploaded to the store. Find the targets with 'list_beta_testing_groups'."),

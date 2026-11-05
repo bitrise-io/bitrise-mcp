@@ -10,7 +10,7 @@ import (
 )
 
 var ContinueAppStorePhasedRelease = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("continue_app_store_phased_release",
 		mcp.WithDescription("Continues a paused App Store phased release of an iOS app version, so the rollout to end users resumes growing on Apple's 7-day schedule. Confirm with the user before calling. iOS only."),
 		mcp.WithString("app_version_id",

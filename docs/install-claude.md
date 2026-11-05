@@ -13,7 +13,7 @@ The remote server uses OAuth to authenticate you against your Bitrise account. N
 
 1. Add the server:
    ```bash
-   claude mcp add --transport http bitrise https://mcp.bitrise.io
+   claude mcp add --transport http bitrise "https://mcp.bitrise.io/?toolset=all"
    ```
 2. Restart Claude Code.
 3. On the first tool use, Claude Code will open your browser to sign in. Log in to Bitrise (or confirm your existing session) and approve the consent screen.
@@ -26,7 +26,7 @@ If you're on a Claude Code version without MCP OAuth support, or you'd prefer to
 1. [Create a Bitrise API Token](https://devcenter.bitrise.io/api/authentication) under [Account Settings → Security](https://app.bitrise.io/me/account/security).
 2. Add the server with the token as a Bearer header:
    ```bash
-   claude mcp add --transport http bitrise https://mcp.bitrise.io -H "Authorization: Bearer YOUR_BITRISE_PAT"
+   claude mcp add --transport http bitrise "https://mcp.bitrise.io/?toolset=all" -H "Authorization: Bearer YOUR_BITRISE_PAT"
    ```
 
 <details>
@@ -47,7 +47,7 @@ echo -e ".env\n.mcp.json" >> .gitignore
 
 3. Reference it when adding:
 ```bash
-claude mcp add --transport http bitrise https://mcp.bitrise.io -H "Authorization: Bearer $(grep BITRISE_PAT .env | cut -d '=' -f2)"
+claude mcp add --transport http bitrise "https://mcp.bitrise.io/?toolset=all" -H "Authorization: Bearer $(grep BITRISE_PAT .env | cut -d '=' -f2)"
 ```
 
 </details>
@@ -60,12 +60,12 @@ Prerequisites: [Go](https://go.dev/) (>=1.25) installed and a Bitrise PAT.
 
 1. Run:
    ```bash
-   claude mcp add bitrise -e BITRISE_TOKEN=YOUR_BITRISE_PAT -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
+   claude mcp add bitrise -e ENABLED_TOOLSET=all -e BITRISE_TOKEN=YOUR_BITRISE_PAT -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
    ```
 
    With an environment variable:
    ```bash
-   claude mcp add bitrise -e BITRISE_TOKEN=$(grep BITRISE_PAT .env | cut -d '=' -f2) -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
+   claude mcp add bitrise -e ENABLED_TOOLSET=all -e BITRISE_TOKEN=$(grep BITRISE_PAT .env | cut -d '=' -f2) -- go run github.com/bitrise-io/bitrise-mcp/v2@v2
    ```
 2. Restart Claude Code.
 3. Run `claude mcp list` to see if the Bitrise server is configured.
@@ -100,7 +100,7 @@ If your Claude Desktop version doesn't yet support remote MCP servers natively, 
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp.bitrise.io"
+        "https://mcp.bitrise.io/?toolset=all"
       ]
     }
   }
@@ -116,7 +116,7 @@ If your Claude Desktop version doesn't yet support remote MCP servers natively, 
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp.bitrise.io",
+        "https://mcp.bitrise.io/?toolset=all",
         "--header",
         "Authorization: Bearer YOUR_BITRISE_PAT"
       ]
@@ -157,6 +157,7 @@ The local server uses stdio with a Personal Access Token:
       ],
       "env": {
         "BITRISE_TOKEN": "YOUR_BITRISE_PAT",
+        "ENABLED_TOOLSET": "all",
         "PATH": "PATH to bin directory of go:PATH to directory of git",
         "GOPATH": "your GOPATH",
         "GOCACHE": "your GOCACHE"
@@ -181,7 +182,9 @@ The local server uses stdio with a Personal Access Token:
 
 ### Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
+
+The setup steps above enable every toolset, with `?toolset=all` in the server URL or `ENABLED_TOOLSET=all` for the local server. We suggest this for Claude: it loads tools dynamically, so the larger toolset doesn't fill its context, and you don't have to reconfigure the server when a task needs a tool from another toolset. Leave it out to get the default toolset.
 
 ## Troubleshooting
 
@@ -194,7 +197,7 @@ See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
 - For PAT: check token hasn't expired or been revoked
 
 **Remote Server:**
-- Verify URL: `https://mcp.bitrise.io`
+- Verify URL: `https://mcp.bitrise.io/?toolset=all`
 
 **Server Not Starting / Tools Not Showing:**
 - Run `claude mcp list` to view currently configured MCP servers

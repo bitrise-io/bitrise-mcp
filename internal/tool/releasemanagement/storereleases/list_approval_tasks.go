@@ -10,7 +10,7 @@ import (
 )
 
 var ListApprovalTasks = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("list_approval_tasks",
 		mcp.WithDescription("Lists the approval tasks of the approval stage of an app version. Each task has an 'id' (used as 'task_id' by the other approval tools), 'summary', 'description', 'due_date', 'completed', 'completed_at', and the 'assigned_user' and 'creator_user'. "+
 			"The approval stage completes once every task is completed."),

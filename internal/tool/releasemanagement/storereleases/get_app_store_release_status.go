@@ -10,7 +10,7 @@ import (
 )
 
 var GetAppStoreReleaseStatus = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management", "read-only"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("get_app_store_release_status",
 		mcp.WithDescription("Gives back the App Store release status of an iOS app version: 'app_release_status' (e.g. ready_to_release, released) and 'phased_release_status' (e.g. INACTIVE, ACTIVE, PAUSED, COMPLETE). "+
 			"iOS only; fails with 422 ERR_APP_STORE_VERSION_NOT_FOUND when the version does not exist in App Store Connect."),

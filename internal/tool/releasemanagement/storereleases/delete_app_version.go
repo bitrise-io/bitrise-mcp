@@ -10,7 +10,7 @@ import (
 )
 
 var DeleteAppVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("delete_app_version",
 		mcp.WithDescription("Deletes a store release app version (a release in the Release Management UI) with its stages, approval tasks, automations and event history. "+
 			"This cannot be undone and does not touch anything already uploaded to or published on the store, so always confirm with the user before calling. "+

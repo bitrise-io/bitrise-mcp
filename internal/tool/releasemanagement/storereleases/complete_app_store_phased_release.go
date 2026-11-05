@@ -10,7 +10,7 @@ import (
 )
 
 var CompleteAppStorePhasedRelease = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("complete_app_store_phased_release",
 		mcp.WithDescription("Completes the in-progress App Store phased release of an iOS app version, making the update available to 100% of users immediately. This cannot be undone, so always confirm with the user before calling. iOS only."),
 		mcp.WithString("app_version_id",

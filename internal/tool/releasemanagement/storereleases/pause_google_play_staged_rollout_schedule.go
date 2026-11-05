@@ -10,7 +10,7 @@ import (
 )
 
 var PauseGooglePlayStagedRolloutSchedule = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("pause_google_play_staged_rollout_schedule",
 		mcp.WithDescription("Pauses the running staged rollout schedule of an Android app version, so no further scheduled steps raise the production rollout until it is resumed with 'resume_google_play_staged_rollout_schedule'. "+
 			"Fails with 412 when there is no schedule, it has not started yet, or it has already finished. Android only."),

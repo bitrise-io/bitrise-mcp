@@ -9,7 +9,7 @@ import (
 )
 
 var UpdateAppStoreDraftVersion = bitrise.Tool{
-	APIGroups: []string{"release-management-store-releases", "release-management"},
+	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("update_app_store_draft_version",
 		mcp.WithDescription("Renames the App Store Connect draft version of an iOS connected app (the latest unreleased version, see 'get_app_store_draft_version') to the given version string, so it matches the Release Management app version to be released. "+
 			"A Release Management app version named 'version_string' must already exist under the connected app. iOS only."),
