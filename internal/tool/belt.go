@@ -15,6 +15,7 @@ import (
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/pipelines"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/codepush"
+	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/releasemanagement/storereleases"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/user"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/webhooks"
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/tool/workspaces"
@@ -133,6 +134,51 @@ func NewBelt() *Belt {
 		codepush.GenerateUpdateUploadURL,
 		codepush.GetMetrics,
 
+		// Store Releases
+		storereleases.ListAppVersions,
+		storereleases.GetAppVersion,
+		storereleases.CreateAppVersion,
+		storereleases.UpdateAppVersion,
+		storereleases.DeleteAppVersion,
+		storereleases.GetReleaseCandidate,
+		storereleases.UploadReleaseCandidate,
+		storereleases.GetReleaseCandidateUploadStatus,
+		storereleases.SubmitReleaseCandidateForBetaReview,
+		storereleases.ListBetaTestingGroups,
+		storereleases.StartBetaTesting,
+		storereleases.StopBetaTesting,
+		storereleases.ListWhatToTestDescriptions,
+		storereleases.CreateWhatToTestDescription,
+		storereleases.UpdateWhatToTestDescription,
+		storereleases.DeleteWhatToTestDescription,
+		storereleases.ListApprovalTasks,
+		storereleases.GetApprovalTask,
+		storereleases.CreateApprovalTask,
+		storereleases.UpdateApprovalTask,
+		storereleases.DeleteApprovalTask,
+		storereleases.SubmitForAppStoreReview,
+		storereleases.GetAppStoreReviewStatus,
+		storereleases.CancelAppStoreReview,
+		storereleases.ReleaseToAppStore,
+		storereleases.PauseAppStorePhasedRelease,
+		storereleases.ContinueAppStorePhasedRelease,
+		storereleases.CompleteAppStorePhasedRelease,
+		storereleases.GetAppStoreReleaseStatus,
+		storereleases.GetAppStoreReleaseSettings,
+		storereleases.UpdateAppStoreReleaseSettings,
+		storereleases.UpdateGooglePlayReleaseNotes,
+		storereleases.GetGooglePlayRelease,
+		storereleases.ReleaseToGooglePlay,
+		storereleases.GetGooglePlayStagedRolloutSchedule,
+		storereleases.CreateGooglePlayStagedRolloutSchedule,
+		storereleases.PauseGooglePlayStagedRolloutSchedule,
+		storereleases.ResumeGooglePlayStagedRolloutSchedule,
+		storereleases.DeleteGooglePlayStagedRolloutSchedule,
+		storereleases.ListReleaseEvents,
+		storereleases.CreateAppStoreVersion,
+		storereleases.GetAppStoreDraftVersion,
+		storereleases.UpdateAppStoreDraftVersion,
+
 		// Insights
 		insights.GetBuildTotals,
 		insights.GetBuildSeries,
@@ -140,25 +186,30 @@ func NewBelt() *Belt {
 		insights.GetTestSeries,
 		insights.ListFlakyTests,
 	}
-	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList))}
+	belt := &Belt{tools: make(map[string]bitrise.Tool, len(toolList)+1)}
 	for _, tool := range toolList {
-		if _, dup := belt.tools[tool.Definition.Name]; dup {
-			panic("duplicate tool name: " + tool.Definition.Name)
-		}
-		// Every tool advertises the schema of its result (declared in code or
-		// generated from the API document) and, to honour it, returns the
-		// result as structuredContent too. Tools without a schema (image
-		// results) are served as they are.
-		if outputschema.Apply(&tool.Definition) {
-			tool.Handler = outputschema.WithStructuredContent(tool.Handler)
-		}
-		// Clients prefer the spec-level title over annotations.title.
-		if tool.Definition.Title == "" {
-			tool.Definition.Title = tool.Definition.Annotations.Title
-		}
-		belt.tools[tool.Definition.Name] = tool
+		belt.add(tool)
 	}
+	belt.add(listToolset(belt))
 	return belt
+}
+
+func (b *Belt) add(tool bitrise.Tool) {
+	if _, dup := b.tools[tool.Definition.Name]; dup {
+		panic("duplicate tool name: " + tool.Definition.Name)
+	}
+	// Every tool advertises the schema of its result (declared in code or
+	// generated from the API document) and, to honour it, returns the
+	// result as structuredContent too. Tools without a schema (image
+	// results) are served as they are.
+	if outputschema.Apply(&tool.Definition) {
+		tool.Handler = outputschema.WithStructuredContent(tool.Handler)
+	}
+	// Clients prefer the spec-level title over annotations.title.
+	if tool.Definition.Title == "" {
+		tool.Definition.Title = tool.Definition.Annotations.Title
+	}
+	b.tools[tool.Definition.Name] = tool
 }
 
 func (b *Belt) RegisterAll(server *server.MCPServer) {
@@ -180,6 +231,9 @@ func (b *Belt) ToolEnabled(name string, enabledGroups []string) bool {
 	tool, ok := b.tools[name]
 	if !ok {
 		return false
+	}
+	if tool.AlwaysEnabled {
+		return true
 	}
 	for _, enabledGroup := range enabledGroups {
 		if slices.Contains(tool.APIGroups, enabledGroup) {

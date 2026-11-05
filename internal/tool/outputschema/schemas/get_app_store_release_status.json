@@ -1,0 +1,18 @@
+{
+  "description": "Response of GET /app-versions/{id}/apple-app-store/release/status (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "app_release_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phased_release_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

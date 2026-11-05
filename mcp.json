@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "bitrise": {
-      "url": "https://mcp.bitrise.io"
+      "url": "https://mcp.bitrise.io/?toolset=all"
     }
   }
 }

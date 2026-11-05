@@ -100,7 +100,23 @@ The local Bitrise MCP server runs via Go and uses a Personal Access Token (stdio
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific API groups.
+The Marketplace install enables every toolset with `https://mcp.bitrise.io/?toolset=all`, and you can use the same URL in a manual configuration. Cursor users have reported that a server with a very large tool list disappears from the agent without an error. If the Bitrise tools don't show up in the agent, enable only the toolsets you need with the `toolset` query parameter. This example keeps the CI tools:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "url": "https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
+    }
+  }
+}
+```
+
+For the local server, put the same comma-separated list in the `ENABLED_TOOLSET` environment variable instead.
+
+If a task needs a tool from a toolset you haven't enabled, such as the store release tools, the agent can call `list_toolset` to find out which toolset to add.
+
+See [Toolsets](/docs/tools.md#advanced-configuration) for every toolset and combinations that stay under common tool limits.
 
 ## Troubleshooting
 

@@ -1,0 +1,58 @@
+{
+  "description": "Response of POST /apple-app-store/app-versions (Release Management API, HTTP 200): the App Store Connect version record that was created. The published API document only shows a null example; this mirrors the record the App Store Connect client returns.",
+  "properties": {
+    "app_store_state": {
+      "description": "App Store Connect state of the version, e.g.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "app_store_version_phased_release": {
+      "description": "Phased release settings of the version, when set.",
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "created_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "earliest_release_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "description": "App Store Connect identifier of the version.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "platform": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_type": {
+      "description": "MANUAL, AFTER_APPROVAL or SCHEDULED.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "version_string": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

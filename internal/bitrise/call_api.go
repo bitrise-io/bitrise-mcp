@@ -14,14 +14,16 @@ import (
 	httptrace "github.com/DataDog/dd-trace-go/contrib/net/http/v2"
 )
 
-// APIBaseURL, APIRMAppsBaseURL, APIRMBuildDistributionsBaseURL, and
-// APIRMCodePushBaseURL are vars so main can override them via environment
-// variables to point at non-production API instances.
+// APIBaseURL, APIRMAppsBaseURL, APIRMBuildDistributionsBaseURL,
+// APIRMCodePushBaseURL and APIRMStoreReleasesBaseURL are vars so main can
+// override them via environment variables to point at non-production API
+// instances.
 var (
 	APIBaseURL                     = "https://api.bitrise.io/v0.1"                                         //nolint:gochecknoglobals
 	APIRMAppsBaseURL               = "https://api.bitrise.io/release-management/v2/apps/v1"                //nolint:gochecknoglobals
 	APIRMBuildDistributionsBaseURL = "https://api.bitrise.io/release-management/v2/build-distributions/v1" //nolint:gochecknoglobals
 	APIRMCodePushBaseURL           = "https://api.bitrise.io/release-management/v2/code-push/v1"           //nolint:gochecknoglobals
+	APIRMStoreReleasesBaseURL      = "https://api.bitrise.io/release-management/v2/store-releases/v1"      //nolint:gochecknoglobals
 	APIInsightsBaseURL             = "https://api.bitrise.io/insights/v1"                                  //nolint:gochecknoglobals
 )
 
