@@ -1,5 +1,5 @@
 {
-  "description": "Response of GET /apps/{app-slug}/builds/{build-slug}/test-results (Bitrise API, HTTP 200). With failed_only=true, test_cases only holds failed and errored cases and suites without any are dropped; the suite counts still cover every case.",
+  "description": "Response of GET /apps/{app-slug}/builds/{build-slug}/test-results (Bitrise API, HTTP 200). With any filter or limit, test suites without matching test cases are dropped; the suite counts still cover every case.",
   "properties": {
     "test_suites": {
       "items": {

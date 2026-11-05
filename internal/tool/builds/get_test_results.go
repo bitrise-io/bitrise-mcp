@@ -2,9 +2,9 @@ package builds
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/bitrise-io/bitrise-mcp/v2/internal/bitrise"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -13,7 +13,7 @@ import (
 var GetTestResults = bitrise.Tool{
 	APIGroups: []string{"builds", "read-only"},
 	Definition: mcp.NewTool("get_build_test_results",
-		mcp.WithDescription("Get the test results of a finished build of a given app: test suites and test cases with their status, duration and failure message. Requires a plan that includes test reports."),
+		mcp.WithDescription("Get the test results of a finished build of a given app: test suites and test cases with their status, duration and failure message. Requires a plan that includes test reports. Filters are applied on the server; with any filter or limit, test suites without matching test cases are left out, while suite counts still cover every test case."),
 		mcp.WithString("app_slug",
 			mcp.Description("Identifier of the Bitrise app"),
 			mcp.Required(),
@@ -22,8 +22,31 @@ var GetTestResults = bitrise.Tool{
 			mcp.Description("Identifier of the build"),
 			mcp.Required(),
 		),
-		mcp.WithBoolean("failed_only",
-			mcp.Description("Only return failed and errored test cases, and the test suites containing them. Suite counts still cover every test case. Default: false"),
+		mcp.WithArray("status",
+			mcp.WithStringEnumItems([]string{"passed", "failed", "skipped", "error"}),
+			mcp.Description("Keep only test cases with these statuses. Use [\"failed\", \"error\"] for every test that needs fixing. A test that failed and then passed on a retry has status passed and flaky true."),
+		),
+		mcp.WithString("suite",
+			mcp.Description("Keep only test cases under the test suite with this exact name, at any nesting level"),
+		),
+		mcp.WithString("class_name",
+			mcp.Description("Keep only test cases with this exact class name"),
+		),
+		mcp.WithBoolean("flaky",
+			mcp.Description("Keep only test cases that are (true) or are not (false) flaky in this build, meaning their retries ended with different statuses"),
+		),
+		mcp.WithString("sort_by",
+			mcp.Description("Sort the test cases within each test suite. Ascending status lists error, failed, skipped, then passed."),
+			mcp.Enum("duration", "name", "status"),
+		),
+		mcp.WithString("sort_order",
+			mcp.Description("Direction of sort_by. Default: asc"),
+			mcp.Enum("asc", "desc"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of test cases to return, counted in response order across all test suites"),
+			mcp.Min(1),
+			mcp.Max(1000),
 		),
 		mcp.WithTitleAnnotation("Get Build Test Results"),
 		mcp.WithReadOnlyHintAnnotation(true),
@@ -41,65 +64,31 @@ var GetTestResults = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		params := map[string]any{}
+		if v := request.GetStringSlice("status", nil); len(v) > 0 {
+			params["status"] = v
+		}
+		for _, key := range []string{"suite", "class_name", "sort_by", "sort_order"} {
+			if v := request.GetString(key, ""); v != "" {
+				params[key] = v
+			}
+		}
+		if _, ok := request.GetArguments()["flaky"]; ok {
+			params["flaky"] = strconv.FormatBool(request.GetBool("flaky", false))
+		}
+		if _, ok := request.GetArguments()["limit"]; ok {
+			params["limit"] = strconv.Itoa(request.GetInt("limit", 0))
+		}
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    fmt.Sprintf("/apps/%s/builds/%s/test-results", appSlug, buildSlug),
+			Params:  params,
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
 		}
-
-		if !request.GetBool("failed_only", false) {
-			return mcp.NewToolResultText(res), nil
-		}
-
-		var response map[string]any
-		if err := json.Unmarshal([]byte(res), &response); err != nil {
-			return mcp.NewToolResultText(res), nil
-		}
-		if suites, ok := response["test_suites"].([]any); ok {
-			response["test_suites"] = failedTestSuites(suites)
-		}
-
-		return mcp.NewToolResultStructuredOnly(response), nil
+		return mcp.NewToolResultText(res), nil
 	},
-}
-
-func failedTestSuites(suites []any) []any {
-	failed := []any{}
-	for _, s := range suites {
-		suite, ok := s.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		cases := []any{}
-		if testCases, ok := suite["test_cases"].([]any); ok {
-			for _, c := range testCases {
-				if testCase, ok := c.(map[string]any); ok && isFailedTestCase(testCase) {
-					cases = append(cases, testCase)
-				}
-			}
-		}
-
-		var nested []any
-		if nestedSuites, ok := suite["test_suites"].([]any); ok {
-			nested = failedTestSuites(nestedSuites)
-		}
-
-		if len(cases) == 0 && len(nested) == 0 {
-			continue
-		}
-		suite["test_cases"] = cases
-		suite["test_suites"] = nested
-		failed = append(failed, suite)
-	}
-
-	return failed
-}
-
-func isFailedTestCase(testCase map[string]any) bool {
-	status, _ := testCase["status"].(string)
-	return status == "failed" || status == "error"
 }
