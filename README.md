@@ -17,7 +17,7 @@ MCP Server for the Bitrise API, enabling app management, build operations, artif
 - **[Claude Applications](/docs/install-claude.md)** - Installation guide for Claude Desktop and Claude Code CLI
 - **[Cursor](/docs/install-cursor.md)** - Installation guide for Cursor IDE, including one-click install from the [Cursor Marketplace](https://cursor.com/marketplace) (this repo doubles as the Cursor plugin via `.cursor-plugin/plugin.json` + `mcp.json`)
 - **[Windsurf](/docs/install-windsurf.md)** - Installation guide for Windsurf IDE
-- **[Gemini CLI](/docs/install-gemini-cli.md)** - Installation guide for Gemini CLI
+- **[Google Antigravity CLI](/docs/install-antigravity-cli.md)** - Installation guide for Google Antigravity CLI (`agy`), which replaces Gemini CLI
 - **[AWS Kiro](/docs/install-kiro.md)** - Installation guide for AWS Kiro IDE
 
 ## Example prompts
