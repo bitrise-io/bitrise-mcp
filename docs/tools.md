@@ -195,13 +195,22 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
+      - `status` (optional): Keep only steps with these statuses (e.g. `failed`, `aborted_with_custom_timeout`); workflows without any are left out
+      - `step_id` (optional): Keep only the runs of this step, e.g. `xcode-test`
+      - `verbose` (optional): Include all build details (default: false)
 
 20. `get_build_test_results`
-    - Get the test results of a finished build: test suites and test cases with their status, duration and failure message. Requires a plan that includes test reports.
+    - Get the test results of a finished build: test suites and test cases with their status, duration and failure message. Requires a plan that includes test reports. Filters are applied on the server.
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
-      - `failed_only` (optional): Only return failed and errored test cases, and the test suites containing them (default: false)
+      - `status` (optional): Keep only test cases with these statuses (`passed`, `failed`, `skipped`, `error`)
+      - `suite` (optional): Keep only test cases under the test suite with this exact name
+      - `class_name` (optional): Keep only test cases with this exact class name
+      - `flaky` (optional): Keep only flaky (true) or non-flaky (false) test cases
+      - `sort_by` (optional): Sort test cases within each suite by `duration`, `name` or `status`
+      - `sort_order` (optional): `asc` (default) or `desc`
+      - `limit` (optional): Maximum number of test cases to return, 1-1000
 
 ### Artifacts
 

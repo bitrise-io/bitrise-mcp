@@ -22,6 +22,13 @@ var GetSteps = bitrise.Tool{
 			mcp.Description("Identifier of the build"),
 			mcp.Required(),
 		),
+		mcp.WithArray("status",
+			mcp.WithStringEnumItems([]string{"not_started", "started", "success", "failed", "failed_skippable", "preparation_failed", "skipped", "skipped_with_run_if", "aborted", "aborted_with_custom_timeout", "aborted_with_no_output"}),
+			mcp.Description("Keep only steps with these statuses; workflows without any are left out. Use [\"failed\", \"preparation_failed\", \"aborted\", \"aborted_with_custom_timeout\", \"aborted_with_no_output\"] for every step that broke the build."),
+		),
+		mcp.WithString("step_id",
+			mcp.Description("Keep only the runs of this step, e.g. xcode-test. A step used several times is returned once per run, each with its own uuid."),
+		),
 		mcp.WithBoolean("verbose",
 			mcp.Description("Include all build details. Default: false"),
 		),
@@ -41,10 +48,19 @@ var GetSteps = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		params := map[string]any{}
+		if v := request.GetStringSlice("status", nil); len(v) > 0 {
+			params["status"] = v
+		}
+		if v := request.GetString("step_id", ""); v != "" {
+			params["step_id"] = v
+		}
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIBaseURL,
 			Path:    fmt.Sprintf("/apps/%s/builds/%s/log/summary", appSlug, buildSlug),
+			Params:  params,
 		})
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("call api", err), nil
