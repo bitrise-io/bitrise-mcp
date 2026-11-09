@@ -1,0 +1,12 @@
+{
+  "description": "Response of GET /app-versions/{id}/google-play-store/release (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "user_fraction": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

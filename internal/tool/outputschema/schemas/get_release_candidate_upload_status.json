@@ -1,0 +1,33 @@
+{
+  "description": "Response of GET /app-versions/{id}/release-candidate/upload/status (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "processing_state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_candidate_build_slug": {
+      "description": "Only null appears in the published examples."
+    },
+    "release_candidate_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "upload_build_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "upload_state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

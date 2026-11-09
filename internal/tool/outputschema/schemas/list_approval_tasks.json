@@ -1,0 +1,47 @@
+{
+  "description": "Response of GET /app-versions/{id}/approvals (Release Management API - App Versions, HTTP 200).",
+  "properties": {
+    "items": {
+      "description": "Inferred from the examples published in the API document; field types reflect the example values.",
+      "items": {
+        "properties": {
+          "assigned_user": {},
+          "completed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "completed_at": {},
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "creator_user": {},
+          "description": {},
+          "due_date": {},
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "type": "object"
+}

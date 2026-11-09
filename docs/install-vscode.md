@@ -84,4 +84,21 @@ Local stdio mode authenticates with a Personal Access Token:
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
+VS Code allows at most 128 tools in a chat request, and its built-in tools count toward that limit. The default toolset exposes 88 Bitrise tools and `all` exposes 136, so together with the built-in tools and other MCP servers, chat requests can fail with "Cannot have more than 128 tools per request". GitHub Copilot doesn't load tools dynamically, so we suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
+
+```json
+{
+  "servers": {
+    "bitrise": {
+      "type": "http",
+      "url": "https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
+    }
+  }
+}
+```
+
+For the local server, put the same comma-separated list in the `ENABLED_TOOLSET` environment variable instead. You can also turn off individual tools in the tool picker of the Chat view.
+
+If a task needs a tool from a toolset you haven't enabled, such as the store release tools, the agent can call `list_toolset` to find out which toolset to add.
+
+See [Toolsets](/docs/tools.md#advanced-configuration) for every toolset and combinations that stay under common tool limits.

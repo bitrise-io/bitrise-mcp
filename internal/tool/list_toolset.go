@@ -39,12 +39,12 @@ var toolsetDescriptions = map[string]string{
 	"cache-items":                           "Build cache items.",
 	"configuration":                         "bitrise.yml validation, Step search and Step inputs, available stacks.",
 	"insights":                              "Build and test metrics from Bitrise Insights.",
-	"read-only":                             "Every tool that only reads data, across all toolsets.",
-	"release-management":                    "Every Release Management tool.",
+	"read-only":                             "Every tool that only reads data, across all toolsets except release-management-store-releases.",
+	"release-management":                    "Every Release Management tool except store releases, which are in release-management-store-releases.",
 	"release-management-app":                "Release Management connected apps and installable artifacts.",
 	"release-management-build-distribution": "Build distribution: versions, test builds, tester groups and testers.",
 	"release-management-code-push":          "CodePush deployments and updates.",
-	"release-management-store-releases":     "Store releases: app versions from release candidate and beta testing through approvals and store review to the rollout.",
+	"release-management-store-releases":     "Store releases: app versions from release candidate and beta testing through approvals and store review to the rollout, and the release presets new app versions start from. Not enabled by default.",
 }
 
 type toolsetsResult struct {

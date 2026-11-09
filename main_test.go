@@ -14,8 +14,9 @@ import (
 // optInToolsets are left out of defaultToolsets on purpose: a client gets
 // their tools only by naming the toolset or all. The default toolset is not a
 // stable contract (see the toolset configuration RFC), so a toolset can be
-// moved here from defaultToolsets.
-var optInToolsets = []string{}
+// moved here from defaultToolsets. The RFC keeps the store release tools out
+// of the default.
+var optInToolsets = []string{"release-management-store-releases"}
 
 // TestDefaultToolsetsMatchToolGroups keeps defaultToolsets in step with the
 // toolsets tools are tagged with: every toolset a tool uses is either enabled

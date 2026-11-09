@@ -1,0 +1,275 @@
+{
+  "description": "Response of GET /app-versions/{id}/beta-distribution/testing-groups (Release Management API - App Versions, HTTP 200). Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "closed_tracks": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version_code": {
+            "type": [
+              "string",
+              "integer",
+              "null"
+            ]
+          },
+          "version_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "external": {
+      "items": {
+        "properties": {
+          "beta_testers": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "beta_testers_total": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "created_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "feedback_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "has_access_to_all_builds": {},
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ios_builds_available_for_apple_silicon_mac": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "ios_builds_available_for_apple_vision": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_internal_group": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_link": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_link_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "public_link_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_link_limit": {},
+          "public_link_limit_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "internal": {
+      "items": {
+        "properties": {
+          "beta_testers": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "beta_testers_total": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "created_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "feedback_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "has_access_to_all_builds": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ios_builds_available_for_apple_silicon_mac": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "ios_builds_available_for_apple_vision": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_internal_group": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_link": {},
+          "public_link_enabled": {},
+          "public_link_id": {},
+          "public_link_limit": {},
+          "public_link_limit_enabled": {}
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "internal_tracks": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version_code": {
+            "type": [
+              "string",
+              "integer",
+              "null"
+            ]
+          },
+          "version_name": {}
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "open_tracks": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version_code": {
+            "type": [
+              "string",
+              "integer",
+              "null"
+            ]
+          },
+          "version_name": {}
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}

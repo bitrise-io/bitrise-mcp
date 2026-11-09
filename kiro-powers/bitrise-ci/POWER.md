@@ -414,11 +414,11 @@ The Bitrise MCP server provides 67 tools organized into the following categories
 
 You can limit the number of tools exposed to the MCP client. This is useful if you want to optimize token usage or your MCP client has a limit on the number of tools.
 
-Tools are grouped into toolsets, and you can pass the toolsets you want to expose. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management, release-management-app, release-management-build-distribution`, or `all` for every toolset.
+Tools are grouped into toolsets, and you can pass the toolsets you want to expose. Possible values: `apps, builds, workspaces, outgoing-webhooks, artifacts, group-roles, cache-items, pipelines, account, configuration, read-only, release-management, release-management-app, release-management-build-distribution, release-management-store-releases`, or `all` for every toolset.
 
 We recommend using the `release-management` toolset separately to avoid any confusion with the `apps` toolset.
 
-By default, all toolsets are enabled. The default toolset is not a stable contract: we may remove tools from it without a major version bump, so if you rely on specific tools, name their toolsets. You can specify which toolsets to enable with a comma-separated list of toolset names: the `ENABLED_TOOLSET` environment variable for local (stdio) servers, or the `toolset` query parameter of the server URL (for example `https://mcp.bitrise.io/?toolset=apps,builds`) or the `x-bitrise-enabled-toolset` HTTP header for remote (Streamable HTTP) servers. The earlier `ENABLED_API_GROUPS` environment variable and `x-bitrise-enabled-api-groups` header still work.
+By default, every toolset except `release-management-store-releases` is enabled. The default toolset is not a stable contract: we may remove tools from it without a major version bump, so if you rely on specific tools, name their toolsets. You can specify which toolsets to enable with a comma-separated list of toolset names: the `ENABLED_TOOLSET` environment variable for local (stdio) servers, or the `toolset` query parameter of the server URL (for example `https://mcp.bitrise.io/?toolset=apps,builds`) or the `x-bitrise-enabled-toolset` HTTP header for remote (Streamable HTTP) servers. The earlier `ENABLED_API_GROUPS` environment variable and `x-bitrise-enabled-api-groups` header still work.
 
 ## Resources
 

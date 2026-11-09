@@ -83,7 +83,23 @@ After installation:
 
 ## Advanced configuration
 
-See [Tools](/docs/tools.md) for enabling/disabling specific toolsets.
+Cascade allows at most 100 tools across all MCP servers. The default toolset exposes 88 Bitrise tools, which leaves little room for other MCP servers, and `all` exposes 136. We suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
+
+```json
+{
+  "mcpServers": {
+    "bitrise": {
+      "serverUrl": "https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights"
+    }
+  }
+}
+```
+
+For the local server, put the same comma-separated list in the `ENABLED_TOOLSET` environment variable instead. You can also list individual tools you don't need under `disabledTools`.
+
+If a task needs a tool from a toolset you haven't enabled, such as the store release tools, the agent can call `list_toolset` to find out which toolset to add.
+
+See [Toolsets](/docs/tools.md#advanced-configuration) for every toolset and combinations that stay under common tool limits.
 
 ## Troubleshooting
 

@@ -1,0 +1,65 @@
+{
+  "description": "Response of GET /app-versions/{id}/google-play-store/staged-rollout-schedule (Release Management API - App Versions, HTTP 204). The API returns a bare null when the app version has no schedule, which the tool returns as {\"content\": \"null\"}. Inferred from the examples published in the API document; field types reflect the example values.",
+  "properties": {
+    "content": {
+      "description": "\"null\" when no schedule exists; the other properties are then absent.",
+      "type": "string"
+    },
+    "failure_reason": {
+      "description": "Only null appears in the published examples."
+    },
+    "last_paused_at": {
+      "description": "Only null appears in the published examples."
+    },
+    "paused": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "schedule": {
+      "items": {
+        "properties": {
+          "has_run": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_run_at": {},
+          "rollout_percentage": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {},
+          "when": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "setup_location": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "type": "object"
+}
