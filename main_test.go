@@ -12,15 +12,18 @@ import (
 )
 
 // optInToolsets are left out of defaultToolsets on purpose: a client gets
-// their tools only by naming the toolset or all. The RFC on toolset
-// configuration keeps the store release tools out of the default.
+// their tools only by naming the toolset or all. The default toolset is not a
+// stable contract (see the toolset configuration RFC), so a toolset can be
+// moved here from defaultToolsets. The RFC keeps the store release tools out
+// of the default.
 var optInToolsets = []string{"release-management-store-releases"}
 
 // TestDefaultToolsetsMatchToolGroups keeps defaultToolsets in step with the
 // toolsets tools are tagged with: every toolset a tool uses is either enabled
-// by default or opt-in, and every default or opt-in toolset enables at least
-// one tool, so naming it in ENABLED_TOOLSET, the toolset query parameter or a
-// header never returns an empty tool list.
+// by default or opt-in, so a new toolset can't land without a decision, and
+// every default or opt-in toolset enables at least one tool, so naming it in
+// ENABLED_TOOLSET, the toolset query parameter or a header never returns an
+// empty tool list.
 func TestDefaultToolsetsMatchToolGroups(t *testing.T) {
 	defaults := strings.Split(defaultToolsets, ",")
 
@@ -43,8 +46,8 @@ func TestDefaultToolsetsMatchToolGroups(t *testing.T) {
 }
 
 // TestOptInToolsAreNotEnabledByDefault catches a tool of an opt-in toolset
-// that is also tagged with a default toolset, such as release-management or
-// read-only, which would enable it by default.
+// that is also tagged with a default toolset, such as read-only or
+// release-management, which would enable it by default.
 func TestOptInToolsAreNotEnabledByDefault(t *testing.T) {
 	belt := tool.NewBelt()
 	defaults := belt.EnabledToolsets(defaultToolsets)
