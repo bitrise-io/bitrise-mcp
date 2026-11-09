@@ -16,7 +16,7 @@ The `release-management` toolset enables every Release Management tool. To load 
 - `release-management-build-distribution`: build distribution versions and test builds, tester groups and testers
 - `release-management-code-push`: CodePush deployments and updates
 
-By default, all toolsets are enabled. To choose them, pass a comma-separated list of toolset names, or `all`:
+By default, all toolsets are enabled. The default toolset is not a stable contract: we may remove tools from it without a major version bump, so if you rely on specific tools, name their toolsets. To choose them, pass a comma-separated list of toolset names, or `all`:
 
 - Remote (Streamable HTTP) server: the `toolset` query parameter of the server URL, for example `https://mcp.bitrise.io/?toolset=apps,builds`, or the `x-bitrise-enabled-toolset` HTTP header. The query parameter wins when both are set.
 - Local (stdio) server: the `ENABLED_TOOLSET` environment variable.

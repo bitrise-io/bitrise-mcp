@@ -418,7 +418,7 @@ Tools are grouped into toolsets, and you can pass the toolsets you want to expos
 
 We recommend using the `release-management` toolset separately to avoid any confusion with the `apps` toolset.
 
-By default, all toolsets are enabled. You can specify which toolsets to enable with a comma-separated list of toolset names: the `ENABLED_TOOLSET` environment variable for local (stdio) servers, or the `toolset` query parameter of the server URL (for example `https://mcp.bitrise.io/?toolset=apps,builds`) or the `x-bitrise-enabled-toolset` HTTP header for remote (Streamable HTTP) servers. The earlier `ENABLED_API_GROUPS` environment variable and `x-bitrise-enabled-api-groups` header still work.
+By default, all toolsets are enabled. The default toolset is not a stable contract: we may remove tools from it without a major version bump, so if you rely on specific tools, name their toolsets. You can specify which toolsets to enable with a comma-separated list of toolset names: the `ENABLED_TOOLSET` environment variable for local (stdio) servers, or the `toolset` query parameter of the server URL (for example `https://mcp.bitrise.io/?toolset=apps,builds`) or the `x-bitrise-enabled-toolset` HTTP header for remote (Streamable HTTP) servers. The earlier `ENABLED_API_GROUPS` environment variable and `x-bitrise-enabled-api-groups` header still work.
 
 ## Resources
 
