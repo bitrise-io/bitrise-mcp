@@ -88,7 +88,7 @@ var CreateAppVersion = bitrise.Tool{
 			mcp.Items(automationItemsSchema),
 		),
 		mcp.WithString("presets_id",
-			mcp.Description("Identifier of a preset template to fill the app version from. Presets can carry the release branch and workflow, automatic store upload, notification URLs, approvals and automations."),
+			mcp.Description("Identifier of a release preset to fill the app version from, as listed by 'list_release_presets'. Presets can carry the release branch and workflow, automatic store upload, notification URLs, approvals and automations."),
 		),
 		mcp.WithTitleAnnotation("Create App Version"),
 		mcp.WithReadOnlyHintAnnotation(false),

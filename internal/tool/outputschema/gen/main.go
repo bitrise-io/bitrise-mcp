@@ -149,6 +149,11 @@ var mappings = []mapping{
 	{Tool: "set_installable_artifact_public_install_page", Spec: "rm-apps", Method: "patch", Path: "/installable-artifacts/{id}/public-install-page"},
 	{Tool: "get_app_store_draft_version", Spec: "rm-apps", Method: "get", Path: "/apple-app-store/app-versions/draft"},
 	{Tool: "update_app_store_draft_version", Spec: "rm-apps", Method: "patch", Path: "/apple-app-store/app-versions/draft"},
+	{Tool: "list_release_presets", Spec: "rm-apps", Method: "get", Path: "/presets"},
+	{Tool: "get_release_preset", Spec: "rm-apps", Method: "get", Path: "/presets/{id}"},
+	{Tool: "create_release_preset", Spec: "rm-apps", Method: "post", Path: "/presets"},
+	{Tool: "update_release_preset", Spec: "rm-apps", Method: "put", Path: "/presets/{id}"},
+	{Tool: "delete_release_preset", Spec: "rm-apps", Method: "delete", Path: "/presets/{id}"},
 
 	// Release Management v2 — build distributions.
 	{Tool: "list_build_distribution_versions", Spec: "rm-bd", Method: "get", Path: "/"},

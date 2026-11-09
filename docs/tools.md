@@ -16,7 +16,7 @@ The `release-management` toolset enables every Release Management tool except st
 - `release-management-build-distribution`: build distribution versions and test builds, tester groups and testers
 - `release-management-code-push`: CodePush deployments and updates
 
-The store release tools are in `release-management-store-releases` only: app versions and their way to the stores, from release candidate and beta testing through approvals and store review to the rollout. Neither `release-management`, `read-only` nor the default toolset includes them, so enable `release-management-store-releases` or `all` to use them.
+The store release tools are in `release-management-store-releases` only: app versions and their way to the stores, from release candidate and beta testing through approvals and store review to the rollout, and the release presets new app versions start from. Neither `release-management`, `read-only` nor the default toolset includes them, so enable `release-management-store-releases` or `all` to use them.
 
 By default, every toolset except `release-management-store-releases` is enabled. The default toolset is not a stable contract: we may remove tools from it without a major version bump, so if you rely on specific tools, name their toolsets. To choose them, pass a comma-separated list of toolset names, or `all`:
 
@@ -27,15 +27,15 @@ The earlier names, the `x-bitrise-enabled-api-groups` header and the `ENABLED_AP
 
 `all` suits Claude, which loads tools dynamically, so a large toolset doesn't fill its context. It doesn't suit GitHub Copilot, which has no dynamic tool loading; VS Code allows 128 tools per chat request, its built-in tools included.
 
-Some MCP clients cap the number of tools. VS Code allows 128 per chat request, its built-in tools included, and Windsurf allows 100 across all MCP servers. The default toolset exposes 88 tools and `all` exposes 131, so on those clients, especially next to other MCP servers, enable a smaller set. These combinations stay under 100 tools (the counts include `list_toolset`):
+Some MCP clients cap the number of tools. VS Code allows 128 per chat request, its built-in tools included, and Windsurf allows 100 across all MCP servers. The default toolset exposes 88 tools and `all` exposes 136, so on those clients, especially next to other MCP servers, enable a smaller set. These combinations stay under 100 tools (the counts include `list_toolset`):
 
 | Use case | `toolset` value | Tools |
 |---|---|---|
 | CI | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights` | 56 |
 | CI and CodePush | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-code-push` | 70 |
 | Release Management without store releases | `release-management` | 33 |
-| Release Management | `release-management,release-management-store-releases` | 76 |
-| CI and store releases | `apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights,release-management-store-releases` | 99 |
+| Release Management | `release-management,release-management-store-releases` | 81 |
+| Store releases | `release-management-store-releases` | 49 |
 
 Use the same value in the `x-bitrise-enabled-toolset` header or the `ENABLED_TOOLSET` environment variable. Leave `read-only` out of a smaller set, because it adds the read tools of the other toolsets.
 
@@ -707,7 +707,7 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `slack_webhook_url`, `slack_notification_integration_id`, `teams_webhook_url`: (Optional) Release update notification targets.
      - `approvals`: (Optional) Approval tasks (array of objects with `summary`, and optional `description` and `due_date`).
      - `automation`: (Optional) Workflow or pipeline runs on release events (array of objects with `event_name` and `workflow_name` or `pipeline_name`).
-     - `presets_id`: (Optional) Identifier of a preset template to fill the app version from.
+     - `presets_id`: (Optional) Identifier of a release preset to fill the app version from, as listed by `list_release_presets`.
 
 85. `update_app_version`
    - Updates an app version; omitted arguments are left unchanged. Selecting a `release_candidate_id` requires `release_candidate_locked` set to true (409 otherwise). Turning on `automatic_store_upload` also starts uploading the currently selected release candidate right away. An empty string clears `description`, `slack_webhook_url` or `teams_webhook_url`. `approvals` and `automation` replace the whole existing list. Setting `status` moves the app version to a final status, after which it cannot be modified (409).
@@ -723,81 +723,118 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-87. `get_release_candidate`
+87. `list_release_presets`
+   - Lists the release presets of a connected app: templates for new app versions with the release candidate settings, automatic store upload, notifications, approval tasks and automation. Pass a preset's `id` as `presets_id` to `create_app_version`. `default` marks the app's default preset.
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+
+88. `get_release_preset`
+   - Gets a release preset.
+   - Arguments:
+     - `preset_id`: The uuidV4 identifier of the release preset.
+
+89. `create_release_preset`
+   - Creates a release preset. An app can have at most 5 presets, and creating one needs a Standard license on the app (412 otherwise).
+   - Arguments:
+     - `connected_app_id`: The uuidV4 identifier of the connected app.
+     - `template_name`: The name of the preset.
+     - `default`: (Optional) Make it the app's default preset in place of the current one.
+     - `artifact_source`: (Optional) `ci` or `api`. Required the first time the release candidate settings are set, unless `release_branch` or `workflow` is given, which implies `ci`; `api` can't be combined with them (422).
+     - `release_branch`, `workflow`: (Optional) The build configuration for the release candidate stage.
+     - `auto_select_release_candidate`: (Optional) Select the latest matching artifact as the release candidate automatically.
+     - `automatic_store_upload`: (Optional) Upload every successful build of the branch and workflow to the store.
+     - `slack_webhook_url`, `slack_notification_integration_id`, `teams_webhook_url`: (Optional) Release update notifications.
+     - `approvals`: (Optional) Approval tasks (array of objects with `summary` and optional `description`).
+     - `automation`: (Optional) Workflow or pipeline runs on release events (array of objects with `event_name` and `workflow_name` or `pipeline_name`).
+
+90. `update_release_preset`
+   - Updates a release preset; omitted arguments are left unchanged. `approvals` and `automation` replace the whole existing list. The notification arguments are merged into the current notification settings, and an empty string clears one. To change the default preset, set `default` to true on the new one; setting it to false on the current default fails. App versions already created from the preset keep their settings.
+   - Arguments:
+     - `preset_id`: The uuidV4 identifier of the release preset.
+     - `template_name`: (Optional) The new name of the preset.
+     - `default`, `artifact_source`, `release_branch`, `workflow`, `auto_select_release_candidate`, `automatic_store_upload`, `slack_webhook_url`, `slack_notification_integration_id`, `teams_webhook_url`, `approvals`, `automation`: (Optional) As in `create_release_preset`.
+
+91. `delete_release_preset`
+   - Deletes a release preset. Deleting the app's default preset needs `new_default_template_id` (400 otherwise). App versions already created from the preset keep their settings. Cannot be undone.
+   - Arguments:
+     - `preset_id`: The uuidV4 identifier of the release preset.
+     - `new_default_template_id`: (Optional) The preset that becomes the default; required when deleting the default preset.
+
+92. `get_release_candidate`
    - Gives back the release candidate of an app version: the selected installable artifact and the Bitrise CI build it came from.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-88. `upload_release_candidate`
+93. `upload_release_candidate`
    - Starts uploading the release candidate to TestFlight (iOS) or the Google Play Console (Android) in an asynchronous Bitrise build, locking the release candidate unless `automatic_store_upload` is on. 422 without a suitable artifact, 409 when an upload cannot be started.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-89. `get_release_candidate_upload_status`
+94. `get_release_candidate_upload_status`
    - Gives back the store upload status of the release candidate: `upload_state`, the uploading build's URL and, for iOS, the App Store Connect `processing_state`.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-90. `submit_release_candidate_for_beta_review`
+95. `submit_release_candidate_for_beta_review`
    - Submits the uploaded release candidate for TestFlight beta app review, which external testing groups require. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `auto_notify_enabled`: (Optional) Let TestFlight notify testers once the build is approved (default: false).
 
-91. `list_beta_testing_groups`
+96. `list_beta_testing_groups`
    - Lists the TestFlight testing groups (iOS, each with an `id`) or the Google Play testing tracks (Android, grouped as internal, closed and open, each with a `name`) of an app version.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-92. `start_beta_testing`
+97. `start_beta_testing`
    - Distributes the uploaded release candidate to a TestFlight testing group or a Google Play testing track.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `group_id`: The TestFlight testing group id (iOS) or the Google Play track name (Android).
 
-93. `stop_beta_testing`
+98. `stop_beta_testing`
    - Stops TestFlight beta testing of the release candidate on a testing group, removing the build from the group. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `group_id`: The TestFlight testing group id.
 
-94. `list_what_to_test_descriptions`
+99. `list_what_to_test_descriptions`
    - Lists the TestFlight "What to Test" descriptions of the uploaded release candidate per locale, with the app's primary locale. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-95. `create_what_to_test_description`
+100. `create_what_to_test_description`
    - Adds a TestFlight "What to Test" description in a new locale. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `locale`: The App Store Connect locale shortcode, e.g. `en-US`.
      - `whats_new`: The text shown to testers.
 
-96. `update_what_to_test_description`
+101. `update_what_to_test_description`
    - Replaces the text of an existing TestFlight "What to Test" description. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `what_to_test_id`: The description id from `list_what_to_test_descriptions`.
      - `whats_new`: The new text shown to testers.
 
-97. `delete_what_to_test_description`
+102. `delete_what_to_test_description`
    - Removes a TestFlight "What to Test" description. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `what_to_test_id`: The description id from `list_what_to_test_descriptions`.
 
-98. `list_approval_tasks`
+103. `list_approval_tasks`
    - Lists the approval tasks of an app version. The approval stage completes once every task is completed.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-99. `get_approval_task`
+104. `get_approval_task`
    - Gives back one approval task.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `task_id`: The identifier of the approval task.
 
-100. `create_approval_task`
+105. `create_approval_task`
    - Adds an approval task to the approval stage of an app version.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
@@ -806,68 +843,68 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `assigned_user_slug`: (Optional) Slug of the user to assign the task to.
      - `due_date`: (Optional) A date in the future.
 
-101. `update_approval_task`
+106. `update_approval_task`
    - Updates an approval task, including completing or reopening it. On an assigned task only the assignee or a project admin may change `completed`, and only the creator or a project admin the other fields (403 otherwise).
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `task_id`: The identifier of the approval task.
-     - `summary`, `description`, `assigned_user_slug`: (Optional) New values. An empty `description` clears it.
+     - `summary`, `description`, `assigned_user_slug`, `due_date`: (Optional) New values; `due_date` must be in the future. An empty `description` clears it.
      - `completed`: (Optional) `true` to complete (approve), `false` to reopen.
 
-102. `delete_approval_task`
+107. `delete_approval_task`
    - Deletes an approval task; removing the last open task completes the approval stage. An assigned task can only be deleted by its creator or a project admin (403 otherwise).
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `task_id`: The identifier of the approval task.
 
-103. `submit_for_app_store_review`
+108. `submit_for_app_store_review`
    - Submits the uploaded release candidate to App Store review, optionally setting App Store metadata per locale first. With release type `AFTER_APPROVAL` Apple publishes the version as soon as the review passes. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `copy_primary_whats_new`: (Optional) Copy the primary localization's `whats_new` into empty ones (default: false).
      - `localizations`: (Optional) Array of objects with `locale` and optional `whats_new`, `description`, `keywords`, `promotional_text`, `marketing_url`, `support_url`.
 
-104. `get_app_store_review_status`
+109. `get_app_store_review_status`
    - Gives back the App Store review status as tracked by Release Management and as reported by App Store Connect. iOS only; 422 `ERR_REVIEW_NOT_REQUESTED` when never submitted.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-105. `cancel_app_store_review`
+110. `cancel_app_store_review`
    - Cancels the in-flight App Store review submission. The version loses its place in Apple's review queue and must be resubmitted. iOS only; 422 when the version is not under review.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-106. `release_to_app_store`
+111. `release_to_app_store`
    - Releases an approved `MANUAL` release-type app version to the App Store. Publishes to production and cannot be undone. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-107. `pause_app_store_phased_release`
+112. `pause_app_store_phased_release`
    - Pauses the in-progress App Store phased release; users who already have the update keep it. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-108. `continue_app_store_phased_release`
+113. `continue_app_store_phased_release`
    - Continues a paused App Store phased release on Apple's 7-day schedule. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-109. `complete_app_store_phased_release`
+114. `complete_app_store_phased_release`
    - Completes the phased release, making the update available to 100% of users immediately. Cannot be undone. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-110. `get_app_store_release_status`
+115. `get_app_store_release_status`
    - Gives back the App Store `app_release_status` and `phased_release_status` of an app version. iOS only; 422 `ERR_APP_STORE_VERSION_NOT_FOUND` when the version is missing from App Store Connect.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-111. `get_app_store_release_settings`
+116. `get_app_store_release_settings`
    - Gives back the App Store Connect release settings: `release_type` (`MANUAL`, `AFTER_APPROVAL` or `SCHEDULED`), `phased_release` and `earliest_release_date`. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-112. `update_app_store_release_settings`
+117. `update_app_store_release_settings`
    - Updates the App Store Connect release settings; both `release_type` and `phased_release` must be given. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
@@ -875,53 +912,53 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `phased_release`: Roll out over 7 days (`true`) or to everyone at once (`false`).
      - `earliest_release_date`: (Optional) Earliest publish date-time; only with `SCHEDULED`.
 
-113. `update_google_play_release_notes`
+118. `update_google_play_release_notes`
    - Sets the Google Play release notes of the uploaded release candidate per language. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `release_notes`: Array of objects with `language` (a Google Play language code) and `text` (max 500 characters).
 
-114. `get_google_play_release`
+119. `get_google_play_release`
    - Gives back the current Google Play production rollout as `user_fraction` (0 to 1, `1` is a full release, `null` when not on the production track). Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-115. `release_to_google_play`
+120. `release_to_google_play`
    - Releases the uploaded release candidate on the Google Play production track to a fraction of users, or raises an in-progress rollout. Publishes to production and cannot be undone. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `user_fraction`: Greater than 0 and at most 1, where 1 is a full release.
 
-116. `get_google_play_staged_rollout_schedule`
+121. `get_google_play_staged_rollout_schedule`
    - Gives back the staged rollout schedule: its steps (each with `id`, `rollout_percentage`, `when`, `has_run`, `status`), time zone, paused state and failure reason. `null` when no schedule exists. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-117. `create_google_play_staged_rollout_schedule`
+122. `create_google_play_staged_rollout_schedule`
    - Creates a staged rollout schedule: dates at which the production rollout is raised to the given percentage. Steps that have run cannot be undone. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `location`: Time zone of the dates: a TZ database name or `UTC`.
      - `schedule`: Array of objects with `percentage` (0 to 100, `100` is a full release) and `when` (ISO 8601).
 
-118. `pause_google_play_staged_rollout_schedule`
+123. `pause_google_play_staged_rollout_schedule`
    - Pauses the running staged rollout schedule. 412 when there is no schedule, it has not started, or it has finished. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-119. `resume_google_play_staged_rollout_schedule`
+124. `resume_google_play_staged_rollout_schedule`
    - Resumes a paused staged rollout schedule with the remaining steps re-timed. 412 when the schedule is not paused or has finished. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `location`: Time zone of the dates: a TZ database name or `UTC`.
      - `schedule`: Array of objects with the step `id` from `get_google_play_staged_rollout_schedule`, `percentage` and the new `when`.
 
-120. `delete_google_play_staged_rollout_schedule`
+125. `delete_google_play_staged_rollout_schedule`
    - Deletes the staged rollout schedule so no further steps run; steps that already ran stay in effect. 412 when there is no schedule or it has finished. Android only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
 
-121. `list_release_events`
+126. `list_release_events`
    - Lists the event history of an app version, newest first, paginated with a cursor: pass `next_before` back as `before` until it is `null`. `total_count` and `available_actors` come with the first page only. Requires a Standard license (412 otherwise).
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
@@ -931,18 +968,18 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `from`, `to`: (Optional) Inclusive ISO 8601 time range; must be given together.
      - `triggered_by`: (Optional) User slugs or machine actor types (`store`, `automation`, `preset`) to filter by.
 
-122. `create_app_store_version`
+127. `create_app_store_version`
    - Creates the App Store Connect version record needed before an iOS app version can be submitted for review. An app version named `version_string` must already exist under the connected app (404 otherwise). iOS only.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
      - `version_string`: The version to create in App Store Connect, e.g. `1.2.3`.
 
-123. `get_app_store_draft_version`
+128. `get_app_store_draft_version`
    - Gives back the App Store Connect draft version of a connected app: the latest unreleased version, with its state, release type and the matching `app_version_id`. 404 when there is none. iOS only.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
 
-124. `update_app_store_draft_version`
+129. `update_app_store_draft_version`
    - Renames the App Store Connect draft version to match an existing app version. iOS only.
    - Arguments:
      - `connected_app_id`: The uuidV4 identifier of the connected app.
@@ -1097,6 +1134,11 @@ The Bitrise MCP server organizes tools into toolsets that can be enabled or disa
 | create_app_version | | | | | | | | | | | | | | | | ✅ | |
 | update_app_version | | | | | | | | | | | | | | | | ✅ | |
 | delete_app_version | | | | | | | | | | | | | | | | ✅ | |
+| list_release_presets | | | | | | | | | | | | | | | | ✅ | |
+| get_release_preset | | | | | | | | | | | | | | | | ✅ | |
+| create_release_preset | | | | | | | | | | | | | | | | ✅ | |
+| update_release_preset | | | | | | | | | | | | | | | | ✅ | |
+| delete_release_preset | | | | | | | | | | | | | | | | ✅ | |
 | get_release_candidate | | | | | | | | | | | | | | | | ✅ | |
 | upload_release_candidate | | | | | | | | | | | | | | | | ✅ | |
 | get_release_candidate_upload_status | | | | | | | | | | | | | | | | ✅ | |

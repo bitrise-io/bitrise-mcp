@@ -84,7 +84,7 @@ Local stdio mode authenticates with a Personal Access Token:
 
 ## Advanced configuration
 
-VS Code allows at most 128 tools in a chat request, and its built-in tools count toward that limit. The default toolset exposes 88 Bitrise tools and `all` exposes 131, so together with the built-in tools and other MCP servers, chat requests can fail with "Cannot have more than 128 tools per request". GitHub Copilot doesn't load tools dynamically, so we suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
+VS Code allows at most 128 tools in a chat request, and its built-in tools count toward that limit. The default toolset exposes 88 Bitrise tools and `all` exposes 136, so together with the built-in tools and other MCP servers, chat requests can fail with "Cannot have more than 128 tools per request". GitHub Copilot doesn't load tools dynamically, so we suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
 
 ```json
 {

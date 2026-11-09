@@ -31,6 +31,9 @@ var UpdateApprovalTask = bitrise.Tool{
 		mcp.WithString("assigned_user_slug",
 			mcp.Description("The slug of the user to assign the task to."),
 		),
+		mcp.WithString("due_date",
+			mcp.Description("A valid date in the future by which the task should be completed."),
+		),
 		mcp.WithBoolean("completed",
 			mcp.Description("Set to true to complete the task (approve), or to false to reopen it. Omit to leave unchanged."),
 		),
@@ -51,7 +54,7 @@ var UpdateApprovalTask = bitrise.Tool{
 		}
 
 		body := map[string]any{}
-		for _, key := range []string{"summary", "assigned_user_slug"} {
+		for _, key := range []string{"summary", "assigned_user_slug", "due_date"} {
 			if v := request.GetString(key, ""); v != "" {
 				body[key] = v
 			}
@@ -69,7 +72,7 @@ var UpdateApprovalTask = bitrise.Tool{
 			body["completed"] = v
 		}
 		if len(body) == 0 {
-			return mcp.NewToolResultError("nothing to update: give at least one of summary, description, assigned_user_slug or completed"), nil
+			return mcp.NewToolResultError("nothing to update: give at least one of summary, description, assigned_user_slug, due_date or completed"), nil
 		}
 
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{

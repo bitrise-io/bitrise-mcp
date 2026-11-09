@@ -264,7 +264,7 @@ After setup:
 
 ## Advanced configuration
 
-GitHub Copilot limits the number of tools in a chat request and doesn't load tools dynamically. In VS Code the limit is 128, built-in tools included. The default toolset exposes 88 Bitrise tools and `all` exposes 131, so if your IDE reports too many tools, enable only the toolsets you need. For the remote server, add the `toolset` query parameter to the `url` in the configurations above. This example keeps the CI tools:
+GitHub Copilot limits the number of tools in a chat request and doesn't load tools dynamically. In VS Code the limit is 128, built-in tools included. The default toolset exposes 88 Bitrise tools and `all` exposes 136, so if your IDE reports too many tools, enable only the toolsets you need. For the remote server, add the `toolset` query parameter to the `url` in the configurations above. This example keeps the CI tools:
 
 ```
 https://mcp.bitrise.io/?toolset=apps,builds,workspaces,outgoing-webhooks,artifacts,group-roles,cache-items,pipelines,account,configuration,insights

@@ -44,7 +44,7 @@ var toolsetDescriptions = map[string]string{
 	"release-management-app":                "Release Management connected apps and installable artifacts.",
 	"release-management-build-distribution": "Build distribution: versions, test builds, tester groups and testers.",
 	"release-management-code-push":          "CodePush deployments and updates.",
-	"release-management-store-releases":     "Store releases: app versions from release candidate and beta testing through approvals and store review to the rollout. Not enabled by default.",
+	"release-management-store-releases":     "Store releases: app versions from release candidate and beta testing through approvals and store review to the rollout, and the release presets new app versions start from. Not enabled by default.",
 }
 
 type toolsetsResult struct {

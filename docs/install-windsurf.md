@@ -83,7 +83,7 @@ After installation:
 
 ## Advanced configuration
 
-Cascade allows at most 100 tools across all MCP servers. The default toolset exposes 88 Bitrise tools, which leaves little room for other MCP servers, and `all` exposes 131. We suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
+Cascade allows at most 100 tools across all MCP servers. The default toolset exposes 88 Bitrise tools, which leaves little room for other MCP servers, and `all` exposes 136. We suggest enabling only the toolsets you need with the `toolset` query parameter of the server URL. This example keeps the CI tools:
 
 ```json
 {
