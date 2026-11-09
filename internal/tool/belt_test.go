@@ -68,6 +68,8 @@ var openWorld = map[string]string{
 	"codepush_delete_update":                       "withdraws an update served to end-user devices",
 	"create_app_version":                           "makes Bitrise send release notifications to an arbitrary Slack or Teams webhook URL",
 	"update_app_version":                           "makes Bitrise send release notifications to an arbitrary URL, and can start a store upload",
+	"create_release_preset":                        "sets the Slack or Teams webhook URL that app versions created from the preset notify",
+	"update_release_preset":                        "sets the Slack or Teams webhook URL that app versions created from the preset notify",
 	"upload_release_candidate":                     "uploads the build to TestFlight or the Google Play Console",
 	"submit_release_candidate_for_beta_review":     "submits the build to Apple's TestFlight beta review",
 	"start_beta_testing":                           "distributes the build to the testers of a TestFlight group or Google Play testing track",

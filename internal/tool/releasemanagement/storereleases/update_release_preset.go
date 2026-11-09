@@ -32,7 +32,7 @@ var UpdateReleasePreset = bitrise.Tool{
 			mcp.WithTitleAnnotation("Update Release Preset"),
 			mcp.WithReadOnlyHintAnnotation(false),
 			mcp.WithDestructiveHintAnnotation(true),
-			mcp.WithOpenWorldHintAnnotation(false),
+			mcp.WithOpenWorldHintAnnotation(true),
 			mcp.WithIdempotentHintAnnotation(true),
 		},
 	)...),

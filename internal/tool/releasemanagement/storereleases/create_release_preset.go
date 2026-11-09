@@ -29,7 +29,7 @@ var CreateReleasePreset = bitrise.Tool{
 			mcp.WithTitleAnnotation("Create Release Preset"),
 			mcp.WithReadOnlyHintAnnotation(false),
 			mcp.WithDestructiveHintAnnotation(false),
-			mcp.WithOpenWorldHintAnnotation(false),
+			mcp.WithOpenWorldHintAnnotation(true),
 			mcp.WithIdempotentHintAnnotation(false),
 		},
 	)...),

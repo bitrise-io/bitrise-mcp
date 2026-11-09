@@ -53,6 +53,7 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
 - `update_artifact`, `generate_installable_artifact_upload_url` (with `with_public_page`) and `set_installable_artifact_public_install_page` publish an install page on the public internet.
 - `codepush_generate_update_upload_url`, `codepush_promote_deployment`, `codepush_rollback_deployment`, `codepush_patch_update` and `codepush_delete_update` change what end-user devices download.
 - `create_app_version` and `update_app_version` make Bitrise send release notifications to an arbitrary Slack or Teams webhook URL; `update_app_version` can also start a store upload.
+- `create_release_preset` and `update_release_preset` set the Slack or Teams webhook URL that app versions created from the preset, in the Bitrise UI or through the API, send release notifications to.
 - `upload_release_candidate`, `submit_release_candidate_for_beta_review`, `start_beta_testing`, `stop_beta_testing` and the `create`/`update`/`delete_what_to_test_description` tools write to TestFlight or the Google Play Console and reach testers.
 - `create_app_store_version`, `update_app_store_draft_version`, `update_app_store_release_settings`, `submit_for_app_store_review` and `cancel_app_store_review` write to App Store Connect, and a submitted version can go live once approved.
 - `release_to_app_store`, the `pause`/`continue`/`complete_app_store_phased_release` tools, `update_google_play_release_notes`, `release_to_google_play`, and `create`/`resume_google_play_staged_rollout_schedule` publish to the stores or change what end-user devices receive.
@@ -905,7 +906,7 @@ Tools marked iOS only or Android only fail with HTTP 422 `ERR_INVALID_PLATFORM` 
      - `app_version_id`: The uuidV4 identifier of the app version.
 
 117. `update_app_store_release_settings`
-   - Updates the App Store Connect release settings; both `release_type` and `phased_release` must be given. iOS only.
+   - Updates the App Store Connect release settings; both `release_type` and `phased_release` must be given. `AFTER_APPROVAL` and `SCHEDULED` make Apple publish the version without another call, so an agent should confirm with the user before setting them. iOS only.
    - Arguments:
      - `app_version_id`: The uuidV4 identifier of the app version.
      - `release_type`: `MANUAL`, `AFTER_APPROVAL` or `SCHEDULED` (case-insensitive).

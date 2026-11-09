@@ -13,7 +13,7 @@ var UpdateAppStoreReleaseSettings = bitrise.Tool{
 	APIGroups: []string{"release-management-store-releases"},
 	Definition: mcp.NewTool("update_app_store_release_settings",
 		mcp.WithDescription("Updates the App Store release settings of an iOS app version in App Store Connect. Both 'release_type' and 'phased_release' must be given; the API rejects a partial update. "+
-			"Mind that AFTER_APPROVAL makes Apple publish the version to end users as soon as the review passes, and SCHEDULED publishes it at 'earliest_release_date'. iOS only."),
+			"Confirm with the user before setting 'release_type' to AFTER_APPROVAL or SCHEDULED: AFTER_APPROVAL makes Apple publish the version to end users as soon as the review passes, and SCHEDULED publishes it at 'earliest_release_date', with no further call. iOS only."),
 		mcp.WithString("app_version_id",
 			mcp.Description(appVersionIDDescription),
 			mcp.Required(),
