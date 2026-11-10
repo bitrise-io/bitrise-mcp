@@ -41,6 +41,18 @@ var Get = bitrise.Tool{
 			return mcp.NewToolResultError(err.Error()), nil
 		}
 
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+		type imageVersionResult struct {
+			version string
+			err     error
+		}
+		imageVersionCh := make(chan imageVersionResult, 1)
+		go func() {
+			v, err := stackImageVersion(ctx, appSlug, buildSlug)
+			imageVersionCh <- imageVersionResult{version: v, err: err}
+		}()
+
 		res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
 			Method:  http.MethodGet,
 			BaseURL: bitrise.APIBaseURL,
@@ -53,6 +65,16 @@ var Get = bitrise.Tool{
 		var response map[string]any
 		if err := json.Unmarshal([]byte(res), &response); err != nil {
 			return mcp.NewToolResultText(res), nil
+		}
+
+		if build, ok := response["data"].(map[string]any); ok {
+			r := <-imageVersionCh
+			switch {
+			case r.err != nil:
+				response["warnings"] = []string{fmt.Sprintf("could not fetch stack image version: %v", r.err)}
+			case r.version != "":
+				build["stack_image_version"] = r.version
+			}
 		}
 
 		verbose := request.GetBool("verbose", false)
@@ -82,4 +104,29 @@ var Get = bitrise.Tool{
 
 		return mcp.NewToolResultStructuredOnly(response), nil
 	},
+}
+
+// stackImageVersion returns agent_info.stack_image_version from the build's log
+// summary, or "" when the summary has no agent_info (the build never got a VM).
+func stackImageVersion(ctx context.Context, appSlug, buildSlug string) (string, error) {
+	res, err := bitrise.CallAPI(ctx, bitrise.CallAPIParams{
+		Method:  http.MethodGet,
+		BaseURL: bitrise.APIBaseURL,
+		Path:    fmt.Sprintf("/apps/%s/builds/%s/log/summary", appSlug, buildSlug),
+	})
+	if err != nil {
+		return "", err
+	}
+	var summary struct {
+		AgentInfo *struct {
+			StackImageVersion string `json:"stack_image_version"`
+		} `json:"agent_info"`
+	}
+	if err := json.Unmarshal([]byte(res), &summary); err != nil {
+		return "", fmt.Errorf("decode log summary: %w", err)
+	}
+	if summary.AgentInfo == nil {
+		return "", nil
+	}
+	return summary.AgentInfo.StackImageVersion, nil
 }

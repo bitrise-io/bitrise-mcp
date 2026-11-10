@@ -166,6 +166,7 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
     - Arguments:
       - `app_slug`: Identifier of the Bitrise app
       - `build_slug`: Identifier of the build
+      - `verbose` (optional): Include all build details. Default: false
 
 15. `abort_build`
     - Abort a specific build
