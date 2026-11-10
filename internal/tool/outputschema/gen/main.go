@@ -97,7 +97,15 @@ var mappings = []mapping{
 		}}},
 	{Tool: "get_build", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}",
 		Drop: []string{"data.credit_cost", "data.commit_view_url", "data.environment_prepare_finished_at", "data.is_processed", "data.is_status_sent", "data.log_format"},
-		Note: "pull_request_id is omitted when 0; original_build_params is included only with verbose=true."},
+		Note: "pull_request_id is omitted when 0; original_build_params is included only with verbose=true. data.stack_image_version (the stack VM image version the build ran on, e.g. 2-159-0, from the build's log summary) is absent when the build never got a VM or its log summary could not be fetched.",
+		Add: map[string]map[string]any{
+			"data": {"stack_image_version": map[string]any{"type": "string"}},
+			"": {"warnings": map[string]any{
+				"type":        "array",
+				"items":       map[string]any{"type": "string"},
+				"description": "Problems that left parts of the result out without failing the tool.",
+			}},
+		}},
 	{Tool: "abort_build", Spec: "ci", Method: "post", Path: "/apps/{app-slug}/builds/{build-slug}/abort"},
 	{Tool: "get_build_bitrise_yml", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/bitrise.yml"},
 	{Tool: "get_build_test_results", Spec: "ci", Method: "get", Path: "/apps/{app-slug}/builds/{build-slug}/test-results",

@@ -1,5 +1,5 @@
 {
-  "description": "Response of GET /apps/{app-slug}/builds/{build-slug} (Bitrise API, HTTP 200). pull_request_id is omitted when 0; original_build_params is included only with verbose=true.",
+  "description": "Response of GET /apps/{app-slug}/builds/{build-slug} (Bitrise API, HTTP 200). pull_request_id is omitted when 0; original_build_params is included only with verbose=true. data.stack_image_version (the stack VM image version the build ran on, e.g. 2-159-0, from the build's log summary) is absent when the build never got a VM or its log summary could not be fetched.",
   "properties": {
     "data": {
       "properties": {
@@ -99,6 +99,9 @@
             "null"
           ]
         },
+        "stack_image_version": {
+          "type": "string"
+        },
         "started_on_worker_at": {
           "type": [
             "string",
@@ -152,6 +155,13 @@
         "object",
         "null"
       ]
+    },
+    "warnings": {
+      "description": "Problems that left parts of the result out without failing the tool.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
   "type": "object"
