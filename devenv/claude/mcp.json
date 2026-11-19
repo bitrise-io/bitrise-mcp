@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "bitrise-local": {
+      "type": "http",
+      "url": "http://localhost:8765",
+      "headers": {
+        "Authorization": "Bearer ${BITRISE_TOKEN}"
+      }
+    }
+  }
+}
