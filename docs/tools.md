@@ -82,10 +82,10 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
    - Finish the setup of a Bitrise app
    - Arguments:
      - `app_slug`: The slug of the Bitrise app to finish setup for
-     - `project_type` (optional): The type of project (e.g., android, ios, flutter, etc.)
-     - `stack_id` (optional): The stack ID to use for the app
-     - `mode` (optional): The mode of setup
-     - `config` (optional): The configuration to use for the app
+     - `project_type`: The type of project (android, cordova, fastlane, flutter, ionic, ios, java, kotlin-multiplatform, macos, node-js, other, python, react-native, ruby)
+     - `stack_id`: The stack ID to use for the app
+     - `config` (optional): The configuration preset; must belong to `project_type` (defaults to that project type's first preset). The tool rejects a mismatched pair before calling the API, which would answer 400 Bad Request
+   - The setup mode is always `manual`. The valid `project_type`/`config` pairs are listed in the tool description
 
 4. `get_app`
    - Get the details of a specific app
