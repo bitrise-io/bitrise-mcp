@@ -84,8 +84,7 @@ Every tool carries the MCP behavioral annotations (`readOnlyHint`, `destructiveH
      - `app_slug`: The slug of the Bitrise app to finish setup for
      - `project_type` (optional): The type of project (e.g., android, ios, flutter, etc.)
      - `stack_id` (optional): The stack ID to use for the app
-     - `mode` (optional): The mode of setup
-     - `config` (optional): The configuration to use for the app
+     - `config` (optional): The configuration to use for the app; must belong to `project_type`, required if it has several
 
 4. `get_app`
    - Get the details of a specific app
