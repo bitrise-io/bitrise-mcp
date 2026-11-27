@@ -12,12 +12,15 @@ import (
 
 	"github.com/DataDog/datadog-agent/pkg/obfuscate"
 	"github.com/DataDog/datadog-agent/pkg/trace/stats"
+
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/ext"
 	"github.com/DataDog/dd-trace-go/v2/internal"
 	"github.com/DataDog/dd-trace-go/v2/internal/civisibility/constants"
 	"github.com/DataDog/dd-trace-go/v2/internal/civisibility/utils"
+	"github.com/DataDog/dd-trace-go/v2/internal/globalconfig"
 	"github.com/DataDog/dd-trace-go/v2/internal/log"
 	"github.com/DataDog/dd-trace-go/v2/internal/processtags"
+	"github.com/DataDog/dd-trace-go/v2/internal/telemetry"
 
 	"github.com/DataDog/datadog-go/v5/statsd"
 )
@@ -30,6 +33,16 @@ var tracerObfuscationVersion = 1
 // covered in one stats bucket.
 var defaultStatsBucketSize = (10 * time.Second).Nanoseconds()
 
+// statsConcentrator abstracts the stats-computation lifecycle so that callers
+// don't need nil checks when stats are disabled (e.g. OTLP export mode).
+type statsConcentrator interface {
+	Start()
+	Stop()
+	flushAndSend(now time.Time, includeCurrent bool)
+	newTracerStatSpan(s *Span, obfuscator *obfuscate.Obfuscator) (*tracerStatSpan, bool)
+	trySendSpan(s *tracerStatSpan)
+}
+
 // concentrator aggregates and stores statistics on incoming spans in time buckets,
 // flushing them occasionally to the underlying transport located in the given
 // tracer config.
@@ -40,7 +53,7 @@ type concentrator struct {
 	In chan *tracerStatSpan
 
 	// stopped reports whether the concentrator is stopped (when non-zero)
-	stopped uint32
+	stopped uint32 // +checkatomic
 
 	spanConcentrator *stats.SpanConcentrator
 
@@ -56,16 +69,25 @@ type concentrator struct {
 type tracerStatSpan struct {
 	statSpan *stats.StatSpan
 	origin   string
+	version  string // per-span version tag; "" means use global aggKey version
 }
 
 // newConcentrator creates a new concentrator using the given tracer
 // configuration c. It creates buckets of bucketSize nanoseconds duration.
 func newConcentrator(c *config, bucketSize int64, statsdClient internal.StatsdClient) *concentrator {
 	sCfg := &stats.SpanConcentratorConfig{
-		ComputeStatsBySpanKind: true,
-		BucketInterval:         defaultStatsBucketSize,
+		ComputeStatsBySpanKind:       true,
+		BucketInterval:               bucketSize,
+		WholeKeyCardinalityLimit:     c.internalConfig.StatsWholeKeyCardinalityLimit(),
+		ResourceCardinalityLimit:     c.internalConfig.StatsResourceCardinalityLimit(),
+		HTTPEndpointCardinalityLimit: c.internalConfig.StatsHTTPEndpointCardinalityLimit(),
+		PeerTagsCardinalityLimit:     c.internalConfig.StatsPeerTagsCardinalityLimit(),
+		OriginCardinalityLimit:       c.internalConfig.StatsOriginCardinalityLimit(),
 	}
-	env := c.agent.defaultEnv
+	if len(c.internalConfig.StatsAdditionalTags()) > 0 {
+		sCfg.AdditionalMetricTagsCardinalityLimit = c.internalConfig.StatsAdditionalTagsCardinalityLimit()
+	}
+	env := c.agent.load().defaultEnv
 	if c.internalConfig.Env() != "" {
 		env = c.internalConfig.Env()
 	}
@@ -114,18 +136,14 @@ func (c *concentrator) Start() {
 		return
 	}
 	c.stop = make(chan struct{})
-	c.wg.Add(1)
-	go func() {
-		defer c.wg.Done()
+	c.wg.Go(func() {
 		tick := time.NewTicker(time.Duration(c.bucketSize) * time.Nanosecond)
 		defer tick.Stop()
 		c.runFlusher(tick.C)
-	}()
-	c.wg.Add(1)
-	go func() {
-		defer c.wg.Done()
+	})
+	c.wg.Go(func() {
 		c.runIngester()
-	}()
+	})
 }
 
 // runFlusher runs the flushing loop which sends stats to the underlying transport.
@@ -162,48 +180,60 @@ func (c *concentrator) runIngester() {
 	}
 }
 
+// +checklocksignore — Post-finish: reads finished span fields during stats computation.
 func (c *concentrator) newTracerStatSpan(s *Span, obfuscator *obfuscate.Obfuscator) (*tracerStatSpan, bool) {
+	agentInfo := c.cfg.agent.load()
 	resource := s.resource
-	if c.shouldObfuscate() {
+	if obfuscatingVersion := agentInfo.obfuscationVersion; obfuscatingVersion > 0 && obfuscatingVersion <= tracerObfuscationVersion {
 		resource = obfuscatedResource(obfuscator, s.spanType, s.resource)
+		c.spanConcentrator.SetObfuscationEnabled(true, agentInfo.HasFlag("big_resource"))
+	} else {
+		c.spanConcentrator.SetObfuscationEnabled(false, false)
 	}
-
-	httpMethod := s.meta[ext.HTTPMethod]
-	httpEndpoint := s.meta[ext.HTTPEndpoint]
+	httpMethod, _ := s.meta.Get(ext.HTTPMethod)
+	httpEndpoint, _ := s.meta.Get(ext.HTTPEndpoint)
 
 	statSpan, ok := c.spanConcentrator.NewStatSpanWithConfig(stats.StatSpanConfig{
-		Service:      s.service,
-		Resource:     resource,
-		Name:         s.name,
-		Type:         s.spanType,
-		ParentID:     s.parentID,
-		Start:        s.start,
-		Duration:     s.duration,
-		Error:        s.error,
-		Meta:         s.meta,
-		Metrics:      s.metrics,
-		PeerTags:     c.cfg.agent.peerTags,
-		HTTPMethod:   httpMethod,
-		HTTPEndpoint: httpEndpoint,
+		Service:                 s.service,
+		Resource:                resource,
+		Name:                    s.name,
+		Type:                    s.spanType,
+		ParentID:                s.parentID,
+		Start:                   s.start,
+		Duration:                s.duration,
+		Error:                   s.error,
+		Meta:                    s.meta.Map(false), // stats reads span.kind, _dd.svc_src, status codes, peer tags — no promoted keys needed
+		Metrics:                 s.metrics,
+		PeerTags:                agentInfo.peerTags,
+		AdditionalMetricTagKeys: c.cfg.internalConfig.StatsAdditionalTags(),
+		HTTPMethod:              httpMethod,
+		HTTPEndpoint:            httpEndpoint,
 	})
 	if !ok {
 		return nil, false
 	}
-	origin := s.meta[keyOrigin]
+	origin, _ := s.meta.Get(keyOrigin)
+	version, _ := s.meta.Version()
 	return &tracerStatSpan{
 		statSpan: statSpan,
 		origin:   origin,
+		version:  version,
 	}, true
 }
 
 func (c *concentrator) shouldObfuscate() bool {
 	// Obfuscate if agent reports an obfuscation version AND our version is at least as new
-	return c.cfg.agent.obfuscationVersion > 0 && c.cfg.agent.obfuscationVersion <= tracerObfuscationVersion
+	agentObfVersion := c.cfg.agent.load().obfuscationVersion
+	return agentObfVersion > 0 && agentObfVersion <= tracerObfuscationVersion
 }
 
 // add s into the concentrator's internal stats buckets.
 func (c *concentrator) add(s *tracerStatSpan) {
-	c.spanConcentrator.AddSpan(s.statSpan, c.aggregationKey, "", nil, s.origin)
+	aggKey := c.aggregationKey
+	if s.version != "" {
+		aggKey.Version = s.version
+	}
+	c.spanConcentrator.AddSpan(s.statSpan, aggKey, "", nil, s.origin)
 }
 
 // Stop stops the concentrator and blocks until the operation completes.
@@ -235,12 +265,14 @@ const (
 // the concentrator config. The current bucket is only included if includeCurrent is true, such as during shutdown.
 func (c *concentrator) flushAndSend(timenow time.Time, includeCurrent bool) {
 	csps := c.spanConcentrator.Flush(timenow.UnixNano(), includeCurrent)
+	bc := c.spanConcentrator.DrainBlockCounts()
+	c.emitCollapseMetrics(bc)
 
 	obfVersion := 0
 	if c.shouldObfuscate() {
 		obfVersion = tracerObfuscationVersion
 	} else {
-		log.Debug("Stats Obfuscation was skipped, agent will obfuscate (tracer %d, agent %d)", tracerObfuscationVersion, c.cfg.agent.obfuscationVersion)
+		log.Debug("Stats Obfuscation was skipped, agent will obfuscate (tracer %d, agent %d)", tracerObfuscationVersion, c.cfg.agent.load().obfuscationVersion)
 	}
 
 	if len(csps) == 0 {
@@ -251,13 +283,87 @@ func (c *concentrator) flushAndSend(timenow time.Time, includeCurrent bool) {
 	flushedBuckets := 0
 	// Given we use a constant PayloadAggregationKey there should only ever be 1 of these, but to be forward
 	// compatible in case this ever changes we can just iterate through all of them.
+	sendRetries := c.cfg.internalConfig.SendRetries()
+	retryInterval := c.cfg.internalConfig.RetryInterval()
 	for _, csp := range csps {
+		csp.RuntimeID = globalconfig.RuntimeID()
+		csp.Service = c.cfg.internalConfig.ServiceName()
 		csp.ProcessTags = processtags.GlobalTags().String()
 		flushedBuckets += len(csp.Stats)
-		if err := c.cfg.transport.sendStats(csp, obfVersion); err != nil {
+		var err error
+		for attempt := 0; attempt <= sendRetries; attempt++ {
+			err = c.cfg.ddTransport.sendStats(csp, obfVersion)
+			if err == nil {
+				break
+			}
+			if attempt < sendRetries {
+				time.Sleep(retryInterval)
+			}
+		}
+		if err != nil {
 			c.statsd().Incr("datadog.tracer.stats.flush_errors", nil, 1)
 			log.Error("Error sending stats payload: %s", err.Error())
 		}
 	}
 	c.statsd().Incr("datadog.tracer.stats.flush_buckets", nil, float64(flushedBuckets))
 }
+
+// emitCollapseMetrics sends health and instrumentation telemetry for cardinality collapse events.
+// Per the Cardinality Limits RFC:
+//   - Health metric:  datadog.tracer.stats.collapsed_spans  (statsd, public)
+//   - Telemetry metric: tracers.stats_collapsed_spans       (instrumentation telemetry, internal)
+//
+// Tags follow the RFC: collapsed:<field>, collapsed:whole_key, oversized:additional_metric_tags.
+func (c *concentrator) emitCollapseMetrics(bc stats.BlockCounts) {
+	type collapseEntry struct {
+		count int64
+		tag   string
+	}
+	entries := []collapseEntry{
+		{bc.LengthBlocks, "oversized:additional_metric_tags"},
+		{bc.CapBlocks, "collapsed:additional_metric_tags"},
+		{bc.ResourceCollapses, "collapsed:resource"},
+		{bc.HTTPEndpointCollapses, "collapsed:http_endpoint"},
+		{bc.PeerTagsCollapses, "collapsed:peer_tags"},
+		{bc.OriginCollapses, "collapsed:origin"},
+		{bc.WholeKeyCollapses, "collapsed:whole_key"},
+	}
+	anyCollapse := false
+	for _, e := range entries {
+		if e.count <= 0 {
+			continue
+		}
+		anyCollapse = true
+		tags := []string{e.tag}
+		// Health metric (statsd, may be off by default in some deployments)
+		c.statsd().Count("datadog.tracer.stats.collapsed_spans", e.count, tags, 1)
+		// Instrumentation telemetry (on by default, internal-facing)
+		telemetry.Count(telemetry.NamespaceTracers, "stats_collapsed_spans", tags).Submit(float64(e.count))
+	}
+	if anyCollapse {
+		log.Debug("Client-side stats values are being collapsed to 'tracer_blocked_value' in the current flush window. " +
+			"This is caused by a tag value exceeding 200 characters, or by exceeding one of the DD_TRACE_STATS_*_CARDINALITY_LIMIT caps.")
+	}
+}
+
+// trySendSpan attempts a non-blocking send of the stat span to the
+// concentrator's input channel.
+func (c *concentrator) trySendSpan(s *tracerStatSpan) {
+	select {
+	case c.In <- s:
+	default:
+		log.Error("Stats channel full, disregarding span.")
+	}
+}
+
+// noopConcentrator is a no-op implementation of statsConcentrator used when
+// client-side stats are disabled (e.g. OTLP export mode).
+type noopConcentrator struct{}
+
+func (c *noopConcentrator) Start()                           {}
+func (c *noopConcentrator) Stop()                            {}
+func (c *noopConcentrator) flushAndSend(_ time.Time, _ bool) {}
+func (c *noopConcentrator) newTracerStatSpan(_ *Span, _ *obfuscate.Obfuscator) (*tracerStatSpan, bool) {
+	return nil, false
+}
+func (c *noopConcentrator) trySendSpan(_ *tracerStatSpan) {}

@@ -75,6 +75,8 @@ func getProviderTestSessionTypeFromProviderString(provider string) TestSessionTy
 		return BuddyCiTestSessionType
 	case "awscodepipeline":
 		return AwsCodePipelineSessionType
+	case "bazel":
+		return BazelTestSessionType
 	default:
 		return UnsupportedTestSessionType
 	}
@@ -137,6 +139,18 @@ func EndpointPayloadRequestsErrors(endpointType EndpointType, errorType ErrorTyp
 	tags := []string{string(endpointType)}
 	tags = append(tags, errorType...)
 	telemetry.Count(telemetry.NamespaceCIVisibility, "endpoint_payload.requests_errors", removeEmptyStrings(tags)).Submit(1.0)
+}
+
+// CoverageUploadRequest records the number of code coverage report upload requests.
+func CoverageUploadRequest(requestCompressed RequestCompressedType) {
+	telemetry.Count(telemetry.NamespaceCIVisibility, "coverage_upload.request", removeEmptyStrings([]string{
+		string(requestCompressed),
+	})).Submit(1.0)
+}
+
+// CoverageUploadRequestErrors records the number of code coverage report upload requests that errored.
+func CoverageUploadRequestErrors(errorType ErrorType) {
+	telemetry.Count(telemetry.NamespaceCIVisibility, "coverage_upload.request_errors", removeEmptyStrings(errorType)).Submit(1.0)
 }
 
 // EndpointPayloadDropped the number of payloads dropped after all retries by CI Visibility

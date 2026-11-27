@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"math/big"
 	"slices"
@@ -46,7 +47,10 @@ var (
 )
 
 const (
-	baggageKeyExperimentID = "_ml_obs.experiment_id"
+	baggageKeyExperimentID           = "_ml_obs.experiment_id"
+	baggageKeyExperimentRunID        = "_ml_obs.experiment_run_id"
+	baggageKeyExperimentRunIteration = "_ml_obs.experiment_run_iteration"
+	baggageKeyExperimentProjectID    = "_ml_obs.experiment_project_id"
 )
 
 const (
@@ -93,6 +97,7 @@ type llmobsContext struct {
 	metadata map[string]any
 	metrics  map[string]float64
 	tags     map[string]string
+	costTags []string
 
 	// agent specific
 	agentManifest string
@@ -114,7 +119,8 @@ type llmobsContext struct {
 	outputText      string
 
 	// tool specific
-	intent string
+	intent      string
+	toolVersion string
 
 	// experiment specific
 	experimentInput          any
@@ -136,15 +142,17 @@ type LLMObs struct {
 	evalMetricsCh chan *transport.LLMObsMetric
 
 	// runtime buffers, payloads are accumulated here and flushed periodically
-	bufSpanEvents  []*transport.LLMObsSpanEvent
-	bufEvalMetrics []*transport.LLMObsMetric
+	bufSpanEvents     []*transport.LLMObsSpanEvent
+	bufSpanEventsSize int // cumulative JSON size of buffered span events
+	bufEvalMetrics    []*transport.LLMObsMetric
 
 	// lifecycle
 	mu            sync.Mutex
 	running       bool
-	wg            sync.WaitGroup
-	stopCh        chan struct{} // signal stop
-	flushNowCh    chan struct{}
+	sendWg        sync.WaitGroup // tracks in-flight batchSend goroutines
+	workerDone    chan struct{}  // closed when the worker loop exits
+	stopCh        chan struct{}  // signal stop
+	flushNowCh    chan chan struct{}
 	flushInterval time.Duration
 }
 
@@ -183,8 +191,9 @@ func newLLMObs(cfg *config.Config, tracer Tracer) (*LLMObs, error) {
 		Tracer:        tracer,
 		spanEventsCh:  make(chan *transport.LLMObsSpanEvent),
 		evalMetricsCh: make(chan *transport.LLMObsMetric),
+		workerDone:    make(chan struct{}),
 		stopCh:        make(chan struct{}),
-		flushNowCh:    make(chan struct{}, 1),
+		flushNowCh:    make(chan chan struct{}, 1),
 		flushInterval: defaultFlushInterval,
 	}, nil
 }
@@ -241,6 +250,13 @@ func Flush() {
 	}
 }
 
+// FlushSync forces a flush of all buffered LLMObs data and blocks until the flush completes.
+func FlushSync() {
+	if activeLLMObs != nil {
+		activeLLMObs.FlushSync()
+	}
+}
+
 // Run starts the worker loop that processes span events and metrics.
 func (l *LLMObs) Run() {
 	l.mu.Lock()
@@ -251,10 +267,9 @@ func (l *LLMObs) Run() {
 	l.running = true
 	l.mu.Unlock()
 
-	l.wg.Add(1)
 	go func() {
+		defer close(l.workerDone)
 		// this goroutine should be the only one writing to the internal buffers
-		defer l.wg.Done()
 
 		ticker := time.NewTicker(l.flushInterval)
 		defer ticker.Stop()
@@ -262,25 +277,34 @@ func (l *LLMObs) Run() {
 		for {
 			select {
 			case ev := <-l.spanEventsCh:
+				evSize := jsonSize(ev)
+				if l.bufSpanEventsSize+evSize > sizeLimitEVPEvent {
+					log.Debug("llmobs: span events buffer size limit reached, flushing before adding new event")
+					params := l.clearBuffersNonLocked()
+					l.sendWg.Go(func() { l.batchSend(params) })
+				}
 				l.bufSpanEvents = append(l.bufSpanEvents, ev)
+				l.bufSpanEventsSize += evSize
 
 			case evalMetric := <-l.evalMetricsCh:
 				l.bufEvalMetrics = append(l.bufEvalMetrics, evalMetric)
 
 			case <-ticker.C:
 				params := l.clearBuffersNonLocked()
-				l.wg.Add(1)
-				go func() {
-					defer l.wg.Done()
-					l.batchSend(params)
-				}()
+				l.sendWg.Go(func() { l.batchSend(params) })
 
-			case <-l.flushNowCh:
+			case done := <-l.flushNowCh:
 				log.Debug("llmobs: on-demand flush signal")
 				params := l.clearBuffersNonLocked()
-				l.wg.Add(1)
+				l.sendWg.Add(1)
 				go func() {
-					defer l.wg.Done()
+					defer func() {
+						l.sendWg.Done()
+						if done != nil {
+							l.sendWg.Wait()
+							close(done)
+						}
+					}()
 					l.batchSend(params)
 				}()
 
@@ -303,6 +327,7 @@ func (l *LLMObs) clearBuffersNonLocked() batchSendParams {
 		evalMetrics: l.bufEvalMetrics,
 	}
 	l.bufSpanEvents = nil
+	l.bufSpanEventsSize = 0
 	l.bufEvalMetrics = nil
 	return params
 }
@@ -312,8 +337,21 @@ func (l *LLMObs) clearBuffersNonLocked() batchSendParams {
 func (l *LLMObs) Flush() {
 	// non-blocking edge trigger so multiple calls coalesce
 	select {
-	case l.flushNowCh <- struct{}{}:
+	case l.flushNowCh <- nil:
 	default:
+	}
+}
+
+// FlushSync forces an immediate flush and blocks until the flush completes.
+func (l *LLMObs) FlushSync() {
+	done := make(chan struct{})
+	select {
+	case l.flushNowCh <- done:
+		select {
+		case <-done:
+		case <-l.stopCh:
+		}
+	case <-l.stopCh:
 	}
 }
 
@@ -334,8 +372,10 @@ func (l *LLMObs) Stop() {
 		close(l.stopCh)
 	}
 
-	// Wait for the main worker to exit (it will do a final flush)
-	l.wg.Wait()
+	// Wait for the worker loop to exit (it does a final synchronous flush),
+	// then wait for any async batchSend goroutines still in flight.
+	<-l.workerDone
+	l.sendWg.Wait()
 }
 
 // drainChannels pulls everything currently buffered in the channels into our in-memory buffers.
@@ -377,8 +417,9 @@ func (l *LLMObs) batchSend(params batchSendParams) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
+	// Use an empty context so each retry in the transport gets its own
+	// fresh per-request timeout rather than all retries sharing a single deadline.
+	ctx := context.Background()
 
 	var wg sync.WaitGroup
 
@@ -453,14 +494,13 @@ func (l *LLMObs) llmobsSpanEvent(span *Span) *transport.LLMObsSpanEvent {
 	}
 
 	metadata := span.llmCtx.metadata
-	if metadata == nil {
+	if len(metadata) > 0 {
+		metadata = maps.Clone(metadata)
+	} else {
 		metadata = make(map[string]any)
 	}
 	if spanKind == SpanKindAgent && span.llmCtx.agentManifest != "" {
 		metadata["agent_manifest"] = span.llmCtx.agentManifest
-	}
-	if len(metadata) > 0 {
-		meta["metadata"] = metadata
 	}
 
 	input := make(map[string]any)
@@ -504,11 +544,7 @@ func (l *LLMObs) llmobsSpanEvent(span *Span) *transport.LLMObsSpanEvent {
 		if spanKind != SpanKindLLM {
 			log.Warn("llmobs: dropping prompt on non-LLM span kind, annotating prompts is only supported for LLM span kinds")
 		} else {
-			input["prompt"] = inputPrompt
-		}
-	} else if spanKind == SpanKindLLM {
-		if span.parent != nil && span.parent.llmCtx.prompt != nil {
-			input["prompt"] = span.parent.llmCtx.prompt
+			input["prompt"] = promptPayload{Prompt: *inputPrompt, MLApp: span.mlApp}
 		}
 	}
 
@@ -522,6 +558,10 @@ func (l *LLMObs) llmobsSpanEvent(span *Span) *transport.LLMObsSpanEvent {
 		} else {
 			meta["intent"] = intent
 		}
+	}
+
+	if toolVersion := span.llmCtx.toolVersion; toolVersion != "" {
+		meta["tool.version"] = toolVersion
 	}
 
 	spanStatus := "ok"
@@ -583,9 +623,13 @@ func (l *LLMObs) llmobsSpanEvent(span *Span) *transport.LLMObsSpanEvent {
 		tags["integration"] = span.integration
 	}
 
-	for k, v := range span.llmCtx.tags {
-		tags[k] = v
+	maps.Copy(tags, span.llmCtx.tags)
+
+	setMetadataCostTags(metadata, validateCostTags(span, tags))
+	if len(metadata) > 0 {
+		meta["metadata"] = metadata
 	}
+
 	tagsSlice := make([]string, 0, len(tags))
 	for k, v := range tags {
 		tagsSlice = append(tagsSlice, fmt.Sprintf("%s:%s", k, v))
@@ -641,6 +685,53 @@ func (l *LLMObs) llmobsSpanEvent(span *Span) *transport.LLMObsSpanEvent {
 		trackSpanEventSize(ev, actualSize, truncated)
 	}
 	return ev
+}
+
+// validateCostTags filters the span's annotated cost tags against the final
+// event tag set, drops entries that don't reference an emitted tag key, and
+// emits the cost-tags-submitted telemetry. It must run after the final tags
+// map is fully assembled, so cost tags referencing SDK-injected keys (e.g.
+// session_id from WithSessionID or propagation, integration, ml_app) are
+// accepted.
+func validateCostTags(span *Span, finalTags map[string]string) []string {
+	costTags := span.llmCtx.costTags
+	if len(costTags) == 0 {
+		return nil
+	}
+
+	validated := make([]string, 0, len(costTags))
+	missing := 0
+	for _, costTag := range costTags {
+		if _, ok := finalTags[costTag]; !ok {
+			log.Warn("llmobs: cost_tags entry %q must reference a key present in span tags. Skipping entry.", costTag)
+			missing++
+			continue
+		}
+		validated = append(validated, costTag)
+	}
+
+	if missing > 0 {
+		trackCostTagsSubmitted(span, missing, "annotate", "error", "missing_span_tag")
+	}
+	if len(validated) > 0 {
+		trackCostTagsSubmitted(span, len(validated), "annotate", "success", "none")
+	}
+	return validated
+}
+
+func setMetadataCostTags(metadata map[string]any, costTags []string) {
+	if len(costTags) == 0 {
+		return
+	}
+
+	ddMetadata, ok := metadata["_dd"].(map[string]any)
+	if ok {
+		ddMetadata = maps.Clone(ddMetadata)
+	} else {
+		ddMetadata = make(map[string]any)
+	}
+	ddMetadata["cost_tags"] = append([]string(nil), costTags...)
+	metadata["_dd"] = ddMetadata
 }
 
 func dropSpanEventIO(ev *transport.LLMObsSpanEvent) bool {
@@ -717,6 +808,12 @@ func (l *LLMObs) StartSpan(ctx context.Context, kind SpanKind, name string, cfg 
 		modelProvider: cfg.ModelProvider,
 	}
 
+	if kind == SpanKindTool {
+		if v := span.resolvedToolVersion(); v != "" {
+			span.llmCtx.toolVersion = v
+		}
+	}
+
 	if span.sessionID == "" {
 		span.sessionID = span.propagatedSessionID()
 	}
@@ -727,18 +824,60 @@ func (l *LLMObs) StartSpan(ctx context.Context, kind SpanKind, name string, cfg 
 			log.Warn("llmobs: ML App is required for sending LLM Observability data.")
 		}
 	}
+
+	experimentID := apmSpan.BaggageItem(baggageKeyExperimentID)
+	experimentRunID := apmSpan.BaggageItem(baggageKeyExperimentRunID)
+	experimentRunIteration := apmSpan.BaggageItem(baggageKeyExperimentRunIteration)
+	experimentProjectID := apmSpan.BaggageItem(baggageKeyExperimentProjectID)
+	if experimentID != "" || experimentRunID != "" || experimentRunIteration != "" || experimentProjectID != "" {
+		if span.llmCtx.tags == nil {
+			span.llmCtx.tags = make(map[string]string)
+		}
+		if experimentID != "" {
+			span.scope = "experiments"
+			span.llmCtx.tags["experiment_id"] = experimentID
+		}
+		if experimentRunID != "" {
+			span.llmCtx.tags["run_id"] = experimentRunID
+		}
+		if experimentRunIteration != "" {
+			span.llmCtx.tags["run_iteration"] = experimentRunIteration
+		}
+		if experimentProjectID != "" {
+			span.llmCtx.tags["project_id"] = experimentProjectID
+		}
+	}
+
 	log.Debug("llmobs: starting LLMObs span: %s, span_kind: %s, ml_app: %s", spanName, kind, span.mlApp)
 	return span, contextWithActiveLLMSpan(ctx, span)
 }
 
-// StartExperimentSpan starts a new experiment span with the given name, experiment ID, and configuration.
+// ExperimentInfo holds the experiment identifiers propagated via baggage to distributed child spans.
+type ExperimentInfo struct {
+	ID           string
+	RunID        string
+	RunIteration int
+	ProjectID    string
+}
+
+// StartExperimentSpan starts a new experiment span with the given name and configuration.
+// ExperimentInfo fields are propagated via baggage so distributed child spans inherit them.
 // Returns the created span and a context containing the span.
-func (l *LLMObs) StartExperimentSpan(ctx context.Context, name string, experimentID string, cfg StartSpanConfig) (*Span, context.Context) {
+func (l *LLMObs) StartExperimentSpan(ctx context.Context, name string, params ExperimentInfo, cfg StartSpanConfig) (*Span, context.Context) {
 	span, ctx := l.StartSpan(ctx, SpanKindExperiment, name, cfg)
 
-	if experimentID != "" {
-		span.apm.SetBaggageItem(baggageKeyExperimentID, experimentID)
+	if params.ID != "" {
+		span.apm.SetBaggageItem(baggageKeyExperimentID, params.ID)
 		span.scope = "experiments"
+	}
+	if params.RunID != "" {
+		span.apm.SetBaggageItem(baggageKeyExperimentRunID, params.RunID)
+	}
+	if params.RunIteration > 0 {
+		span.apm.SetBaggageItem(baggageKeyExperimentRunIteration, fmt.Sprintf("%d", params.RunIteration))
+	}
+	if params.ProjectID != "" {
+		span.apm.SetBaggageItem(baggageKeyExperimentProjectID, params.ProjectID)
 	}
 	return span, ctx
 }
@@ -882,6 +1021,15 @@ func newLLMObsTraceID() string {
 
 	// 32-byte hex string
 	return fmt.Sprintf("%032x", x)
+}
+
+// jsonSize returns the JSON-encoded byte size of v, or 0 if marshaling fails.
+func jsonSize(v any) int {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return 0
+	}
+	return len(b)
 }
 
 // isAPIKeyValid reports whether the given string is a structurally valid API key
