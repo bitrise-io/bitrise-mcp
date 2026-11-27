@@ -7,11 +7,13 @@ package stats
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/datadog-agent/pkg/trace/config"
 	"github.com/DataDog/datadog-agent/pkg/trace/log"
+	"github.com/DataDog/datadog-agent/pkg/trace/semantics"
 	"github.com/DataDog/datadog-agent/pkg/trace/traceutil"
 	"github.com/DataDog/datadog-agent/pkg/trace/watchdog"
 
@@ -46,7 +48,16 @@ type Concentrator struct {
 	agentHostname string
 	agentVersion  string
 	statsd        statsd.ClientInterface
-	peerTagKeys   []string
+	conf          *config.AgentConfig
+	// peerTagsCache caches the peer-tag attribute key set keyed by the
+	// semantic registry version it was derived from. Readers call
+	// getPeerTagKeys, which rebuilds the cache (via conf.PeerTagsCache) when
+	// the live registry content_hash no longer matches — this is how the
+	// Concentrator picks up semantic-core RC updates without explicit
+	// notification from the RC handler. The stored snapshot's Keys slice is
+	// never mutated in place; getPeerTagKeys always Stores a fresh snapshot.
+	peerTagsCache           atomic.Pointer[config.PeerTagsCache]
+	additionalMetricTagKeys []string
 }
 
 // NewConcentrator initializes a new concentrator ready to be started
@@ -56,6 +67,7 @@ func NewConcentrator(conf *config.AgentConfig, writer Writer, now time.Time, sta
 		ComputeStatsBySpanKind: conf.ComputeStatsBySpanKind,
 		BucketInterval:         bsize,
 	}, now)
+	sc.additionalMetricTagValueBlockSentinel = blockedByAgentSentinel
 	_, disabledCIDStats := conf.Features["disable_cid_stats"]
 	_, disabledProcessStats := conf.Features["disable_process_stats"]
 	c := Concentrator{
@@ -69,9 +81,30 @@ func NewConcentrator(conf *config.AgentConfig, writer Writer, now time.Time, sta
 		agentVersion:     conf.AgentVersion,
 		statsd:           statsd,
 		bsize:            bsize,
-		peerTagKeys:      conf.ConfiguredPeerTags(),
+		conf:             conf,
+		// On the agent side, this is non-nil only in serverless contexts (AAS extension
+		// or cmd/serverless-init) via the deprecated DD_APM_SPAN_DERIVED_PRIMARY_TAGS
+		// option. The Go tracer (dd-trace-go) also configures it via
+		// SpanConcentratorConfig.AdditionalMetricTagKeys when it imports SpanConcentrator
+		// directly.
+		additionalMetricTagKeys: conf.ConfiguredSpanDerivedPrimaryTagKeys(),
 	}
+	c.peerTagsCache.Store(conf.PeerTagsCache())
 	return &c
+}
+
+// getPeerTagKeys returns the cached peer-tag key set, rebuilding it via
+// AgentConfig.PeerTagsCache when the live semantic registry has been replaced
+// (its ContentHash() differs from the cached snapshot's ContentHash). Two
+// concurrent callers that observe staleness may both rebuild and Store; the
+// result is identical so last-Store-wins is benign.
+func (c *Concentrator) getPeerTagKeys() []string {
+	snap := c.peerTagsCache.Load()
+	if snap == nil || snap.ContentHash != semantics.DefaultRegistry().ContentHash() {
+		snap = c.conf.PeerTagsCache()
+		c.peerTagsCache.Store(snap)
+	}
+	return snap.Keys
 }
 
 // Start starts the concentrator.
@@ -119,12 +152,28 @@ type Input struct {
 	ProcessTags   string
 }
 
+// InputV1 specifies a set of traces originating from a certain payload.
+type InputV1 struct {
+	Traces        []traceutil.ProcessedTraceV1
+	ContainerID   string
+	ContainerTags []string
+	ProcessTags   string
+}
+
 // NewStatsInput allocates a stats input for an incoming trace payload
 func NewStatsInput(numChunks int, containerID string, clientComputedStats bool, processTags string) Input {
 	if clientComputedStats {
 		return Input{}
 	}
 	return Input{Traces: make([]traceutil.ProcessedTrace, 0, numChunks), ContainerID: containerID, ProcessTags: processTags}
+}
+
+// NewStatsInputV1 allocates a stats input for an incoming trace payload
+func NewStatsInputV1(numChunks int, containerID string, clientComputedStats bool, processTags string) InputV1 {
+	if clientComputedStats {
+		return InputV1{}
+	}
+	return InputV1{Traces: make([]traceutil.ProcessedTraceV1, 0, numChunks), ContainerID: containerID, ProcessTags: processTags}
 }
 
 // Add applies the given input to the concentrator.
@@ -140,6 +189,19 @@ func (c *Concentrator) Add(t Input) {
 	}
 }
 
+// AddV1 applies the given input to the concentrator.
+func (c *Concentrator) AddV1(t InputV1) {
+	tags := infraTags{
+		containerID:     t.ContainerID,
+		containerTags:   t.ContainerTags,
+		processTagsHash: processTagsHash(t.ProcessTags),
+		processTags:     t.ProcessTags,
+	}
+	for _, trace := range t.Traces {
+		c.addNowV1(&trace, tags)
+	}
+}
+
 type infraTags struct {
 	containerID     string
 	containerTags   []string
@@ -148,7 +210,6 @@ type infraTags struct {
 }
 
 // addNow adds the given input into the concentrator.
-// Callers must guard!
 func (c *Concentrator) addNow(pt *traceutil.ProcessedTrace, tags infraTags) {
 	if !c.cidStats {
 		tags.containerID = ""
@@ -175,11 +236,51 @@ func (c *Concentrator) addNow(pt *traceutil.ProcessedTrace, tags infraTags) {
 		ImageTag:        pt.ImageTag,
 		Lang:            pt.Lang,
 		ProcessTagsHash: tags.processTagsHash,
+		BaseService:     semantics.LookupString(semantics.DefaultRegistry(), semantics.NewDDSpanAccessor(pt.Root.Meta, pt.Root.Metrics), semantics.ConceptDDBaseService),
 	}
+	peerTagKeys := c.getPeerTagKeys()
 	for _, s := range pt.TraceChunk.Spans {
-		statSpan, ok := c.spanConcentrator.NewStatSpanFromPB(s, c.peerTagKeys)
+		statSpan, ok := c.spanConcentrator.NewStatSpanFromPB(s, peerTagKeys, c.additionalMetricTagKeys)
 		if ok {
 			c.spanConcentrator.addSpan(statSpan, aggKey, tags, pt.TraceChunk.Origin, weight)
+		}
+	}
+}
+
+func (c *Concentrator) addNowV1(pt *traceutil.ProcessedTraceV1, tags infraTags) {
+	if !c.cidStats {
+		tags.containerID = ""
+	}
+	if !c.processStats {
+		tags.processTagsHash = 0
+		tags.processTags = ""
+	}
+	hostname := pt.TracerHostname
+	if hostname == "" {
+		hostname = c.agentHostname
+	}
+	env := pt.TracerEnv
+	if env == "" {
+		env = c.agentEnv
+	}
+	weight := weightV1(pt.Root)
+	baseService := semantics.LookupString(semantics.DefaultRegistry(), semantics.NewDDSpanAccessorV1(pt.Root), semantics.ConceptDDBaseService)
+	aggKey := PayloadAggregationKey{
+		Env:             env,
+		Hostname:        hostname,
+		Version:         pt.AppVersion,
+		ContainerID:     tags.containerID,
+		GitCommitSha:    pt.GitCommitSha,
+		ImageTag:        pt.ImageTag,
+		Lang:            pt.Lang,
+		ProcessTagsHash: tags.processTagsHash,
+		BaseService:     baseService,
+	}
+	peerTagKeys := c.getPeerTagKeys()
+	for _, s := range pt.TraceChunk.Spans {
+		statSpan, ok := c.spanConcentrator.NewStatSpanFromV1(s, peerTagKeys, c.additionalMetricTagKeys)
+		if ok {
+			c.spanConcentrator.addSpan(statSpan, aggKey, tags, pt.TraceChunk.Origin(), weight)
 		}
 	}
 }

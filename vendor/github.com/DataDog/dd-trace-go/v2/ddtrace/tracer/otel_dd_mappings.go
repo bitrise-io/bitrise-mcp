@@ -31,12 +31,6 @@ var otelDDConfigs = map[string]*otelDDEnv{
 		remapper: mapService,
 		handsOff: false,
 	},
-	"metrics": {
-		dd:       "DD_RUNTIME_METRICS_ENABLED",
-		ot:       "OTEL_METRICS_EXPORTER",
-		remapper: mapMetrics,
-		handsOff: true,
-	},
 	"debugMode": {
 		dd:       "DD_TRACE_DEBUG",
 		ot:       "OTEL_LOG_LEVEL",
@@ -169,15 +163,6 @@ func mapService(ot string) (string, error) {
 	return ot, nil
 }
 
-// mapMetrics maps OTEL_METRICS_EXPORTER to DD_RUNTIME_METRICS_ENABLED
-func mapMetrics(ot string) (string, error) {
-	ot = strings.TrimSpace(strings.ToLower(ot))
-	if ot == "none" {
-		return "false", nil
-	}
-	return "", fmt.Errorf("the following configuration is not supported: OTEL_METRICS_EXPORTER=%v", ot)
-}
-
 // mapLogLevel maps OTEL_LOG_LEVEL to DD_TRACE_DEBUG
 func mapLogLevel(ot string) (string, error) {
 	if strings.TrimSpace(strings.ToLower(ot)) == "debug" {
@@ -225,7 +210,7 @@ func mapSampleRate(ot string) (string, error) {
 func mapPropagationStyle(ot string) (string, error) {
 	ot = strings.TrimSpace(strings.ToLower(ot))
 	supportedStyles := make([]string, 0)
-	for _, otStyle := range strings.Split(ot, ",") {
+	for otStyle := range strings.SplitSeq(ot, ",") {
 		otStyle = strings.TrimSpace(otStyle)
 		if _, ok := propagationMapping[otStyle]; ok {
 			supportedStyles = append(supportedStyles, propagationMapping[otStyle])

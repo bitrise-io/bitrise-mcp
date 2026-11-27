@@ -16,8 +16,10 @@ var validProducts = map[string]struct{}{
 	ProductAgentTask:                    {},
 	ProductAgentIntegrations:            {},
 	ProductAPMSampling:                  {},
+	ProductAPMSemanticCoreDD:            {},
 	ProductCWSDD:                        {},
 	ProductCWSCustom:                    {},
+	ProductCWSRemediation:               {},
 	ProductCWSProfiles:                  {},
 	ProductCSMSideScanning:              {},
 	ProductASM:                          {},
@@ -25,24 +27,26 @@ var validProducts = map[string]struct{}{
 	ProductASMDD:                        {},
 	ProductASMData:                      {},
 	ProductAPMTracing:                   {},
-	ProductSDSRules:                     {},
-	ProductSDSAgentConfig:               {},
 	ProductLiveDebugging:                {},
 	ProductContainerAutoscalingSettings: {},
 	ProductContainerAutoscalingValues:   {},
+	ProductClusterAutoscalingValues:     {},
 	ProductTesting1:                     {},
 	ProductTesting2:                     {},
 	ProductOrchestratorK8sCRDs:          {},
 	ProductHaAgent:                      {},
 	ProductNDMDeviceProfilesCustom:      {},
 	ProductMetricControl:                {},
-	ProductDataStreamsLiveMessages:      {},
+	ProductDataStreamsKafkaActions:      {},
 	ProductLiveDebuggingSymbolDB:        {},
 	ProductGradualRollout:               {},
 	ProductApmPolicies:                  {},
 	ProductSyntheticsTest:               {},
 	ProductBTFDD:                        {},
 	ProductFFEFlags:                     {},
+	ProductAgentFlags:                   {},
+	ProductDOQueryActions:               {},
+	ProductK8SActions:                   {},
 }
 
 const (
@@ -66,10 +70,17 @@ const (
 	ProductAgentTask = "AGENT_TASK"
 	// ProductAPMSampling is the apm sampling product
 	ProductAPMSampling = "APM_SAMPLING"
+	// ProductAPMSemanticCoreDD is the employee-signed product that pushes
+	// semantic-core mapping updates (span tag equivalences, peer tag mappings)
+	// to the trace-agent. A future API-signed per-org variant will be
+	// ProductAPMSemanticCore (without the _DD suffix).
+	ProductAPMSemanticCoreDD = "APM_SEMANTIC_CORE_DD"
 	// ProductCWSDD is the cloud workload security product managed by datadog employees
 	ProductCWSDD = "CWS_DD"
 	// ProductCWSCustom is the cloud workload security product managed by datadog customers
 	ProductCWSCustom = "CWS_CUSTOM"
+	// ProductCWSRemediation is the cloud workload security remediation product
+	ProductCWSRemediation = "CWS_REMEDIATION"
 	// ProductCWSProfiles is the cloud workload security profile product
 	ProductCWSProfiles = "CWS_SECURITY_PROFILES"
 	// ProductCSMSideScanning is the side scanning product
@@ -84,10 +95,6 @@ const (
 	ProductASMData = "ASM_DATA"
 	// ProductAPMTracing is the apm tracing product
 	ProductAPMTracing = "APM_TRACING"
-	// ProductSDSRules is the SDS definitions product
-	ProductSDSRules = "SDS_RULES_DD"
-	// ProductSDSAgentConfig is the user SDS configurations product.
-	ProductSDSAgentConfig = "SDS_AGENT_CONFIG"
 	// ProductLiveDebugging is the dynamic instrumentation product
 	ProductLiveDebugging = "LIVE_DEBUGGING"
 	// ProductLiveDebuggingSymbolDB is used by the live debugging product for
@@ -97,6 +104,8 @@ const (
 	ProductContainerAutoscalingSettings = "CONTAINER_AUTOSCALING_SETTINGS"
 	// ProductContainerAutoscalingValues receives values for container autoscaling
 	ProductContainerAutoscalingValues = "CONTAINER_AUTOSCALING_VALUES"
+	// ProductClusterAutoscalingValues receives values for cluster autoscaling
+	ProductClusterAutoscalingValues = "CLUSTER_AUTOSCALING_VALUES"
 	// ProductTesting1 is a product used for testing remote config
 	ProductTesting1 = "TESTING1"
 	// ProductTesting2 is a product used for testing remote config
@@ -111,8 +120,8 @@ const (
 	ProductNDMDeviceProfilesCustom = "NDM_DEVICE_PROFILES_CUSTOM"
 	// ProductMetricControl receives configuration for the metrics control.
 	ProductMetricControl = "METRIC_CONTROL"
-	// ProductDataStreamsLiveMessages is used for capturing messages from Kafka
-	ProductDataStreamsLiveMessages = "DSM_LIVE_MESSAGES"
+	// ProductDataStreamsKafkaActions is used for executing Kafka actions remotely
+	ProductDataStreamsKafkaActions = "DSM_KAFKA_ACTIONS"
 	// ProductGradualRollout tracks the latest stable release versions for K8s gradual rollout.
 	ProductGradualRollout = "K8S_INJECTION_DD"
 	// ProductBTFDD accesses a BTF catalog used when the kernel is newer than the system-probe has bundled support for
@@ -121,4 +130,10 @@ const (
 	ProductApmPolicies = "APM_POLICIES"
 	// ProductFFEFlags is used for feature flagging experiments remote updates
 	ProductFFEFlags = "FFE_FLAGS"
+	// ProductAgentFlags is used for remote feature flags
+	ProductAgentFlags = "AGENT_REMOTE_FLAGS"
+	// ProductDOQueryActions is used for executing database queries remotely for Data Observability
+	ProductDOQueryActions = "DO_QUERY_ACTIONS"
+	// ProductK8SActions receives Kubernetes actions to execute on cluster resources
+	ProductK8SActions = "K8S_ACTIONS"
 )

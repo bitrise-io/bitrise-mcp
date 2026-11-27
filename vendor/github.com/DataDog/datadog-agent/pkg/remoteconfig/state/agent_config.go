@@ -9,8 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-
-	"github.com/pkg/errors"
 )
 
 const agentConfigOrderID = "configuration_order"
@@ -97,7 +95,7 @@ func MergeRCAgentConfig(applyStatus func(cfgPath string, status ApplyStatus), up
 		if len(matched) != 2 {
 			err = fmt.Errorf("config file path '%s' has wrong format", configPath)
 			hasError = true
-			fullErr = errors.Wrap(fullErr, err.Error())
+			fullErr = fmt.Errorf("%s %w", err.Error(), fullErr)
 			applyStatus(configPath, ApplyStatus{
 				State: ApplyStateError,
 				Error: err.Error(),
@@ -113,7 +111,7 @@ func MergeRCAgentConfig(applyStatus func(cfgPath string, status ApplyStatus), up
 			orderFile, err = parseConfigAgentConfigOrder(c.Config, c.Metadata)
 			if err != nil {
 				hasError = true
-				fullErr = errors.Wrap(fullErr, err.Error())
+				fullErr = fmt.Errorf("%s %w", err.Error(), fullErr)
 				applyStatus(configPath, ApplyStatus{
 					State: ApplyStateError,
 					Error: err.Error(),
@@ -141,17 +139,29 @@ func MergeRCAgentConfig(applyStatus func(cfgPath string, status ApplyStatus), up
 		return ConfigContent{}, fullErr
 	}
 
-	// Go through all the layers that were sent, and apply them one by one to the merged structure
+	// Go through all the layers that were sent and apply them one by one to the merged structure.
+	// Priority: Order[0] > Order[1] > … (the loop is reversed so Order[0] is written last and wins).
+	// InternalOrder runs after Order, so InternalOrder[0] has the highest overall priority.
+	// Only overwrite a field when the layer provides a non-empty value; an absent or empty field
+	// means "this layer has no opinion" and must not clear a value already set by a lower-priority
+	// layer. To reset a field entirely, the backend removes the config file rather than sending an
+	// explicit empty value.
+	// NOTE: every field in ConfigContent must follow the same non-empty guard pattern used for
+	// LogLevel below — omitting it for a new field reintroduces the same silent-overwrite bug.
 	mergedConfig := ConfigContent{}
 	for i := len(orderFile.Config.Order) - 1; i >= 0; i-- {
 		if layer, found := parsedLayers[orderFile.Config.Order[i]]; found {
-			mergedConfig.LogLevel = layer.Config.Config.LogLevel
+			if layer.Config.Config.LogLevel != "" {
+				mergedConfig.LogLevel = layer.Config.Config.LogLevel
+			}
 		}
 	}
 	// Same for internal config
 	for i := len(orderFile.Config.InternalOrder) - 1; i >= 0; i-- {
 		if layer, found := parsedLayers[orderFile.Config.InternalOrder[i]]; found {
-			mergedConfig.LogLevel = layer.Config.Config.LogLevel
+			if layer.Config.Config.LogLevel != "" {
+				mergedConfig.LogLevel = layer.Config.Config.LogLevel
+			}
 		}
 	}
 

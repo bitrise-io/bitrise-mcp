@@ -5,6 +5,10 @@
 
 package trace
 
+import "maps"
+
+//msgp:limit arrays:500000 maps:500000
+
 //go:generate go run github.com/tinylib/msgp -file=span.pb.go -o span_gen.go -io=false
 //go:generate go run github.com/tinylib/msgp -file=tracer_payload.pb.go -o tracer_payload_gen.go -io=false
 //go:generate go run github.com/tinylib/msgp -io=false
@@ -42,7 +46,7 @@ func (p *TracerPayload) Cut(i int) *TracerPayload {
 		Env:             p.GetEnv(),
 		Hostname:        p.GetHostname(),
 		AppVersion:      p.GetAppVersion(),
-		Tags:            p.GetTags(),
+		Tags:            maps.Clone(p.GetTags()), // deep copy to prevent concurrent map writes
 	}
 
 	newPayload.Chunks = p.Chunks[:i]

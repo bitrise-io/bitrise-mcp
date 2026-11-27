@@ -18,9 +18,27 @@ import (
 	"github.com/DataDog/dd-trace-go/v2/internal/appsec"
 	"github.com/DataDog/dd-trace-go/v2/internal/globalconfig"
 	"github.com/DataDog/dd-trace-go/v2/internal/log"
+	"github.com/DataDog/dd-trace-go/v2/internal/orchestrion"
 	"github.com/DataDog/dd-trace-go/v2/internal/osinfo"
 	telemetrylog "github.com/DataDog/dd-trace-go/v2/internal/telemetry/log"
 	"github.com/DataDog/dd-trace-go/v2/internal/version"
+)
+
+// orchestrionConfig is the JSON shape used to report Orchestrion configuration
+// in the startup log. Values are sourced from the internal/orchestrion package
+// (orchestrion.Enabled / orchestrion.Version), which are set at build time.
+type (
+	orchestrionConfig struct {
+		// Enabled indicates whether this tracer was instantiated via Orchestrion.
+		Enabled bool `json:"enabled"`
+
+		// Metadata holds Orchestrion specific metadata (e.g orchestrion version, mode (toolexec or manual) etc..)
+		Metadata *orchestrionMetadata `json:"metadata,omitempty"`
+	}
+	orchestrionMetadata struct {
+		// Version is the version of the orchestrion tool that was used to instrument the application.
+		Version string `json:"version,omitempty"`
+	}
 )
 
 // startupInfo contains various information about the status of the tracer on startup.
@@ -92,7 +110,8 @@ func checkEndpoint(c *http.Client, endpoint string, protocol float64) error {
 // JSON format.
 func logStartup(t *tracer) {
 	tags := make(map[string]string)
-	for k, v := range t.config.globalTags.get() {
+	globalTags := t.config.internalConfig.GlobalTags()
+	for k, v := range globalTags {
 		tags[k] = fmt.Sprintf("%v", v)
 	}
 
@@ -103,6 +122,11 @@ func logStartup(t *tracer) {
 	}
 
 	partialFlushEnabled, partialFlushMinSpans := t.config.internalConfig.PartialFlushEnabled()
+
+	orchCfg := orchestrionConfig{Enabled: orchestrion.Enabled()}
+	if orchestrion.Version != "" {
+		orchCfg.Metadata = &orchestrionMetadata{Version: orchestrion.Version}
+	}
 
 	var injectorNames, extractorNames string
 	switch v := t.config.propagator.(type) {
@@ -116,12 +140,16 @@ func logStartup(t *tracer) {
 		injectorNames = "custom"
 		extractorNames = "custom"
 	}
-	// Determine the agent URL to use in the logs
+	af := t.config.agent.load()
+	proto := t.config.effectiveTraceProtocol()
+
+	// Determine the agent URL to use in the logs.
+	// Use the source URL from internalConfig for unix sockets (before UDS rewriting).
 	var agentURL string
-	if t.config.originalAgentURL != nil && t.config.originalAgentURL.Scheme == "unix" {
-		agentURL = t.config.originalAgentURL.String()
+	if srcURL := t.config.internalConfig.RawAgentURL(); srcURL != nil && srcURL.Scheme == "unix" {
+		agentURL = srcURL.String()
 	} else {
-		agentURL = t.config.transport.endpoint()
+		agentURL = t.config.ddTransport.endpoint(proto)
 	}
 	info := startupInfo{
 		Date:                        time.Now().Format(time.RFC3339),
@@ -131,7 +159,7 @@ func logStartup(t *tracer) {
 		Lang:                        "Go",
 		LangVersion:                 runtime.Version(),
 		Env:                         t.config.internalConfig.Env(),
-		Service:                     t.config.serviceName,
+		Service:                     t.config.internalConfig.ServiceName(),
 		AgentURL:                    agentURL,
 		Debug:                       t.config.internalConfig.Debug(),
 		AnalyticsEnabled:            !math.IsNaN(globalconfig.AnalyticsRate()),
@@ -149,17 +177,17 @@ func logStartup(t *tracer) {
 		Architecture:                runtime.GOARCH,
 		GlobalService:               globalconfig.ServiceName(),
 		LambdaMode:                  fmt.Sprintf("%t", t.config.internalConfig.LogToStdout()),
-		AgentFeatures:               t.config.agent,
+		AgentFeatures:               af,
 		Integrations:                t.config.integrations,
 		AppSec:                      appsec.Enabled(),
 		PartialFlushEnabled:         partialFlushEnabled,
 		PartialFlushMinSpans:        partialFlushMinSpans,
-		Orchestrion:                 t.config.orchestrionCfg,
+		Orchestrion:                 orchCfg,
 		FeatureFlags:                featureFlags,
 		PropagationStyleInject:      injectorNames,
 		PropagationStyleExtract:     extractorNames,
 		TracingAsTransport:          t.config.tracingAsTransport,
-		DogstatsdAddr:               t.config.dogstatsdAddr,
+		DogstatsdAddr:               t.config.internalConfig.DogstatsdAddr(),
 		DataStreamsEnabled:          t.config.internalConfig.DataStreamsMonitoringEnabled(),
 	}
 	if _, _, err := samplingRulesFromEnv(); err != nil {
@@ -169,7 +197,7 @@ func logStartup(t *tracer) {
 		info.SampleRateLimit = fmt.Sprintf("%v", limit)
 	}
 	if !t.config.internalConfig.LogToStdout() {
-		if err := checkEndpoint(t.config.httpClient, t.config.transport.endpoint(), t.config.traceProtocol); err != nil {
+		if err := checkEndpoint(t.config.httpClient, t.config.ddTransport.endpoint(proto), proto); err != nil {
 			info.AgentError = err.Error()
 			log.Warn("DIAGNOSTICS Unable to reach agent intake: %s", err.Error())
 		}

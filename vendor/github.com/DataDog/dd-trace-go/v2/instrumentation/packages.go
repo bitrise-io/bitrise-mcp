@@ -7,6 +7,7 @@ package instrumentation
 
 import (
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/ext"
@@ -16,6 +17,7 @@ type Package string
 
 const (
 	Package99DesignsGQLGen      Package = "99designs/gqlgen"
+	PackageAerospikeClientGoV7  Package = "aerospike/aerospike-client-go.v7"
 	PackageAWSSDKGo             Package = "aws/aws-sdk-go"
 	PackageAWSSDKGoV2           Package = "aws/aws-sdk-go-v2"
 	PackageAWSDatadogLambdaGo   Package = "aws/datadog-lambda-go"
@@ -53,12 +55,15 @@ const (
 	PackageTidwallBuntDB             Package = "tidwall/buntdb"
 	PackageSyndtrGoLevelDB           Package = "syndtr/goleveldb"
 	PackageSirupsenLogrus            Package = "sirupsen/logrus"
+	PackageRsZerolog                 Package = "rs/zerolog"
 	PackageShopifySarama             Package = "Shopify/sarama"
 	PackageSegmentioKafkaGo          Package = "segmentio/kafka-go"
+	PackageTwmbFranzGo               Package = "twmb/franz-go"
 	PackageRedisGoRedisV9            Package = "redis/go-redis.v9"
 	PackageOlivereElasticV5          Package = "olivere/elastic.v5"
 	PackageMiekgDNS                  Package = "miekg/dns"
 	PackageLabstackEchoV4            Package = "labstack/echo.v4"
+	PackageLabstackEchoV5            Package = "labstack/echo.v5"
 	PackageK8SClientGo               Package = "k8s.io/client-go"
 	PackageK8SGatewayAPI             Package = "k8s.io/gateway-api"
 	PackageJulienschmidtHTTPRouter   Package = "julienschmidt/httprouter"
@@ -76,6 +81,7 @@ const (
 	PackageModelContextProtocolGoSDK Package = "modelcontextprotocol/go-sdk"
 
 	PackageValkeyIoValkeyGo               Package = "valkey-io/valkey-go"
+	PackageAzureAPIMCallout               Package = "azure/apim-callout"
 	PackageEnvoyProxyGoControlPlane       Package = "envoyproxy/go-control-plane"
 	PackageHAProxyStreamProcessingOffload Package = "haproxy/stream-processing-offload"
 	PackageOS                             Package = "os"
@@ -180,6 +186,18 @@ var packages = map[Package]PackageInfo{
 				buildServiceNameV0: staticName("aws.lambda"),
 				buildOpNameV0:      staticName("aws.lambda"),
 				buildOpNameV1:      staticName("aws.lambda"),
+			},
+		},
+	},
+	PackageAerospikeClientGoV7: {
+		TracedPackage: "github.com/aerospike/aerospike-client-go/v7",
+		EnvVarPrefix:  "AEROSPIKE",
+		naming: map[Component]componentNames{
+			ComponentDefault: {
+				useDDServiceV0:     true,
+				buildServiceNameV0: staticName("aerospike"),
+				buildOpNameV0:      staticName("aerospike.command"),
+				buildOpNameV1:      staticName("aerospike.command"),
 			},
 		},
 	},
@@ -606,6 +624,10 @@ var packages = map[Package]PackageInfo{
 		TracedPackage: "github.com/sirupsen/logrus",
 		EnvVarPrefix:  "LOGRUS",
 	},
+	PackageRsZerolog: {
+		TracedPackage: "github.com/rs/zerolog",
+		EnvVarPrefix:  "ZEROLOG",
+	},
 	PackageShopifySarama: {
 		TracedPackage: "github.com/Shopify/sarama",
 		EnvVarPrefix:  "SARAMA",
@@ -626,6 +648,24 @@ var packages = map[Package]PackageInfo{
 	},
 	PackageSegmentioKafkaGo: {
 		TracedPackage: "github.com/segmentio/kafka-go",
+		EnvVarPrefix:  "KAFKA",
+		naming: map[Component]componentNames{
+			ComponentConsumer: {
+				useDDServiceV0:     true,
+				buildServiceNameV0: staticName("kafka"),
+				buildOpNameV0:      staticName("kafka.consume"),
+				buildOpNameV1:      staticName("kafka.process"),
+			},
+			ComponentProducer: {
+				useDDServiceV0:     false,
+				buildServiceNameV0: staticName("kafka"),
+				buildOpNameV0:      staticName("kafka.produce"),
+				buildOpNameV1:      staticName("kafka.send"),
+			},
+		},
+	},
+	PackageTwmbFranzGo: {
+		TracedPackage: "github.com/twmb/franz-go",
 		EnvVarPrefix:  "KAFKA",
 		naming: map[Component]componentNames{
 			ComponentConsumer: {
@@ -683,6 +723,18 @@ var packages = map[Package]PackageInfo{
 	},
 	PackageLabstackEchoV4: {
 		TracedPackage: "github.com/labstack/echo/v4",
+		EnvVarPrefix:  "ECHO",
+		naming: map[Component]componentNames{
+			ComponentServer: {
+				useDDServiceV0:     true,
+				buildServiceNameV0: staticName("echo"),
+				buildOpNameV0:      staticName("http.request"),
+				buildOpNameV1:      staticName("http.server.request"),
+			},
+		},
+	},
+	PackageLabstackEchoV5: {
+		TracedPackage: "github.com/labstack/echo/v5",
 		EnvVarPrefix:  "ECHO",
 		naming: map[Component]componentNames{
 			ComponentServer: {
@@ -789,6 +841,12 @@ var packages = map[Package]PackageInfo{
 	},
 	PackageGormIOGormV1: {
 		TracedPackage: "gorm.io/gorm",
+		naming: map[Component]componentNames{
+			ComponentDefault: {
+				useDDServiceV0:     false,
+				buildServiceNameV0: staticName("gorm.db"),
+			},
+		},
 	},
 	PackageGorillaMux: {
 		TracedPackage: "github.com/gorilla/mux",
@@ -824,6 +882,9 @@ var packages = map[Package]PackageInfo{
 				buildServiceNameV0: staticName("valkey.client"),
 			},
 		},
+	},
+	PackageAzureAPIMCallout: {
+		TracedPackage: "azure/apim-callout",
 	},
 	PackageEnvoyProxyGoControlPlane: {
 		TracedPackage: "github.com/envoyproxy/go-control-plane",
@@ -958,8 +1019,6 @@ func isAWSMessagingSendOp(awsService, awsOperation string) bool {
 // GetPackages returns a map of Package to the corresponding instrumented module.
 func GetPackages() map[Package]PackageInfo {
 	cp := make(map[Package]PackageInfo)
-	for pkg, info := range packages {
-		cp[pkg] = info
-	}
+	maps.Copy(cp, packages)
 	return cp
 }
